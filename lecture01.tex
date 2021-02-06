@@ -1,0 +1,229 @@
+\Lecture{1}{Power of Randomization}
+\noindent 
+
+Randomized algorithms play a very powerful role in algorithm design. We will concentrate on the randomized algorithms for decision problems in this course. So all of our computational problems can be abstractly represented as given a string $x \in \Sigma^*$ in an alphabet, does $x$ have property $\calP$ or not?
+
+Informally, a randomized algorithm running in time $t$ is an algorithm that that on input $x$ is allowed to perform at most $t$ instances of random experiment of tossing unbiased coins during its computation and uses the outcome of the experiment in the computation, but however, provides a guarantee that the answer of the algorithm is the \textit{correct} answer for the input $x$ in a good fraction of the possible outcomes of the experiment. \footnote{Notice that if the guarantee for the algorithm is not saying "{\em strictly more than half fraction of the coin tosses}", then essentially the algorithm is useless since we can always replace it with a random experiment of tossing an unbiased coin and returning the answer to be {\sc Yes} if we get the heads and {\sc No} if we get tails. Note that we have at least a $\frac{1}{2}$ probability of success $\half$.}
+
+
+\section{Randomness helps in Matrix Multiplication Verification}
+
+Consider the task of multiplying two $n \times n$ matrices over the field $\F_2$. The trivial algorithmic solution to the problem takes $O(n^3)$ time and the trivial lower bound for the problem is $\Omega(n^2)$. It has been a long standing question which is the right complexity bound for this important problem (improvement to which will lead to improvements even in practice !). The exponent of matrix multiplication is the smallest constant $\omega$ such that two $n \times n$ matrices may be multiplied by performing $O(n^{\omega+\epsilon})$ for every $\epsilon > 0$.
+
+Indeed, one of the basic ideas that we learn in algorithms courses for demonstrating the power of divide and conquer is the Strassen's multiplication which gives a running time bound of $O(n^{2.,73})$ which went through a sequence of improvements and to the current best of $O(n^{2.31})$.
+
+The question that we address now is something closely related - that of verifying whether a given multiplicaiton is correct.
+\begin{problem}
+Given three matrices $A,B, C \in \F_2^{n \times n}$, check whether $AB = C$ or not.
+\end{problem}
+
+Indeed, the trivial method would be to mutliply the two matrices and check if the result is equal to $C$. But then this requires, $O(n^{2.31}+n^2)$ time using the best matrix multiplication algorithm that we know currently. Since we just require verification, it is conceivable that we might be able to do better if we are allowed to make a small some error in the process.
+We show that this indeed possible to be done in $O(n^2)$ with error probability at most $2^{-k}$ for any constant $k$ (independent of $n$).
+
+\paragraph{Trivial Approach using randomization:} A natural first cut attempt is to choose an entry $(i,j)\in [n] \times [n]$ uniformly at random from the $n^2$ entries of $C$ and checking if :
+
+$$ \sum_{k=1}^n A_{ik}B_{kj} = C_{ij}$$
+
+\noindent This runs in time $O(n)$. And we can choose constant $k$ more entries to amplify the success probability. However, the probability of correctness is very small. Suppose, in the worst case input, there was only one $(i,j) \in n \times n$ where there was an error in the multiplication. The probability that we will choose that particular $(i,j)$ for verification is as small as $\frac{1}{n^2}$. Amplifying this to a success probability of $\frac{1}{2^k}$ takes more than $\Omega(n^{1+\epsilon})$ iterations and hence the overall algorithm will take $\Omega(n^{2+\epsilon})$ time which is beyond what we can afford to spend time on.
+%\jsay{Substantiate with exact value of $\epsilon$}
+
+\paragraph{Freivalds' Approach:} The idea is to check a randomly chosen "linear combination" of entries rather than a single entry of the matrix $C$. If we choose this to be a random linear combination of rows of the matrix $C$, then the combinatorics helps to achieve a much better probability of error. We now formally write down the algorithm and analyse it.
+
+\begin{algorithm}%\captionsetup{labelfont={sc,bf},labelsep=newline}
+\label{alg:frievalds-algo}
+\caption{: Frievald's Algorithm for Verification of Matrix Multiplication - ${\calF}(A,B,C)$}
+\begin{algorithmic}[1]
+\State Choose a vector $r \in \F_2^n$ uniformly at random.
+\State If ~[$A(Br) = Cr$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+
+The computation of $(A(Br))$ and $Cr$ are done using $O(n^2)$ time algorithms since computing a linear transformation result $Ax$ for an $n \times n$ matrix can be done in $O(n^2)$ time. Now we argue correctness guarantees. If the given matrices indeed satisfy $AB = C$, then no matter which $r \in \F_2^n$ algorithm chooses in step 1, $ABr = Cr$ and hence it always will output {\sc Yes}. The error can happen only when $AB \ne C$ and the algorithm ends up choosing an unfortunate $r$ such that $ABr = Cr$. The following claim upper bounds the probability of this .
+
+\begin{claim}
+For any $A,B,C \in \F_2^n$ such that $AB \ne C$, 
+$$\Pr[\calF(A,B,C)\textrm{ outputs {\sc Yes} }] \le \frac{1}{2} $$
+\end{claim}
+\begin{proof}
+Let $A,B,C \in \F_2^n$ such that $AB \ne C$. We need to analyze the probability that $ABr = Cr$ for $r \in \F_2^n$ chosen uniformly at random. If $AB \ne C$, then $D = AB-C$ is a non-zero matrix.
+Thus $$\Pr_{r \in \F_2^n}[ABr \ne Cr] = \Pr_{r \in \F_2^n}[Dr \ne 0]$$
+
+Imagine that $D$ was all $1$s matrix. Now the above probability is exactly the number of vectors $r \in \F_2^n$ with an odd number of 1s in it. By an obvious bijection, this is also the number of subsets of $[n]$ with odd size. The latter is exactly $2^{n-1}$ and hence the probability of such a vector $r$ being chosen from $\F_2^n$ is $\half$. 
+%If $D \ne 0$ then there must be a row $i$ with non-zero entries in $D$. Let $S = \{j \mid D_{ij} \ne 0\}$. Now the same argument can be made on the subsets of $S$ of odd and even size. Similar to the above, exactly half fraction of them will be odd size and other half will be even thus giving the probability that the $i$th entry of $Dr$ being zero will be $\half$.
+
+Now we formalize and generalize this.
+Let $p$ be the vector $Dr$. Since $D \ne 0$, there must be an entry $D_{ij} \ne 0$. Define, $A = \{ j : D_{ij} \ne 0 \}$. We know that $A \ne \phi$. 
+$i,j \in [n]$. Thus :
+$$p_i = \sum_{k=1}^n D_{ik}r_k = \sum_{k \in A} r_k$$ 
+$$\textrm{Note that: } \Pr_{r \in \F_2^n}[Dr = 0] \le \Pr_{r \in \F_2^n}[p_i = 0]$$ 
+
+Notice that the latter probability depends only on $r_k$ where $k \in A$. The fraction of assignments of the bits $\{ r_k : k \in A \}$ which makes $p_i=0$ is exactly $\half$ since the number of even sized subsets of $A$ and number of odd sized subsets of $A$ are exactly the same.
+%
+%$D_{ij}r_j + \sum_{k \ne j} D_{ik}r_k$. This can rewritten as, $r_j = p_i - \sum_{k \ne j} D_{ik}r_k$ where the RHS is independent of $r_j$. Since $r_i \in \{0,1\}$ chosen uniformly at random, the probability that $r_j +p_i' =0$ is exactly $\half$.
+%$$\Pr_{r \in \F_2^n}[Dr = 0] \le \Pr_{r \in \F_2^n}[p_i = 0] = \Pr_{r_i \in \{0,1\}}[p_i = 0] = \Pr_{r_i \in \{0,1\}}[r_i+p_i' = 0] = \half$$
+\end{proof}
+\begin{remark}
+Informally, if we run the above algorithm ${\cal{F}}(A,B,C)$, and the algorithm outputs {\sc No}, then we can trust the answer and conclude that indeed $AB \ne C$. But a {\sc Yes} answer from the algorithm cannot be trusted - it could be because of the unfortunate choice of $r \in \F_2^n$ that came as the outcome of the experiment.
+
+Why are we interested in the above algorithm even though it gives a success probability bound of only $\half$? The reason is that, it is a one-sided error algorithm and hence still much better than a coin toss outcome because the algorithm does not make an error when $AB = C$. In fact, such algorithms can be repeated in a natural way - run $k$ times, and if any of them says $AB \ne C$ output {\sc No}. This reduces the error probability in exponentially in $k$ - since each of the trials should give an error (with probability $\half$) and hence the error probability bound is at most $\frac{1}{2^k}$.
+\end{remark}
+
+\section{Algorithms for Polynomial Identity Testing Problem}
+
+Now we will do an example problem where there is an efficient (polynomial time in the input size) randomized algorithm for solving the problem but a deterministic algorithm for solving the problem is not known. The problem is easy to state algorithmic question on polynomials. Fix $\F$ to be the field where the coefficients are chosen from.
+{\em Given a polynomial $p \in \F[x_1, x_2, \ldots x_n]$, test if it is identically zero}. That is, do all the terms cancel out and become the zero polynomial. 
+
+This problem has its roots in the simple high school
+arithmetic. Suppose we are given a polynomial in a complicated form where the monomials may repeat with arbitrary coefficients etc. We want to find out if the coefficient of the monomials cancel out to zero. This in effect is testing whether the polynomial is the zero
+polynomial, and equivalenty it is testing if the polynomials evaluates to zero on all substitutions of the variable from the underlying field $\mathbb{F}$.
+
+\textit{How are we given the polynomial?} This indeed is going to have effect
+on the complexity of the problem.  Let us start with the high school
+arithmetic again. Suppose we are given it in the monomial form (though
+some monomials may repeat) along with their coefficients. To solve the
+problem, it suffices to check, for each monomial whether the
+coefficient in its various appearences is adding up to zero. Given the
+explicit representation at the input, this is very easy to do by
+simply going over the input for each monomial. Hence this can be done
+in time polynomial in the input.
+
+What if the polynomial is not given that explicity. What is the most
+implicit form that we can think of? A black box which evaluates the polynomial.
+That is, we have an oracle $p$ when given input $a$ returns $p(a)$, the value of polynomial 
+at $a$.
+
+%The aim is to test whether the input polynomial is identically 0 (The zero polynomial). If the polynomial 
+%is given as monomials, then we can do this in {\tt poly} time. But what if the input polynomial is given in 
+%$blackbox form. 
+
+Assume that we are also given an upper bound on the degree of the
+polynomial $deg(p) \leq d$.  Indeed, we do not have access to the
+actual polynomial except through the blackbox. We have to use some
+property of the degree $d$ polynomials. The most obvious one is the
+number of points in which they can evaluate to zero. Based on this thought, 
+the following deterministic algorithm solves the problem.
+
+
+\begin{algorithm}%\captionsetup{labelfont={sc,bf},labelsep=newline}
+\label{alg:univariate-pit}
+\caption{A deterministic algorithm for univariate polynomial identity testing}
+\begin{algorithmic}[1]
+\State Choose $d + 1$ different points $a_1 , \ldots , a_{d+1}$.
+\State Call the oracle $d+1$ times to evaluate $p(a_1), \ldots , p(a_{d+1})$.
+\State If all calls returned 0 accept else reject.
+\end{algorithmic}
+\end{algorithm}
+
+If $p$ were really the zero polynomial then all calls will return 0 and we will definitely accept. If $p$ were not 
+0, then at most $d$ calls can return 0 since a polynomial with degree at most $d$ has at most $d$ 
+roots. Hence if $p \neq 0$, then our algorithm will definitely reject.
+
+\paragraph{Multivariate PIT:}
+Now let us think about the problem when $p$ is a multivariate
+polynomial. The previous assertion that a degree $d$ polynomial has at
+most $d$ roots no longer holds. To see this, consider the degree 2
+polynomial $p(x_1, x_2) = x_1 x_2$. This has an infinite number of
+roots $x_1 = 0, x_2 \in \mathbb{F}$, where $\mathbb{F}$ is the
+(possibly infinite) field over which $p$ is defined. 
+
+We can work around this problem by considering a finite subset of the field, say
+$S = \{ 0, \ldots ,10 \}$. The polynomial $p$ has $19$ zeroes. So if
+$x_1, x_2$ is chosen uniformly at random from $S$ there is at most
+$19/100$ chance that we will get a false result. As can be seen from
+the above example, by making the size of $S$ arbitrarily large, we can
+make the error probability arbitrarily small. But then the
+disadvantage is that we will need more random bits in order to choose
+an element at random from the set $|S|$, and the running time of our
+algorithm will also increase.
+
+Generalizing this strategy that we will follow is as follows: If the total degree of
+the polynomial is $\leq d$, and if $S \subseteq \F$, such that
+$|S|\geq 2d$, instead of picking elements arbitrarily, we pick
+elements uniformly at random from $S$. Indeed, there may be many
+choices for the values which may lead to zero. But how many?
+
+\begin{lemma}[\textbf{Schwartz-Zippel Lemma}]
+Let $p(x_1, x_2, \cdots , x_n)$ be a non-zero polynomial over a field
+$\mathbb{F}$. Let $S\subseteq \mathbb{F}$
+$$\Pr_{\overline{a} \in S^n}[p(\overline{a})=0]\leq \frac{d}{|S|}$$
+\end{lemma}
+%It also shows that the number of solutions for $P(\bar{a})$ if $\leq d|S|^{(n-1)}$.
+\begin{proof}
+(By induction on $n$) For $n=1$: For a univariate polynomial $p$ of
+  degree $d$, there are $\leq d$ roots. Now in the worst case the set
+  $S$ that we picked has all $d$ roots. Thus for a random choice of
+  substitution for the variable from $S$, the probability that it is a zero of
+  the polynomial $p$ is at most $\frac{d}{|S|}$.
+
+For $n>1$, write the polynomial $p$ as a univariate polynomial in $x_1$ with coefficients as polynomials in the variables $p(x_2, \ldots, x_n)$.
+$$ \displaystyle \sum_{j=0}^{d}x_1^jp_j(x_2, x_3, \ldots, x_n)$$
+\noindent For example: $x_1x_2^2+x_1^2x_2x_3+x_3^2=(x_2x_3)x_1^2+(x_2^2)x_1+x_1^0(x_3^2)$.
+
+We need to analyze the probability that we will choose a zero of the
+polynomial (even though the polynomial is not identically zero). For a
+choice of the variables as $(a_1, a_2, \cdots, a_n)\in S^n$, we ask
+the question : how can $p(a_1, a_2, \cdots, a_n)$ be zero? It could be
+because of two reasons:
+
+\begin{enumerate}
+\item $\forall j~:~1 \le j \le n , ~~ p_j(a_2, a_3, \ldots , a_n)=0$.
+% In this case whatever $(a_2, a_3, \cdots , a_n)=0$, polynomial will be zero.
+\item %$(a_2, a_3, \cdots , a_n)=0$.
+Some coefficients $p_j(a_2, a_3, \ldots , a_n)=0$ are non-zero, but
+the resulting univariate polynomial in $x_1$ evaluates to zero upon
+substituting $x_1 = a_1$.
+\end{enumerate}
+
+\noindent Now we are ready to calculate $Pr [ p(a_1, a_2, \ldots, a_n) = 0 ]$.
+%\begin{eqnarray*}
+For a random choice of $(a_1, \ldots, a_n)$.
+Let $A$ denote the event that the polynomial $p(a_1, \ldots, a_n) = 0$.
+Let $B$ denote the event that $\forall j~:~1 \le j \le n ,~~p_j(a_2, a_3, \cdots , a_n)=0$.
+Note that, $Pr[A] = Pr[A \land B]+Pr[A\land \bar{B}]$.
+
+We calculate both the terms separately: $Pr[A \land B] = Pr[B].Pr[A|B]
+= Pr[B]$ where the last equality is because $B \implies A$.  Let
+$\ell$ be the highest power of $x_1$ in $p(x)$. That is $p_\ell \ne
+0$. Since the event $B$ insists that for all $j$, $p_j(a_2, a_3,
+\ldots , a_n)=0$, we have that $Pr[B] \leq Pr[p_\ell(a_2, a_3, \ldots, a_n) \ne 0]$.  By induction hypothesis, since this polynomial has
+only $n-1$ variables and has degree at most $\frac{d -
+  \ell}{S}$. Thus, $Pr[B] \le \frac{d - \ell}{S}$.
+
+\noindent To calculate the other term,
+\begin{eqnarray*}
+Pr[A \cap \bar{B}] & = & Pr[\bar{B}].Pr[A|\bar{B}] \le Pr[A|\bar{B}] \le \frac{\ell}{|S|}
+\end{eqnarray*}
+where the last inequality holds because the degree of the non-zero
+univariate polynomial after substituting for $a_2, \ldots, a_n$ is at
+most $\ell$ and hence the base case applies.
+\end{proof}
+
+This suggests the following efficient algorithm for solving PIT. Given $d$ and a
+blackbox evaluating the polynomial $p$ of degree at most $d$.
+
+
+\begin{algorithm}%\captionsetup{labelfont={sc,bf},labelsep=newline}
+\label{alg:sz-pit}
+\caption{: Schwartz-Zippel Algorithm for Multivariate PIT}
+\begin{algorithmic}[1]
+\State Choose $S \subseteq \mathbb{F}$ of size $\ge 4d$.
+\State Choose $(a_1, a_2, \ldots, a_n) \in_R S^n$.
+\State Evaluate $p(a_1, a_2, \ldots a_n)$ by querying the blackbox.
+\State If it evaluates to 0 accept else reject.
+\end{algorithmic}
+\end{algorithm}
+
+The algorithm runs in time $\poly(n)$. The following
+Lemma states the error probability and follows from the
+Schwartz-Zippel Lemma that we saw before.
+\begin{lemma}
+There is a randomized polynomial time algorithm $A$, which, given a black
+box access to a polynomial $p$ of degree $d$ ($d$ is also given in unary), answers whether the polynomial is identically zero or not, correctly
+with probability at least $\frac{3}{4}$.
+%\[ p \not\equiv 0 \implies \textrm{ Pr[$A$ accepts] $\ge \frac{3}{4}$} \]
+%\[ p \equiv 0 \implies \textrm{ Pr[$A$ accepts] $= 0$.} \]
+\end{lemma}
+
+Notice that in fact the lemma is weak in the sense that it ignores the
+fact that when the polynomial is identically zero then the success
+probability of the algorithm is actually 1 !. In other words, is it is a one-sided error randomized algorithm.
