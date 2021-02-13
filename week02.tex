@@ -200,6 +200,96 @@ We now describe the main technical idea to be learned this week. Mainly an algor
 
 There are two kinds of randomized algorithms that we have seen so far - essentially to solve two kinds of problems. One is for the decision problems where the probability over different paths of the  computation tree, the algorithm being correct is at least $\frac{2}{3}$. The other is for optimization problems where the expected size of the output has guarantees. The method of derandomization that we are going to discuss can in principle be applied for both, if the randomized algorithm in question uses the random bits in a peculiar way that certain measures can be computed efficiently about the output for particular settings of the randomness. \\[-8mm]
 
-\paragraph{Main Idea:} We discuss the first kind of algorithms first and then adapt it to the second type. In the decision problem case, we know that $\frac{2}{3}$-rd paths in the computation tree are going to make the algorithm answer correctly. A vague idea would be, is there a way to walk down the path of the tree, making a choice deterministically and efficiently at each node (without trying both choices which leads to exponential time) maintaining the invariant that within the subtree that have restricted ourselves to, a $\frac{2}{3}$ fraction of paths within the subtree still make the algorithm go correct. If we make choices like this and set the random bits based on that choices, it is intuitive that we will reach a leaf that makes the algroithm answer correctly and then we can just run the algorithm on that leaf (that choice of random bits) and output the answer. The process is deterministic and effcient and hence gives a derandomization of the original algorithm.
+\paragraph*{Main Idea:}(as we described in the lecture) - we discuss the first kind of algorithms first and then adapt it to the second type. In the decision problem case, we know that $\frac{2}{3}$-rd paths in the computation tree are going to make the algorithm answer correctly. A vague idea would be - walk down the path of the tree, \textit{making a choice deterministically and efficiently at each node (without trying both choices which leads to exponential time) maintaining the invariant that within the subtree that have restricted ourselves to, a $\frac{2}{3}$ fraction of paths within the subtree still make the algorithm go correct}. If we make choices like this and set the random bits based on that choices, it is intuitive that we will reach a leaf that makes the algroithm answer correctly and then we can just run the algorithm on that leaf (that choice of random bits) and output the answer. The process is deterministic and effcient and hence gives a derandomization of the original algorithm.
 
-Of course, this is easier said than done. Many questions remain.
+Of course, this is easier said than done. An important question remains - \textit{at an intermediate node, in the above walk-down, how do we deterministically and efficiently decided whether to take the edge labelled $0$ or $1$ to move to the child}? Formalizing this will require us to fix the type of problem as decision vs search/optimization problem.
+
+\subsection{Framework for Algorithms for Decision Problems}
+
+Recall the following notational set up where $\calA$ is the randomized algorithm solving a decision problem.
+
+\vspace{5mm}
+\begin{minipage}{0.4\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^m$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+%\vspace{-7mm}
+%\vspace{-3mm}
+$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^m} [A(x,y) \textrm{ is correct.}] \ge \frac{2}{3} $$
+\end{minipage}
+\vspace{3mm}
+
+Since we have to keep track of the fraction of paths for a particular partial setting of the random bits (while analysing the walk-down of the tree at an intermediate stage) - we define the following notation:
+
+For every $i \in [n]$, bits $r_1, r_2, \ldots r_i \in \{0,1\}$, define:
+$$p(r_1, r_2, \ldots, r_i) = \Pr_{y \in \{0,1\}^m} \left\{ A(x,y) \textrm{ is correct } \mid  (y_1 = r_1) \land (y_2 = r_2) \land \ldots \land (y_i = r_i) \right\}$$
+
+Indeed, if we are at a particular node represented by a partial assignments $r_1, r_2, \ldots r_i$, the value of $p(r_1, r_2, \ldots , r_i)$ is the average of the value at the two children of that node since the bit is chosen uniformly at random. In terms of expectation, this is equivalent to :
+$$p(r_1, r_2, \ldots r_i) = E_{y_{i+1} \in \{0,1\}} (r_1, r_2, \ldots r_i, y_{i+1})$$
+
+To understand this definition clearly, let us ask, a first question, what is the value of $p(r_1, r_2, \ldots r_m)$ for a setting $r_1, r_2, \ldots r_m \in \zo$. (Class answered $0$ or $1$ depending on whether the setting represents a path which makes $\cal{A}$ correct or not). How about $p(\phi)$, which represents the value of the function when no bit is set. Clearly, by definition, this represents the top of the computation tree, and hence the fraction of correct paths under the node is exactly the success probability of the algorithm. That is, $p(\phi) \ge \frac{2}{3}$.
+
+Indeed, if we call $p(r_1, r_2, \ldots r_i) = \mu$, we have that: $E_{y_{i+1} \in \{0,1\}} p(r_1, r_2, \ldots r_i, y_{i+1}) = \mu$. Hence we know that there must exist a setting of $y_{i+1}$ such that the value of the random variable - which in this case is $p(r_1, r_2, \ldots r_i, y_{i+1})$ - is at least the expected value. That is,
+$$\exists r_{i+1} \in \{0,1\} : p(r_1, r_2, \ldots r_{i+1}) \ge p(r_1, r_2, \ldots r_i) $$
+Applying this repeatedly, we have that $\exists r_1, r_2, \ldots r_m \in \zo$:
+$$ p(r_1, r_2, \ldots r_m) \ge p(r_1, r_2, \ldots r_{m-1}) \ge \ldots \ge p(r_1, r_2) \ge p(r_1) \ge p(\phi) \ge \frac{2}{3}$$
+Notice that, by our observation, the left-end term is Boolean, and hence it must be that there exists $r_1, r_2, \ldots r_m \in \zo$ such that $p(r_1, r_2, \ldots r_m) = 1$. But then, this is not a big deal in the end, we knew about existance of such $r_i$'s anyway. So in the end it does not look very useful.
+
+But the above framework has an interesting feature. It also shows how to construct $r_i$'s bit-by-bit, if we have an efficient algorithm to compute $p(r_1, r_2, \ldots r_i)$ for any $i$. Suppose we have computed $r_1, \ldots r_i$ already, we can compute $r_{i+1}$ as follows: compute $p(r_1, r_2, \ldots, r_{i}, 0)$ and $p(r_1, r_2, \ldots, r_{i}, 1)$ using the above algorithm and set $r_{i+1}$ to be whichever bit in $\zo$ which achieves the maximum. 
+
+However, we still have the problem of computing $p(r_1, r_2, \ldots r_i)$ for any $i \in [m]$ efficiently. This is where the algorithm-specifics come in. The algorithm $\cal{A}$ should be using the random bits in a peculiar way such that the value of $p(r_1, r_2, \ldots, r_i)$ can be computed efficiently for that algorithm $\cal{A}$. Indeed, the trivial method of computing $p(r_1, r_2, \ldots r_i)$ ends up taking exponential time in the worst case. Hence one has to use the algorithm-specific attributes to design this algorithm. We will demonstrate this in the next context.
+
+\subsection{Framework for Algorithms for Optimization Problems}
+
+We now the adapt the above framework for search and optimization problems. The guarantee for algorithms solving such problems is as follows - the expected size of the output is at least as "good" as this, where "good" means at most or at least in minimization and maximization problems respectively. For demonstrative purposes, we restrict ourselves to the randomized algorithm for {\sc Maxcut} that we presented earlier. Notice that the algorithm uses exactly $n$ random bits where $|V|=n$. Note that $S$ and $T$ are the two subsets output by the algorithm.
+For any $i  \in [n]$, define:
+$$V(r_1, r_2, \ldots r_i) = {\mathbb{E}}_{y \in \zo^n} \left[ |cut(S,T)| : (y_1=r_1) \land (y_2=r_2) \land \ldots \land (y_i = r_i) \right] $$
+
+Similar to the previous setting, note that $V(\phi) \ge \frac{|E|}{2}$ since the expected size of the cut when no random bit is conditioned is similar to the original analysis of the algorithm. We apply the averaging principle and argue in a similar way that there must exist a choice of the random bits $r_1, r_2, \ldots, r_n \in \zo$ such that $cut(S,T)$ output by the algorithm has at least $\frac{|E|}{2}$ many edges.
+
+Indeed, we start with $V(\phi) \ge \frac{|E|}{2}$. By averaging principle, there must exist $r_1 \in \zo$ such that $V(r_1) \ge V(\phi) \ge \frac{|E|}{2}$. Continuing in a similar way there must exist $r_1, r_2, \ldots, r_n \in \zo$ such that : 
+$$ V(r_1, r_2, \ldots r_{n-2},r_{n-1},r_n) \ge V(r_1, r_2, \ldots r_{n-2},r_{n-1}) \ge V(r_1, r_2, \ldots r_{n-2}) \ldots \ge V(r_1) \ge V(\phi) \ge \frac{|E|}{2} $$
+Again, this is not new information. We can always derive by a globally applying averaging principle that there must exist such a choice of random bits. But the advantage here is that if there is an efficient algorithm for computing $V(r_1, r_2, \ldots r_i)$ for any $i$, then we can find out the explicit choice of values of the bits as well. As in the previous case, if $r_1, r_2, \ldots r_i$ is already fixed, then we compute $r_{i+1}$ as : compute $V(r_1, r_2, \ldots r_i,0)$ and $V(r_1, r_2, \ldots r_i,1)$ and set $r_{i+1}$ to be that value in $\zo$ which results in the maximum among the two.
+
+\paragraph*{Computing $V(r_1, r_2, \ldots r_i)$ for the algorithm for {\sc Maxcut} :} To apply the above framework, all we need is an efficient algorithm to compute the value of $V(r_1, r_2, \ldots r_i)$ for any choice of $i$ and $r_1, r_2, \ldots r_i \in \zo$. Note that this is a speciality of the algorithm - more importantly the way the bits $y_1, y_2, \ldots y_n$ are used by the algorithm.
+
+At any intermediate point of computation, there are vertices for which the decision (of whether they should be in the set $S$ or not) is already made by then and there are vertices which are decided later. To keep track of this, we define:
+\begin{eqnarray*}
+S_i & = & \{ j \in [n] \mid j \le i, b_j = 1 \} \\
+T_i & = & \{ j \in [n] \mid j \le i, b_j = 0 \} \\
+U_i & = & \{ j \in [n] \mid j > i \}
+\end{eqnarray*}
+The algorithm will grow $S_i$ to $S$ and $T_i$ to $T$, by randomly choosing the remaining vertices $(U_i)$ to be in $S$ or $T$. We need to compute the expected size of the cut conditioned on the fact that the sets $S_i$ and $T_i$ are already fixed by the algorithm. An immediate observation is that  the edges that go across $S_i$ and $T_i$ will necessarily a part of the cut, since their endpoints are already at $S$ and $T$ respectively by definition. The edges which are fully within $S_i$ or fully within $T_i$ are not going to be a part of the cut finally. But there may be more number of edges which forms a part of the final cut. Considering this, we can write:
+$$V(r_1, r_2, \ldots r_i) = |cut(S_i, T_i)| + \frac{|(cut(S_i, U_i)| + |cut(U_i,T_i)| + |cut(U_i,U_i)|}{2}$$
+We need to explain the second term in the RHS. Consider edges $e=(u,v) \in E$ that has one endpoint $u \in S_i$ and the other endpoint in $v \in U_i$. Note that $u \in S$ finally, and hence $(u,v)$ edge will be counted in the cut, if $v$ falls into $T$. Since this is decided by choosing a random bit, the probability that the edge appears in the cut finally is $\half$. Hence, the expected number of edges in $cut(S_i,U_i)$ which appear in the final cut is $\frac{|cut(S_i,U_i)|}{2}$. Similar argument explains the term $\frac{|cut(T_i,U_i)|}{2}$. To see the $\frac{|cut(U_i,U_i)|}{2}$ term, consider edges which are having both end points in $U_i$. They are both going to be put in $S$ or $T$ uniformly at random - hence out of the four possible outcomes (for these two vertices), two of them puts them in the final cut and two of them puts them outside the final cut output by the algorithm. Hence for any edge in $cut(U_i, U_i)$, with probability $\half$ it will form a part of the cut. That is, expected number of edges that gets contributed to the final cut is $\frac{|cut(U_i,U_i)|}{2}$. Hence the expression for $V(r_1, r_2, \ldots r_{i})$ is correct.
+
+
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{maxcut-greedy})]
+\begin{show-ps1}{maxcut-greedy}
+In the derandomization of {\sc Maxcut} algorithm that we described, we derived an expression for $V(r_1, r_2, \ldots r_i)$ for any $i$ and $r_1, r_2, \ldots r_i \in \zo$. We used this to determine, the value of $r_{i+1}$ by computing $V(r_1, r_2, \dots r_i, 0)$ and $V(r_1, r_2, \dots r_i, 0)$ and then choosing the largest.
+Prove that the choice of $r_{i+1}$ will be $1$ if vertex $i+1$ has more neighbors in $T_i$ than in $S_i$ and vice versa. Hence, write down the derandomized $0.5$-approximation deterministic polynomial time algorithm for {\sc Maxcut} as a simple greedy algorithm in terms of the above rule.
+\end{show-ps1}
+\end{exercise-prob}
+
+
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{maxsat})]
+\begin{show-ps1}{maxsat}
+Let $x_1, x_2, \ldots x_n \in \zo$ be Boolean variables and let $f$ be a Boolean formula in CNF form. That is, $f = C_1 \land C_2 \land \ldots \land C_m$ where each $C_i$ (called a {\em clause}) is a disjunction of literals in the set $\{x_1, \overline{x_1}, x_2, \overline{x_2}, \ldots, x_n, \overline{x_n} \}$. We want to find an assignment of the Boolean variables that satisfies as many clauses in the formula as possible.
+\begin{enumerate}[(a)]
+\item Write down a randomized algorithm that outputs an assignment with the guarantee that the expected number of clauses satisfied is at least $\frac{m}{2}$.
+\item Derandomize this algorithm using the method of conditional probabilities discussed in class to get a deterministic algorithm that satisfies at least $\frac{m}{2}$ number of clauses.
+\item Suppose $k$ is the minimum number of literals in any clause, how will you modify the parameters in part(a) and (b) 
+\end{enumerate}
+\end{show-ps1}
+\end{exercise-prob}
