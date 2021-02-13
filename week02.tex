@@ -1,216 +1,205 @@
-\Lecture{2}{The Derandomization Problem}
-\noindent 
-
-In the previous lecture, we talked about randomized algorithms for problems for which we do not know deterministic algorithms with similar complexity resource bounds. Indeed, we are not happy about randomized algorithms as such since these algorithms require perfect unbiased coin toss experiments to be performed and we do not have them in practice. Indeed, the fact that they can output erroneous answers, even though with low probability makes them useless in critical practical applications.
-
-How do convert them to deterministic algorithms without causing much overhead?. One possible way is to look at each algorithm and use inherent properties of the problem to analyze the randomized algorithm better to come up with ways to remove randomness from that algorithm. Here, we start with the original randomized algorithm for a particular problem, and improve it to derandomize it and the techniques are usually very algorithm specific. We will do some examples of this kind later in the course.
+\Week{2}{Method of Conditional Expectation}
 
 
-\section{Abstract Model and some Approaches}
+\section{{\sc Maxcut} Problem}
 
-From now on, we will be concentrating only on abstract models of these randomized algorithms. We fix some notations first. A randomized algorithm ${\cal{A}}$ on input $x$ runs in time $t(n)$ (where $n=|x|$) and let $y \in \{0,1\}^{r(n)}$ be the concatenation of the unbiased coin toss experiement that the algorithm does during its execution. Notice that $r(n) \le t(n)$ (we drop the $n$ when it is not required explicitly). If the algorithm runs in polynomial time $t(n) \le n^c$ for a constant $c$ independent of $n$. \\
+For an undirected graph $G(V,E)$, a cut is a partition of vertices into two sets $S,T \subseteq V$. The size of a cut is the number of edges that go across these partitions. That is, the size of the set :
+$$cut(S,T) = \{ e=(u,v) \mid (u,v) \in E, u \in S, v \in T \}$$
 
-\begin{minipage}{0.4\linewidth}
-\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
-\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
-\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
-\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
-\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
-\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
-\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
-\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^r$};
-\end{tikzpicture}
-\end{minipage}
-\begin{minipage}{0.05\linewidth}
-~
-\end{minipage}
-\begin{minipage}{0.5\linewidth}
-\vspace{-7mm}
-The guarantee we have is there is an $\epsilon \in (0,\half]$.
-\vspace{-3mm}
-$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^r} [A(x,y) \textrm{ is correct.}] \ge \half+\epsilon $$
-\end{minipage}
-\vspace{3mm}
+Maximum cut is a cut whose size is at least the size of any other cut. That is $|cut(S,T)|$ is the largest possible. Given a graph, the problem of finding a maximum cut in a graph is known as the {\sc Maxcut} problem.
 
-\subsection{Trivial Derandomization Approach}
-\noindent The trivial approach to obtain an equivalent deterministic algorithm is run over all possible outcomes of the experiment and check the answer from the algorithm for each of them. Whichever answer comes as majority - report that as the final answer.
+\paragraph*{The problem is hard:} The {\sc Maxcut} problem is known to be $\NP$-hard. This implies, in particular, that if we have an efficient algorithm for the {\sc MaxCut} problem, then some of the very hard problems will yield to having efficient algorithms solving them. This is believed to be unlikely. \\[-9mm]
 
-\begin{algorithm}
-\label{alg:trivial-derand}
-\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$, where success prob. $\half+\epsilon$ for ${\cal{A}}$} 
+\paragraph*{Approximation algorithms: }Hence it makes sense to talk about algorithms which may not output the exact maximum cut, but instead another cut. Indeed, this is useless unless there are guaranteed how large is the cut output by the algorithm. An example guarantee that we may want to target is, for the algorithm, no matter what the input graph $G$ is, the cut output by the algorithm will be, say, at least $\left(\frac{1}{10}\right)$-th of the size of the maximum cut. This is called a $0.1$-approximation algorithm\footnote{Exercise: if you have not seen it already, think about what would be a similar statement that you would like to target for a minimization problem, like vertex cover problem}. Even with this relaxed target for the algorithm, is not immediately clear how to design such an algorithm. It turns out that the best known algorithm for {\sc Maxcut} does much better than this and achieves an approximation guarantee of $0.875$, and for many reasons this is believed to be the best possible ratio that any polynomial time algorithm can achieve for {\sc Maxcut} problem. However, in this lecture, we will concentrate on much smaller rations. \\[-9mm]
+
+\paragraph*{Randomized Approximation algorithms: }
+We resort to randomized algorithms - which in this context will be called randomized approximation algorithms. Notice that unlike the previous examples, {\sc Maxcut} is not a decision problem. Hence, we need to be careful about designing and analysing randomized algorithms for it. For example, there is nothing like the algorithm being correct. Instead, we have only the notion of the approximation ratio - that is how close the output of the algorithm is, to the optimal value.
+
+\subsection{A Simple Randomized Algorithm} We start with a simple randomized algorithm for {\sc MaxCut} problem.
+
+\begin{algorithm}%\captionsetup{labelfont={sc,bf},labelsep=newline}
+\label{alg:maxcut-rand}
+\caption{: Randomized Approx. Algorithm for {\sc MaxCut} for graph $G(V,E)$, $|V| = n$}
 \begin{algorithmic}[1]
-\State {\em count} $\gets 0$. 
-\For{\texttt{each $y \in \{0,1\}^r$}}
-	\State \texttt{Check if ${\cal{A}}(x,y)$ accepts, if so increment {\em count}}
+\State $S = T = \phi$
+\For{each $i \in [n]$}
+\State Choose bit $b_i \in \{0,1\}$ uniformly at random.
+\If{$b_i = 1$}
+\State $S = S \cup \{i\}$
+\Else
+\State $T = T \cup \{i\}$.
+\EndIf
 \EndFor
-\State If ~[{\em count} $> 2^{r-1}$]~ then output {\sc Yes} else output {\sc No}.
+\State Output $cut(S,T)$.
 \end{algorithmic}
 \end{algorithm}
 
-If the running time of the randomized algorithm ${\cal{A}}$ is $t(n)$, then the running time of the new algorithm (which is deterministic) is $t(n)2^{r(n)}$. To argue correctness, if the actual answer for input $x \in \{0,1\}^n$ is {\sc Yes}, then the fraction of $y \in \{0,1\}^r$ which makes ${\cal{A}}(x,y)$ accept is strictly more than $\half$ and hence the algorithm will output {\sc Yes}. If the actual answer for input $x \in \{0,1\}^n$ is {\sc No}, then then the fraction of $y \in \{0,1\}^r$ which makes ${\cal{A}}(x,y)$ accept is strictly less than $\half$ and hence the algorithm will output {\sc No}.
+Notice that the sets $S$ and $T$ will form a partition of $V$ at the end of the algorithm. Clearly, the algorithm will run in linear time. Indeed, the above description is also equivalent to - choose a random subset $S$ of vertices from $V$ and outputing $cut(S,\overline{S})$. Indeed, we need to give a guarantee about the size of the cut output by the algorithm. Roughly, the claim is that the average size of the cut (where average is taken over the $2^n$ different outcomes of the random choices). We recap some basics of random variables and expections now before stating the correctness claim.
 
-\begin{remark}
-Note that the algorithm ${\cal{A}}$ will run in $\poly(n)$ time if the original randomized algorithm was running in $t \le \poly(n)$ time and was using $r \le O(\log n)$ random bits.
-\end{remark}
+\section{Recap of Probability Basics, Random Variables, Expectation}
 
-%\subsection{The Method of Conditional Probabilities}
-%
-%Consider the algorithm choosing $r$ bits of randomness. Imagine this as a tree of computation where each bit is chosen:
-%
-%\jsay{Method of conditional probabilities yet to be typed in}
+Fix a set $\Omega$, which is called the {\em sample space}.
+A probability distribution is defined over $\Omega$, is a function $\Pr: \Omega \to [0,1]$ satisfying the additional condition that, $\sum_{w \in \Omega} \Pr(w) = 1$. An event is a subset ${\cal{E}} \subseteq \Omega$. The probability of an even $\cal{E}$ is nothing buy the sum of the probability values by assigned by the distribution functon to the elements in the subset $\cal{E}$. That is, $\Pr({\cal{E}}) = \sum_{w \in E} \Pr(w)$.
 
-\section{Pseudorandomness : An Informal Overview}
+We consider an example which are going to be relevant for us. This is the notion of random graphs. Consider $n$ vertices, and there are ${n \choose 2}$ possible edges. Imagine that we will choose (independently) each edge to be present in our graph with probability $p$ and to be absent in our graph with probability. The outcome of the experiment is an $n$-vertex simple graph and hence the sample space is the set of all $n$ vertex graphs.
 
-Ideally, we would like to replace the randomized algorithm with a deterministic one as done in the previous section. However, we know how to do this trivially only when the randomized algorithm uses $O(\log n)$ random bits.
+As an example, we can consider, $n=3$. There are $3$ possible edges and hence $8$ possible graphs. The probability assigned the triangle graph (which is the complete graph on $3$ vertices) is $p^3$ since all the three edges have to be chosen for this particular outcome to happen. In a similar way, the following pictures denote the sample space in this case with the corresponding probability values.\\
 
-We outline two "out of the box" thoughts related to our target of derandomization of randomized algorithms.
-
-\paragraph{Fooling the Algorithm with Pseudorandom bits : PRGs}
-
-The first one is about using $y \in \{0,1\}^r$ as not independent random bits. But use {\em dependent} random bits instead. Indeed, the analysis for the error bound for the algorithm ${\cal{A}}$ now may fail since it may assume total independence between the bits of $y$ in its mathematical argument. However, sometimes, it is possible that same analysis (or even a better analysis) may work even when the bits of the $y$ are dependent in a limited way \footnote{At one extreme, if we had an algorithm and an analysis which works wen all the bits of the $y$ are the same (which is an example of extreme dependence) we dont require the random bit at all - we can directly simulate the algorithm deterministically the trivial way.} But this may be specific to the algorithm and sometimes to the problem itself. We would ideally want a more abstract strategy which would work for randomized algorithms in general, modelled by what we described in the previous section. But even if we made it work with some dependent randombits, how do we produce this distribtion of $y'$ with the desired limited dependence among them? Construction of the methods which can produced limited dependence thus becomes important.
-
-Taking a more abstract view point, informally, we would like to have a box (formally an algorithm $G$) which takes in pure random bit string of length $y' \in \{0,1\}^{r'}$ and produces a string $y \in \{0,1\}^r$ such that the distribution of $y$ ``looks" pseudo-random for the resource limited algorithm ${\cal{A}}$. The idea is that we will run the algorithm ${\cal{A}}$ with the random string provided the $G(y')$ - the output of $G$ on input $y' \in \{0,1\}^{r'}$ chosen uniformly at random. 
-
-Indeed, since we are not providing pure random bits to ${\cal{A}}$. Hence we should expect its correctness guarantees to not hold good anymore. That is, it will deteriorate a bit. Can we guarantee that it does not deteriorate too much? This can be done in two ways (1) rework or reanalyse the algorithm ${\cal{A}}$ and argue that it is still having success probability greater than $\half$ (which is enough for trivial derandomization) (2) use only resource bounds of ${\cal{A}}$ to argue that the change of $y$ to $G(y')$ will not affect the success probability much. For this, the generator has to satisfy certain properties.
-
-A function $G : \{0.1\}^{r'} \to \{0,1\}^r$ is said to be a Peudo-Random Generator (PRG) for complexity measure\footnote{We will make it more precise when it comes to the section where we handles these objects. We are leaving at the above description at a less precise level.} $s$ and error parameter $\delta \in [0,1]$ if, for any algorithm ${\cal{A}}$ which runs in time $t \le s$ (or having complexity measure bounded by $s$): For any $x$,
-$$\left|\Pr_{y \in \{0,1\}^r} [{\cal{A}}(x,y) \textrm{ Accepts}] - \Pr_{y' \in \{0,1\}^{r'}} [{\cal{A}}(x,G(y')) \textrm{ Accepts}]~\right| \le \delta$$
-
-\begin{minipage}{0.5\linewidth}
-Connecting to the informal description, $\delta$ is the quantity by which the success probability deteriorates because of the use of the pseudorandom generator output, instead of pure random bits. Hence if we ensure that $\delta < \epsilon$, even after the use of the pseudorandom generator output, we still will have a randomized algorithm ${\cal{B}}$ with the following guarantee $\forall x \in \{0,1\}^n$:
-$$\Pr_{y \in \{0,1\}^r} [{\cal{B}}(x,y) \textrm{ is correct.}] \ge \half+\epsilon-\delta > \half $$
-\end{minipage}
-\begin{minipage}{0.05\linewidth}
-~
-\end{minipage}
-\begin{minipage}{0.4\linewidth}
-\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
-\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
-\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_g)[below=of q_r,yshift=-2cm]{${\cal G}(y')$};
-\node[state,rectangle,minimum width=2.5cm,minimum height=5.25cm](q_b)[below=of q_r,yshift=-0.5cm]{};
-\node[](q_l)[above=of q_r,yshift=0.85cm]{${\cal B}(x,y')$}; 
-\node[coordinate](q_0)[right=of q_r,xshift=3.5cm]{};
-\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
-\node[coordinate](q_2)[left=of q_r,xshift=-3.5cm,yshift=0mm]{};
-\node[coordinate](q_3)[below=of q_g,xshift=0cm,yshift=-2cm]{};
-\draw[->] ([yshift=1mm]q_r.east) -- ([yshift=1mm]q_0)node[midway] {\sc Yes/No};
-\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
-\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y$};
-\draw[->] ([yshift=-2mm]q_3) -- ([yshift=0mm]q_g.south)node[midway,swap] {$y' \in \{0,1\}^{r'}$};
-
+\begin{center}
+\begin{tikzpicture}
+\path[draw] (2,2)node(){$\circ$} -- (3,3)node(){$\circ$} -- (4,2)node(a){$\circ$} -- cycle;
+\path[draw] (5,2)node(){$\circ$} -- (6,3)node(){$\circ$}--(7,2)node(){$\circ$};
+\path[draw] (8,2)node(){$\circ$} -- (10,2)node(){$\circ$}--(9,3)node(){$\circ$};  
+\path[draw] (13,2)node(){$\circ$}--(12,3)node(){$\circ$} -- (11,2)node(){$\circ$};  
+\path[draw] (2,0)node(){$\circ$} -- (3,1)node(){$\circ$}(4,0)node(){$\circ$};
+\path[draw] (5,0)node(){$\circ$} -- (7,0)node(){$\circ$}(6,1)node(){$\circ$};
+\path[draw] (10,0)node(){$\circ$} -- (9,1)node(){$\circ$}(8,0)node(){$\circ$};
+\path[draw] (11,0)node(){$\circ$} (12,1)node(){$\circ$}(13,0)node(){$\circ$};
 \end{tikzpicture}
-\end{minipage}
+\end{center}
 
-\noindent We will end the description by asking the question - {\em what parameters determine how good our pseud-random generator is?}. As per the above discussion it is:
-\begin{itemize}
-\item The relative values of $r$ and $r'$. This leads to the definition of the {\em stretch} of the psuedorandom generator. We would ideally want an exponential stretch function so that with $r' \in O(\log n)$ we can produce $y$ for ${\cal{A}}$ which is of length $r = O(n^c)$ for constant $c$.
-\item The value of $s$. This determines how powerful an algorithm can the pseudorandom generator manage to fool. The larger the $s$ the better. Ideally we want $s$ to be covering all polynomial time running time bounds.
-\item The value of $\delta$. This determines the quantity by which the success probability of the algorithm deteriorates after plugging in the output of the pseudorandom generator instead of the $y$ from the pure random bits. Ideally, we want $\epsilon-\delta > 0$. The smaller the $\delta$, the better.
-\item Running time of the generator itself. Notice that we need ${\cal{G}}$ to be explicit polynomial time algorithm, which runs in time $\poly(n)$. That is, if $r' \in O(\log n)$ (which is what ideally we would want, so that the trivial derandomization runs in $\poly(n)$ time), then technically, the generator can run for exponential time in terms of its input size\footnote{This marks the difference between the pseudorandom generators studied in cryptography and derandomization.}.
-\end{itemize}
+\noindent The probabilities in that order are $p^3$, $p^2(1-p)$, $p^2(1-p)$, $p^2(1-p)$, $p(1-p)^2$, $p(1-p)^2$, $p(1-p)^2$, $(1-p)^3$.
 
-\noindent The main part of the game is in describing the generator algorithms (or functions from $\{0,1\}^{r'} \to \{0,1\}^r$). However, it is not even clear whether such functions exists for the range of parameters that we care about. Indeed, this is the kind of flavour that we will have.
-\begin{itemize}
-\item We can prove that the functions that we are looking for exist, with a non-constructive argument. This is done by - what is termed as the {\em Probablistic method}.
-\item Explicit descriptions of the functions, which are are required for the algorithms with required runtime bounds for ${\cal{G}}$ are not known. In fact, if we have such descriptions, then a complete derandomization of all randomized algorithms is possible, which will be a big achievement.
-\end{itemize}
+How do we analyse the probability that we get a connected graph as the outcome of the experiment. This is where events are used. Recall that formally, an event $\cal{E}$ is a subset of $\Omega$.
 
-\paragraph{Refining Randomness : Randomness Extractors -} Here is a completely different idea about supplying dependent randomness. We do not have source of pure random bits to supply for the randomized algorithm ${\cal{A}}$. But we may have impure radom bit sources. An imaginative question is {\em can we invest a few pure random bits in order to purify/extract and hence improve the impurity in the given random source?}. This, at first sounds crazy and leads to the following questions.
-\begin{itemize}
-\item How do we define {\em impure random bit sources}. They define distributions which are not uniform. There is the notion of entropy which can tell us how uniform the source is.
-\item How do we define {\em how good the output is}. Again, one could have used entropy here too naturally. However, noticing the fact that we would like to finally apply it our algorithms like ${\cal{A}}$, a different measure of "purity" is used which is the notion of statistical distance\footnote{Informally, this is the sum of the difference (in absolute value) between the probability values assigned to points in the sample space.} to uniform distribution. 
-\end{itemize}
+$$Pr({\cal{E}}) = \sum_{w \in {\cal{E}}} Pr(w)$$
 
-The above discussion leads to the definiton of a randomness extractor, which is a function ${\cal{E}}: \{0,1\}^n \times \{0,1\}^d \to \{0,1\}^m$ such that when $X$ is a distribution on $\{0,1\}^n$ with entropy at least $k$, then the distribution of the output ${\cal{E}}(X,U_d)$ is $\epsilon$-close to $U_m$ where $U_d$ and $U_m$ are uniform distributions on the set $\{0,1\}^d$ and $\{0,1\}^m$ respectively.
+\noindent In the above example, if the event ${\cal{E}}$ represent the set of connected graphs.
 
-Again, how do we determine how good is our extractor function? We want extractors which works on highly biased distributions (the smallest $k$ possible) using fewest number of pure random bits (the smallest $d$ possible) and produces output distributions which are closest to uniform distributions ($\epsilon$ must be smallest) - and still run in time polynomial in $n$.
+$$Pr({\cal{E}}) = p^3+2p^2(1-p)$$
 
-Similar to pseudorandom generator functions, it is unclear apriori whether such functions even exist for the range or parameters we care about. A similar situation arises, where by using probablistic method, we can prove that such objects (functions) exists, but at the same time, we do not know how to construct them deterministically (equivalently describe the algorithm for ${\cal{E}}$).
+\noindent In the above example, if the event ${\cal{E}'}$ represent the set of bipartite graphs.
 
-\begin{remark}[(Informal) - {\bf Psuedo-random Objects}]
-The common flavour that we observed about the previous sections is that there are mathematical objects which we would like to describe (by providing algorithms to compute those functions) and we do know that the function that we seek exists. This situation is a common phenomenon in many objects. In fact, in most situations, it is not just the existance of the objects that is argued, but also that if the object that is of interest is chosen at random (with appropriately set up experiments), the object of interest shows up at the outcome with high probability. Thus, there is a randomized algorithm to explicitly construct the object, and now we have to derandomize them !. However, notice that in such situations, we can think of deranodomizations which just depends on those algorithms which chooses the object at random.
-\end{remark}
+$$Pr({\cal{E}'}) = 1-p^3$$
 
-\paragraph{Other Contexts and Psuedorandom Objects}
+\begin{proposition}[{\bf Subadditivity of Probability - a.k.a - Union theorem}]
+Let ${\cal{E}}_1$,${\cal{E}}_2 \ldots {\cal{E}}_n$ be events, then :
+$$Pr\left[\bigcup_{i} {\cal{E}}_i\right] \le \sum_{i=1}^n Pr[{\cal{E}}_i]$$
+\end{proposition}
 
-We now describe a totally unrelated context in which the required mathematical functions display such a psuedorandom behaviour and an explicit construction is being sought for. The context is that of coding theory.
+\begin{definition}[{\bf Conditional Probability}]
+For two events ${\cal{E}}$ and ${\cal{E}'}$, we define, 
+$$Pr({\cal{E}}|{\cal{E}'}) = \frac{Pr({\cal{E}}\cap{\cal{E}'})}{Pr({\cal{E}'})}$$
+\end{definition}
 
-Coding theory had its inception in the late 1940's with the theory of
-reliable communication over a channel in the presence of noise - an
-area that started with the pioneering work of Claude Shannon and
-Richard Hamming. The former addressed and  answered the fundamental
-questions about the possibility of the use of codes for reliable
-communication and the later develped some basic combinatorial
-constructions of error correcting codes that laid the foundations for
-the work later.
+\noindent The conditional probability captures the questions of the kind, what is the probability that we get a connected graph if we are given that the outcome is a bipartite graph? 
 
-Theoretical computer scientists have a major role to play in the algorithmic
-aspects of coding theory research, and coding theory has proved to be instrumental in 
-several interesting results in theoretical computer science as well. There has been several surprising
-applications of codes and the associated mathematical objects, in
-areas like algorithms, complexity theory and cryptography.  
-Some part of the course will aim to discuss of those applications. 
-However, we do not intend to be exhaustive. 
+\begin{definition}[{\bf Independent events}]
+Two events ${\cal{E}}$ and ${\cal{E}'}$ are said to be \textit{independent}, if 
+$$Pr({\cal{E}}|{\cal{E}'}) = Pr({\cal{E}})$$
+Equivalently,
+$$Pr({\cal{E}} \cap {\cal{E}'}) = Pr({\cal{E}})Pr({\cal{E}}')$$
+\end{definition}
 
+For example, if we consider the events event ${\cal{E}}$ represent the set of connected graphs and event ${\cal{E}'}$ represent the set of bipartite graphs, then:
+$$Pr({\cal{E}} \cap {\cal{E}'}) = 3p^2(1-p)$$
+$$Pr({\cal{E}})Pr({\cal{E}'}) = \left[(1-p)^3+3p(1-p)^2+3p^2(1-p)\right](1-p^3)$$
 
-The channel is not harmless in the real world. It introduces errors in
-the transmission. Depending on the application the error may be in the
-physical storage media (communication over time) or in the physical
-channel (communication over space). Some of the 0s gets flipped to 1s
-and vice versa, and some bits may get dropped too. For the purposes of
-this course we will study only model (Shannon studied several
-interesting variants), namely what are called Binary Symmetric
-Channels. In this model, each bit gets flipped with a probability $p$.
-That is, a 1 gets flipped to a 0 with probability and 0 gets flipped
-to 1 with probability $p$.
+Since they are not equal, we conclude that the two events are not indendent. That is, the event that the graph is bipartite has an "influence" on the event that the graph is connected. To make this clearer, we suggest the following exercise:
 
-\[\xymatrix{ 0\ar[rr]^{1-p}\ar[rrdd]^{p} &&0\\
-&&\\
-1\ar[rr]^{1-p}\ar[rruu]^{p} && 1
-}\]
-           
+\begin{exercise}
+Let $G \in G(n,p)$. For all $S \subseteq V$, let $A_S$ be the event that $S$ forms an independent set in $G$. Show that if $S$ and $T$ are two distinct subsets of $k$ vertices then $A_S$ and $A_T$ are independent if and only if
+$|S \cap T| \le 1$.
+\end{exercise}
 
-What is the natural strategy to cope up with errors in transmission?
-Create redundancy. For example, if Alice wants to send a bit 0 to Bob,
-she will do it five times, and send $11111$ and ask Bob to take the
-majority of the bits as the bit that was sent. In this simple looking
-example we have all the essence. The string that was sent will be
-called the {\em codeword} and the original bit to be sent is called
-the {\em message}. There are only two codewords $00000$ and $11111$ in
-the above example. If we define the notion of distance as the hamming
-distance, then the majority decoding mechanism described above can
-also be seen as choosing the codeword that is closest to the received
-word. This natural strategy of decoding is called {\em nearest
-  neighbor decoding} or {\em maximum likelyhood decoding}.
+\noindent Now, we will generalize the above notion of independence to more than two events. An event $\calE$ is independent of a set of events
+$\{ \calE_j \mid j \in J\}$ if, for all subset $J' \subseteq J$, 
+$Pr [ \calE | \cap_{j \in J} B_j ] = Pr(A)$.
 
-Now let us observe facts about guarantees. Clearly if the channel is
-such that it will not corrupt more than 2 bits in a sequence of 5
-bits, then Bob will be able to decode the message bit correctly. But
-the channel may actually flip more number of bits but with relatively
-lower probability. Thus if we increase the number of copies we make of
-the original message, with high probability (over the errors)
-introduced by the channel we are going to be able to decode the bit
-correctly.
+\begin{exercise}
+Prove that an event $\calE$ is independent of a set of events $\{ \calE_j \mid j \in J\}$ 
+if and only if for all $J_1, J_2 \subseteq J$
+such that $J_1 \cap J_2 = \phi$
+$$\Pr [ \calE \cap \left( \cap_{j \in J_1} B_j \right) \cap \left( \cap_{j \in J_2} \overline{B_j} \right) ] = \Pr(\calE) \Pr[\left( \cap_{j \in J_1} B_j \right) \cap \left( \cap_{j \in J_2} \overline{B_j} \right) ]$$
+\end{exercise}
 
-To fix some notations, we denote $E: \{0,1\}^k \to \{0,1\}^n$ as the
-encoding function where $k$ is the message length (in general) and $n$
-is the length of the codeword (which we will call the {\em block
-  length}. Let $m \in \{0,1\}^k$ be a message, and $E(m) \in
-\{0,1\}^n$ is the transmitted word. The channel corrupts the message
-and let $y \in \{0,1\}^n$ is the received word. The error introduced
-by the channel could also be thought of as a string $\eta \in
-\{0,1\}^n$ where the $\eta_i$ determines whether $y_i = (E(m))_i$ or
-not.
+Let $\{ \calE_i \mid i \in I \}$ be a (finite) set of events. They are \textit{pairwise independent} if for all $i \ne j$ the events $\calE_i$ and $\calE_j$ are independent. Events are \textit{mutually independent} if each of them is independent from the set of the others. It is important to note that events may be pairwise independent but not mutually independent. Following exercise demonstrates that.
 
-We want the following guarantee for any $m \in \{0,1\}^k$ as
-translating the above intuition:
-\[ Pr_{\eta} ( D(E(m)+\eta) = m ) \ge 1-o(1) \]
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{independence})]
+\begin{show-ps1}{independence}
+A random $k$-colouring fo a graph $G$ is an element of the probability space $(\Omega,Pr)$
+where $\Omega$ is the set of all $k$-colourings (i.e. partition of $V$ into $k$ sets ($V_1,V_2,\ldots,V_k$), all this colourings being equally likely (so happening with probability $\frac{1}{k^n}$. For every edge $e$ of $G$, let $A_e$ be the event that the two endvertices of e receive the same colour. Show that:
+\begin{enumerate}[(a)]
+\item for any two edges e and f of G, the events $A_e$ and $A_f$ are independent.
+\item if $e,f$ and $g$ are three edges of a triangle of $G$, the events $A_e$, $A_f$ and $A_g$ are dependents.
+\end{enumerate}
+\end{show-ps1}
+\end{exercise-prob}
 
-where the $o(1)$ term is exponentially small depending on $n$ and hence on $k$ (since $c$ is a constant).
+\paragraph*{Random Variables:}
+We need the idea of random variables which we recap now. A random variable is another function $X : \Omega \to \mathbb{R}$. The expected value of the random variable is the "weighted average" value that it takes over the real numbers - weighted by the correspoding probability values. That is, 
+$$ E[X] = \bigsum_{\alpha \in \mathbb{R}} \alpha \Pr[X = \alpha]$$
+Indeed, $[X = \alpha]$ represents an event $\{ w \in \Omega \mid X(w) = \alpha \} \subseteq \Omega$. Hence, the expectation can also be written equivalently as follows:
+$$E[X] = \bigsum_{\alpha \in \mathbb{R}} \alpha \left( \bigsum_{\substack{w \in \Omega \\ X(w) = \alpha}} \Pr(w) \right)  = \bigsum_{w \in \Omega} X(w)\Pr(w)$$
 
-Although the above statement is written in terms of a probability over choice of the channel error vector, a natural combinatorial guarantee that we would want is an encoding and decoding scheme such that if the error string $\eta$ has weight at most $t < \frac{d}{2}$ the decoder retrieves the message correctly. That is, the encoder-decoder pair is guaranteed to get the message across the channel, if the number of corrputions by the chaneel is limited a number $t$. Indeed, the relative redundant information we sent should be minimised (which is the ration of $k$ and $n$ called the rate of the code).
+We need the following properties of expectation:
+\begin{description}
+\item{\bf Tool 1 : Boolean Random Variables } - 
+Suppose $X$ is a random variable that takes only Boolean values. In this case, $E[X] = \Pr[X=1]$ which follows from the definitions.
+\item{\bf Tool 2 : Linearity of Expectation }: Suppose $X_1$ and $X_2$ are random variables defined based on the same probability distribution, consider the new random variable defined as $X = c_1X_1 + c_2X_2$. This is also a random variable as it is a function from $\Omega \to \mathbb{R}$ defined as $X(w) = c_1X_1(w)+c_2X_2(w)$ for every $w \in \Omega$. It turns out there is a neat relationship between the expectation of the random variables $X, X_1$ and $X_2$. This is one of the most imporant relation that is extensively used in analysis of randomized algorithms.
+\begin{eqnarray*}
+E[X] & = & \sum_{w \in \Omega} X(w)\Pr(w) = \sum_{w \in \Omega} \left( c_1X_1(w)+c_2X_2(2) \right) \Pr(w) \\
+& = & c_1 \left( \sum_{w \in \Omega} X_1(w)\Pr(w)  \right)  + c_2 \left( \sum_{w \in \Omega} X_2(w) \Pr(w) \right)
+= c_1E[X_1]+c_2E[X_2]
+\end{eqnarray*}
 
-Shannons theorem essentially states that under sutiable choice of the parameters there is a pair of
-encoding-decoding functions that can achieve this high confidence decoding of the original message. We will state the theorem formally only later. But again, the spirit of the theorem is that there does exist good encoding and decoding schemes with respect to the parameters we usually care about (which we make precise later). The area of algorithmic coding theory essentially attempts to address the question of constructing coding schemes for which there is an efficient decoding.
+We suggest practicing the application of linearity of expectation using the following exercise.
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{spanning-trees})]
+\begin{show-ps1}{spanning-trees}
+A graph $G=(V,E)$ is created at random by selecting each edge with probability $p$.  What is the expected number of spanning trees in the randomly sampled graph?
+(\textit{Hint : Use Cayley’s Theorem that the number of distinct spanning trees on $n$ vertices is $n^{n-2}$. Order them, and define an indicator random variable.})
 
-We conclude the lecture by stating that the three mathematical objects that we stated in this lecture do have some interconnections among themselves and also the pseudorandom objects that we are going to state in the next lecture too.
+\end{show-ps1}
+\end{exercise-prob}
+
+\item{\bf Tool 3 : Averaging Principle } - 
+Suppose $X$ is a random variable and $E[X] = \mu$, then the following statements follow:
+$$\exists w \in \Omega : X(w) \ge \mu \hspace{1cm} \exists w \in \Omega : X(w) \le \mu$$
+Both of them can be proved by contradiction. For sample, we spell out the first one, suppose that the first statement is false. That is, $\forall w \in \Omega, X(w) < \mu$, then:
+$$E[X] = \bigsum_{w \in \Omega} X(w) \Pr(w) < \bigsum_{w \in \Omega} \left( \mu \times  \Pr(w) \right) = \mu \left( \bigsum_{w \in \Omega} \Pr(w) \right) = \mu$$
+This implies, $E[X] < \mu$ which is a contrdiction. A similar proof holds for the other claim as well.
+\item{\bf Tool 4 : Tail inequalities} - Suppose we have a random variable $X$ such that $E[X] = \mu$. What kind of probability guarantees can we write for $X$? For example, can we bound (in terms of the expectation) the probability that $X > \alpha$ for some $\alpha \in \mathbb{R}$? This is what tail bounds do. They help us write probability upper bounds based on expectations and other related parameters. 
+
+As a first example, consider a random variable that takes only non-negative values. Then we can write :
+$$\textrm{\bf Markov's Inequality : } \Pr[X \ge a] \le \frac{E[X]}{a}$$
+The proof is also quite simple.
+$$
+E[X] = \bigsum_{\alpha \in \mathbb{R}} \alpha \Pr[X=\alpha] 
+\ge \bigsum_{\alpha \ge a} \alpha \Pr[X=\alpha] \ge 
+\bigsum_{\alpha \ge a} a \Pr[X=\alpha] \ge 
+a \Pr[X \ge a]$$
+
+For example, this helps us make statements of the form :
+$$\Pr[X > 4\mu] \le \frac{\mu}{4\mu} = \frac{1}{4}$$
+That is the probability that the random variable takes a value which is more than $4$ times the expected value is at most $0.25$. Unfortunately, this does not help us write down a probability bound for $X$ taking value less than say $\frac{\mu}{4}$. Indeed, Markov's inequality is also pretty weak - as demonstrated by the following example - consider tossing $n$ coins and $X$ be the number of heads. Clearly $E[X] = \frac{n}{2}$. By Markov's inequality, $\Pr[X \ge n] \le \frac{1}{2}$ but we know that it is much smaller than that, namely $\frac{1}{2^n}$.
+
+What do we want if we want to bound the probability that the random variable takes a much lower value than the expectation? This is where we require more the next tail bound (without any assumptio of positivity on the random variable).
+$$\textrm{\bf Chebychev's Inequality : } \Pr[|X-\mu| \ge a] \le \frac{Var[X]}{a^2} \textrm{ where, $Var[X] = E[X^2] - E[X]^2$} $$
+We will not discuss the proof of Chebychev's inequality since we do not require it immediately. This concludes the review.
+\end{description}
+
+\section{Analysis of the Algorithm for {\sc Maxcut}}
+Recall Algorithm~\ref{alg:maxcut-rand}. We want to guarantee that th expected size of the cut is at most half of the optimal cut size. In fact, we prove something stronger.
+\begin{claim}
+Let $X$ be the size of the cut output by the algorithm~\ref{alg:maxcut-rand}. Then, $E[X] \ge \frac{m}{2}$ where $m$ is the number of edges in the graph $G$.
+\end{claim}
+\begin{proof}
+For each edge $e \in E$ define a random variable $X_e$ as the following indicator variable:
+$$ X_e = \begin{cases} 1 & \textrm{ if $e \in cut(S,T)$ } \\
+0 & \textrm{ otherwise } \end{cases} $$
+By definition, $X = \sum_{e \in E} X_e$. Hence, by linearity of expectation:
+$$E[X] = \sum_{e \in E} E[X_e] = m E[X_e]$$
+We just need to notice that $E[X_e] = \Pr[X_e = 1] = \Pr[e \in cut(S,T)]$ because of tool 1. Notice that an edge $e$ is in the cut if the two end points get into different sets among $S$ and $T$. That is, out of the four possible outcomes of the random coin tosses correspnoding to the endpoint vertices of $e$, two of them leads to $e$ being in $cut(S,T)$. Hence this is exactly $\half$. This gives:
+$E[X] \ge \frac{m}{2}$. Hence the proof.
+\end{proof}
+Notice that the claim is stronger. Indeed, since the optimum cut can only cut at most $m$ edges, the above also implies $E[X] \ge \frac{m}{2} \ge \frac{\textrm{\sc OptCut}}{2}$.
+
+\section{Method of Conditional Expectations}
+
+We now describe the main technical idea to be learned this week. Mainly an algorithm specific technique of derandomization of randomized algorithms. This presentation is from Salil Vadhan's book on Pseudorandomness.
+
+There are two kinds of randomized algorithms that we have seen so far - essentially to solve two kinds of problems. One is for the decision problems where the probability over different paths of the  computation tree, the algorithm being correct is at least $\frac{2}{3}$. The other is for optimization problems where the expected size of the output has guarantees. The method of derandomization that we are going to discuss can in principle be applied for both, if the randomized algorithm in question uses the random bits in a peculiar way that certain measures can be computed efficiently about the output for particular settings of the randomness. \\[-8mm]
+
+\paragraph{Main Idea:} We discuss the first kind of algorithms first and then adapt it to the second type. In the decision problem case, we know that $\frac{2}{3}$-rd paths in the computation tree are going to make the algorithm answer correctly. A vague idea would be, is there a way to walk down the path of the tree, making a choice deterministically and efficiently at each node (without trying both choices which leads to exponential time) maintaining the invariant that within the subtree that have restricted ourselves to, a $\frac{2}{3}$ fraction of paths within the subtree still make the algorithm go correct. If we make choices like this and set the random bits based on that choices, it is intuitive that we will reach a leaf that makes the algroithm answer correctly and then we can just run the algorithm on that leaf (that choice of random bits) and output the answer. The process is deterministic and effcient and hence gives a derandomization of the original algorithm.
+
+Of course, this is easier said than done. Many questions remain.

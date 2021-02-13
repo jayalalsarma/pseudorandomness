@@ -1,7 +1,7 @@
 \newtheoremstyle{myplain}{10pt}{10pt}{\itshape}{}{\scshape}{.}{.5em}{}
 \newtheoremstyle{mydefinition} {10pt}{10pt}{\itshape}{}{\scshape}{.}{.5em}{}
 \newtheoremstyle{myremark}     {10pt}{10pt}{}{}{\scshape}{.}{.5em}{}
-\newcounter{lecture}
+\newcounter{week}
 \theoremstyle{myplain}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -19,9 +19,9 @@
 \theoremstyle{myremark}
 \newtheorem{remark}        [theorem]{Remark}
 \newtheorem{conjecture}    [theorem]{Conjecture}
-\numberwithin{equation} {lecture}
-\numberwithin{figure}   {lecture}
-\numberwithin{table}    {lecture}
+\numberwithin{equation} {week}
+\numberwithin{figure}   {week}
+\numberwithin{table}    {week}
 \newcommand{\cupdot}{\mathbin{\mathaccent\cdot\cup}}
 \newcommand{\bigsum}{\mathlarger{\mathlarger{\sum}}}
 \newcommand{\bigger}[1]{\mathlarger{\mathlarger{#1}}}
@@ -33,11 +33,11 @@
 \newcommand{\listofscribes}{List of Scribes}
 \newlistof{scribe}{scr}{\listofscribes}
 
-\newcommand{\Lecture}[2]
+\newcommand{\Week}[2]
 {
 	\setcounter{chapter}{#1}
 	\setcounter{section}{0}
-	\setcounter{lecture}{#1}
+	\setcounter{week}{#1}
 	% For table of contents
 	\addcontentsline{toc}{chapter}{\protect	\numberline{#1}{#2}}
 	% For list of scribes
@@ -51,8 +51,8 @@
 	}
 	\hfill
 	\begin{tabular}{c@{}}
-	{\bf\Large LECTURE}\\[2mm]
-	\rule{0mm}{17mm}\scalebox{7}{\bf\thelecture}
+	{\bf\Large WEEK}\\[2mm]
+	\rule{0mm}{17mm}\scalebox{7}{\bf\theweek}
 	\end{tabular}
 	\vspace{1cm}
 	\hrule

@@ -1,4 +1,4 @@
-\Lecture{1}{Power of Randomization}
+\Week{1}{Power of Randomization and Derandomization Problem}
 \noindent 
 
 Randomized algorithms play a very powerful role in algorithm design. We will concentrate on the randomized algorithms for decision problems in this course. So all of our computational problems can be abstractly represented as given a string $x \in \Sigma^*$ in an alphabet, does $x$ have property $\calP$ or not?
@@ -68,9 +68,12 @@ Informally, if we run the above algorithm ${\cal{F}}(A,B,C)$, and the algorithm 
 Why are we interested in the above algorithm even though it gives a success probability bound of only $\half$? The reason is that, it is a one-sided error algorithm and hence still much better than a coin toss outcome because the algorithm does not make an error when $AB = C$. In fact, such algorithms can be repeated in a natural way - run $k$ times, and if any of them says $AB \ne C$ output {\sc No}. This reduces the error probability in exponentially in $k$ - since each of the trials should give an error (with probability $\half$) and hence the error probability bound is at most $\frac{1}{2^k}$.
 \end{remark}
 
-\section{Algorithms for Polynomial Identity Testing Problem}
 
-Now we will do an example problem where there is an efficient (polynomial time in the input size) randomized algorithm for solving the problem but a deterministic algorithm for solving the problem is not known. The problem is easy to state algorithmic question on polynomials. Fix $\F$ to be the field where the coefficients are chosen from.
+\section{Polynomial Identity Testing Problem}
+
+The previous example, while it demonstrates the point, might be a bit unsatifactory since the problem under consideration anyway has an efficient algorithm. To address this, we will now see another example problem where there is an efficient (polynomial time in the input size) randomized algorithm for solving the problem but a deterministic algorithm for solving the problem is not known. 
+
+The problem is easy-to-state algorithmic question on polynomials. Fix $\F$ to be the field where the coefficients are chosen from.
 {\em Given a polynomial $p \in \F[x_1, x_2, \ldots x_n]$, test if it is identically zero}. That is, do all the terms cancel out and become the zero polynomial. 
 
 This problem has its roots in the simple high school
@@ -87,9 +90,10 @@ explicit representation at the input, this is very easy to do by
 simply going over the input for each monomial. Hence this can be done
 in time polynomial in the input.
 
-What if the polynomial is not given that explicity. What is the most
-implicit form that we can think of? A black box which evaluates the polynomial.
-That is, we have an oracle $p$ when given input $a$ returns $p(a)$, the value of polynomial 
+What if the polynomial is not given that explicity. How can it be given implicitly compared to the list of monomials? One answer is that, we could give it in a bracketed form. That is, the polynomial $x_1x_2+x_1x_4+x_3x_2+x_3x_4$ can be given as $(x_1+x_3)(x_1+x_4)$.
+Indeed, this is implicit, since an expression of length $n$, can have number of actual number of monomials to be $2^n$ - consider the example $(x_1+x_2)(x_3+x_4) \ldots (x_{n-1}+x_n)$ where $n$ is the number of variables.
+
+What is the most implicit form that we can think of? A black box which evaluates the polynomial. That is, we have an oracle $p$ when given input $a$ returns $p(a)$, the value of polynomial 
 at $a$.
 
 %The aim is to test whether the input polynomial is identically 0 (The zero polynomial). If the polynomial 
@@ -224,6 +228,222 @@ with probability at least $\frac{3}{4}$.
 %\[ p \equiv 0 \implies \textrm{ Pr[$A$ accepts] $= 0$.} \]
 \end{lemma}
 
-Notice that in fact the lemma is weak in the sense that it ignores the
-fact that when the polynomial is identically zero then the success
-probability of the algorithm is actually 1 !. In other words, is it is a one-sided error randomized algorithm.
+Notice that in fact the lemma is weak in the sense that it ignores the fact that when the polynomial is identically zero then the success probability of the algorithm is actually 1 !. In other words, is it is a one-sided error randomized algorithm.
+
+
+\section{Derandomization Problem}
+
+In the previous section (lecture), we talked about randomized algorithms for problems for which we do not know deterministic algorithms with similar complexity resource bounds. Indeed, we are not happy about randomized algorithms as such since these algorithms require perfect unbiased coin toss experiments to be performed and we do not have them in practice. Indeed, the fact that they can output erroneous answers, even though with low probability makes them useless in critical practical applications.
+
+How do convert them to deterministic algorithms without causing much overhead?. One possible way is to look at each algorithm and use inherent properties of the problem to analyze the randomized algorithm better to come up with ways to remove randomness from that algorithm. Here, we start with the original randomized algorithm for a particular problem, and improve it to derandomize it and the techniques are usually very algorithm specific. We will do some examples of this kind later in the course.
+
+
+\subsection{Abstract Model of Derandomziation}
+
+From now on, we will be concentrating only on abstract models of these randomized algorithms. We fix some notations first. A randomized algorithm ${\cal{A}}$ on input $x$ runs in time $t(n)$ (where $n=|x|$) and let $y \in \{0,1\}^{r(n)}$ be the concatenation of the unbiased coin toss experiement that the algorithm does during its execution. Notice that $r(n) \le t(n)$ (we drop the $n$ when it is not required explicitly). If the algorithm runs in polynomial time $t(n) \le n^c$ for a constant $c$ independent of $n$. \\
+
+\begin{minipage}{0.4\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^r$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\vspace{-7mm}
+The guarantee we have is there is an $\epsilon \in (0,\half]$.
+\vspace{-3mm}
+$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^r} [A(x,y) \textrm{ is correct.}] \ge \half+\epsilon $$
+\end{minipage}
+\vspace{3mm}
+
+\subsection{Derandomization by Brute Force Approach}
+
+\noindent The trivial approach to obtain an equivalent deterministic algorithm is run over all possible outcomes of the experiment and check the answer from the algorithm for each of them. Whichever answer comes as majority - report that as the final answer.
+
+\begin{algorithm}
+\label{alg:trivial-derand}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$, where success prob. $\half+\epsilon$ for ${\cal{A}}$} 
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$. 
+\For{\texttt{each $y \in \{0,1\}^r$}}
+	\State \texttt{Check if ${\cal{A}}(x,y)$ accepts, if so increment {\em count}}
+\EndFor
+\State If ~[{\em count} $> 2^{r-1}$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+
+If the running time of the randomized algorithm ${\cal{A}}$ is $t(n)$, then the running time of the new algorithm (which is deterministic) is $t(n)2^{r(n)}$. To argue correctness, if the actual answer for input $x \in \{0,1\}^n$ is {\sc Yes}, then the fraction of $y \in \{0,1\}^r$ which makes ${\cal{A}}(x,y)$ accept is strictly more than $\half$ and hence the algorithm will output {\sc Yes}. If the actual answer for input $x \in \{0,1\}^n$ is {\sc No}, then then the fraction of $y \in \{0,1\}^r$ which makes ${\cal{A}}(x,y)$ accept is strictly less than $\half$ and hence the algorithm will output {\sc No}.
+
+\begin{remark}
+Note that the algorithm ${\cal{A}}$ will run in $\poly(n)$ time if the original randomized algorithm was running in $t \le \poly(n)$ time and was using $r \le O(\log n)$ random bits.
+\end{remark}
+
+%\subsection{The Method of Conditional Probabilities}
+%
+%Consider the algorithm choosing $r$ bits of randomness. Imagine this as a tree of computation where each bit is chosen:
+%
+%\jsay{Method of conditional probabilities yet to be typed in}
+
+\section{Pseudorandomness : An Informal Overview}
+
+Ideally, we would like to replace the randomized algorithm with a deterministic one as done in the previous section. However, we know how to do this trivially only when the randomized algorithm uses $O(\log n)$ random bits.
+
+We outline two "out of the box" thoughts related to our target of derandomization of randomized algorithms.
+
+\paragraph{Fooling the Algorithm with Pseudorandom bits : PRGs}
+
+The first one is about using $y \in \{0,1\}^r$ as not independent random bits. But use {\em dependent} random bits instead. Indeed, the analysis for the error bound for the algorithm ${\cal{A}}$ now may fail since it may assume total independence between the bits of $y$ in its mathematical argument. However, sometimes, it is possible that same analysis (or even a better analysis) may work even when the bits of the $y$ are dependent in a limited way \footnote{At one extreme, if we had an algorithm and an analysis which works wen all the bits of the $y$ are the same (which is an example of extreme dependence) we dont require the random bit at all - we can directly simulate the algorithm deterministically the trivial way.} But this may be specific to the algorithm and sometimes to the problem itself. We would ideally want a more abstract strategy which would work for randomized algorithms in general, modelled by what we described in the previous section. But even if we made it work with some dependent randombits, how do we produce this distribtion of $y'$ with the desired limited dependence among them? Construction of the methods which can produced limited dependence thus becomes important.
+
+Taking a more abstract view point, informally, we would like to have a box (formally an algorithm $G$) which takes in pure random bit string of length $y' \in \{0,1\}^{r'}$ and produces a string $y \in \{0,1\}^r$ such that the distribution of $y$ ``looks" pseudo-random for the resource limited algorithm ${\cal{A}}$. The idea is that we will run the algorithm ${\cal{A}}$ with the random string provided the $G(y')$ - the output of $G$ on input $y' \in \{0,1\}^{r'}$ chosen uniformly at random. 
+
+Indeed, since we are not providing pure random bits to ${\cal{A}}$. Hence we should expect its correctness guarantees to not hold good anymore. That is, it will deteriorate a bit. Can we guarantee that it does not deteriorate too much? This can be done in two ways (1) rework or reanalyse the algorithm ${\cal{A}}$ and argue that it is still having success probability greater than $\half$ (which is enough for trivial derandomization) (2) use only resource bounds of ${\cal{A}}$ to argue that the change of $y$ to $G(y')$ will not affect the success probability much. For this, the generator has to satisfy certain properties.
+
+A function $G : \{0.1\}^{r'} \to \{0,1\}^r$ is said to be a Peudo-Random Generator (PRG) for complexity measure\footnote{We will make it more precise when it comes to the section where we handles these objects. We are leaving at the above description at a less precise level.} $s$ and error parameter $\delta \in [0,1]$ if, for any algorithm ${\cal{A}}$ which runs in time $t \le s$ (or having complexity measure bounded by $s$): For any $x$,
+$$\left|\Pr_{y \in \{0,1\}^r} [{\cal{A}}(x,y) \textrm{ Accepts}] - \Pr_{y' \in \{0,1\}^{r'}} [{\cal{A}}(x,G(y')) \textrm{ Accepts}]~\right| \le \delta$$
+
+\begin{minipage}{0.5\linewidth}
+Connecting to the informal description, $\delta$ is the quantity by which the success probability deteriorates because of the use of the pseudorandom generator output, instead of pure random bits. Hence if we ensure that $\delta < \epsilon$, even after the use of the pseudorandom generator output, we still will have a randomized algorithm ${\cal{B}}$ with the following guarantee $\forall x \in \{0,1\}^n$:
+$$\Pr_{y \in \{0,1\}^r} [{\cal{B}}(x,y) \textrm{ is correct.}] \ge \half+\epsilon-\delta > \half $$
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.4\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_g)[below=of q_r,yshift=-2cm]{${\cal G}(y')$};
+\node[state,rectangle,minimum width=2.5cm,minimum height=5.25cm](q_b)[below=of q_r,yshift=-0.5cm]{};
+\node[](q_l)[above=of q_r,yshift=0.85cm]{${\cal B}(x,y')$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3.5cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3.5cm,yshift=0mm]{};
+\node[coordinate](q_3)[below=of q_g,xshift=0cm,yshift=-2cm]{};
+\draw[->] ([yshift=1mm]q_r.east) -- ([yshift=1mm]q_0)node[midway] {\sc Yes/No};
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y$};
+\draw[->] ([yshift=-2mm]q_3) -- ([yshift=0mm]q_g.south)node[midway,swap] {$y' \in \{0,1\}^{r'}$};
+
+\end{tikzpicture}
+\end{minipage}
+
+\noindent We will end the description by asking the question - {\em what parameters determine how good our pseud-random generator is?}. As per the above discussion it is:
+\begin{itemize}
+\item The relative values of $r$ and $r'$. This leads to the definition of the {\em stretch} of the psuedorandom generator. We would ideally want an exponential stretch function so that with $r' \in O(\log n)$ we can produce $y$ for ${\cal{A}}$ which is of length $r = O(n^c)$ for constant $c$.
+\item The value of $s$. This determines how powerful an algorithm can the pseudorandom generator manage to fool. The larger the $s$ the better. Ideally we want $s$ to be covering all polynomial time running time bounds.
+\item The value of $\delta$. This determines the quantity by which the success probability of the algorithm deteriorates after plugging in the output of the pseudorandom generator instead of the $y$ from the pure random bits. Ideally, we want $\epsilon-\delta > 0$. The smaller the $\delta$, the better.
+\item Running time of the generator itself. Notice that we need ${\cal{G}}$ to be explicit polynomial time algorithm, which runs in time $\poly(n)$. That is, if $r' \in O(\log n)$ (which is what ideally we would want, so that the trivial derandomization runs in $\poly(n)$ time), then technically, the generator can run for exponential time in terms of its input size\footnote{This marks the difference between the pseudorandom generators studied in cryptography and derandomization.}.
+\end{itemize}
+
+\noindent The main part of the game is in describing the generator algorithms (or functions from $\{0,1\}^{r'} \to \{0,1\}^r$). However, it is not even clear whether such functions exists for the range of parameters that we care about. Indeed, this is the kind of flavour that we will have.
+\begin{itemize}
+\item We can prove that the functions that we are looking for exist, with a non-constructive argument. This is done by - what is termed as the {\em Probablistic method}.
+\item Explicit descriptions of the functions, which are are required for the algorithms with required runtime bounds for ${\cal{G}}$ are not known. In fact, if we have such descriptions, then a complete derandomization of all randomized algorithms is possible, which will be a big achievement.
+\end{itemize}
+
+\paragraph{Refining Randomness : Randomness Extractors -} Here is a completely different idea about supplying dependent randomness. We do not have source of pure random bits to supply for the randomized algorithm ${\cal{A}}$. But we may have impure radom bit sources. An imaginative question is {\em can we invest a few pure random bits in order to purify/extract and hence improve the impurity in the given random source?}. This, at first sounds crazy and leads to the following questions.
+\begin{itemize}
+\item How do we define {\em impure random bit sources}. They define distributions which are not uniform. There is the notion of entropy which can tell us how uniform the source is.
+\item How do we define {\em how good the output is}. Again, one could have used entropy here too naturally. However, noticing the fact that we would like to finally apply it our algorithms like ${\cal{A}}$, a different measure of "purity" is used which is the notion of statistical distance\footnote{Informally, this is the sum of the difference (in absolute value) between the probability values assigned to points in the sample space.} to uniform distribution. 
+\end{itemize}
+
+The above discussion leads to the definiton of a randomness extractor, which is a function ${\cal{E}}: \{0,1\}^n \times \{0,1\}^d \to \{0,1\}^m$ such that when $X$ is a distribution on $\{0,1\}^n$ with entropy at least $k$, then the distribution of the output ${\cal{E}}(X,U_d)$ is $\epsilon$-close to $U_m$ where $U_d$ and $U_m$ are uniform distributions on the set $\{0,1\}^d$ and $\{0,1\}^m$ respectively.
+
+Again, how do we determine how good is our extractor function? We want extractors which works on highly biased distributions (the smallest $k$ possible) using fewest number of pure random bits (the smallest $d$ possible) and produces output distributions which are closest to uniform distributions ($\epsilon$ must be smallest) - and still run in time polynomial in $n$.
+
+Similar to pseudorandom generator functions, it is unclear apriori whether such functions even exist for the range or parameters we care about. A similar situation arises, where by using probablistic method, we can prove that such objects (functions) exists, but at the same time, we do not know how to construct them deterministically (equivalently describe the algorithm for ${\cal{E}}$).
+
+\begin{remark}[(Informal) - {\bf Psuedo-random Objects}]
+The common flavour that we observed about the previous sections is that there are mathematical objects which we would like to describe (by providing algorithms to compute those functions) and we do know that the function that we seek exists. This situation is a common phenomenon in many objects. In fact, in most situations, it is not just the existance of the objects that is argued, but also that if the object that is of interest is chosen at random (with appropriately set up experiments), the object of interest shows up at the outcome with high probability. Thus, there is a randomized algorithm to explicitly construct the object, and now we have to derandomize them !. However, notice that in such situations, we can think of deranodomizations which just depends on those algorithms which chooses the object at random.
+\end{remark}
+
+\paragraph{Other Contexts and Psuedorandom Objects}
+
+We now describe a totally unrelated context in which the required mathematical functions display such a psuedorandom behaviour and an explicit construction is being sought for. The context is that of coding theory.
+
+Coding theory had its inception in the late 1940's with the theory of
+reliable communication over a channel in the presence of noise - an
+area that started with the pioneering work of Claude Shannon and
+Richard Hamming. The former addressed and  answered the fundamental
+questions about the possibility of the use of codes for reliable
+communication and the later develped some basic combinatorial
+constructions of error correcting codes that laid the foundations for
+the work later.
+
+Theoretical computer scientists have a major role to play in the algorithmic
+aspects of coding theory research, and coding theory has proved to be instrumental in 
+several interesting results in theoretical computer science as well. There has been several surprising
+applications of codes and the associated mathematical objects, in
+areas like algorithms, complexity theory and cryptography.  
+Some part of the course will aim to discuss of those applications. 
+However, we do not intend to be exhaustive. 
+
+
+The channel is not harmless in the real world. It introduces errors in
+the transmission. Depending on the application the error may be in the
+physical storage media (communication over time) or in the physical
+channel (communication over space). Some of the 0s gets flipped to 1s
+and vice versa, and some bits may get dropped too. For the purposes of
+this course we will study only model (Shannon studied several
+interesting variants), namely what are called Binary Symmetric
+Channels. In this model, each bit gets flipped with a probability $p$.
+That is, a 1 gets flipped to a 0 with probability and 0 gets flipped
+to 1 with probability $p$.
+
+\[\xymatrix{ 0\ar[rr]^{1-p}\ar[rrdd]^{p} &&0\\
+&&\\
+1\ar[rr]^{1-p}\ar[rruu]^{p} && 1
+}\]
+           
+
+What is the natural strategy to cope up with errors in transmission?
+Create redundancy. For example, if Alice wants to send a bit 0 to Bob,
+she will do it five times, and send $11111$ and ask Bob to take the
+majority of the bits as the bit that was sent. In this simple looking
+example we have all the essence. The string that was sent will be
+called the {\em codeword} and the original bit to be sent is called
+the {\em message}. There are only two codewords $00000$ and $11111$ in
+the above example. If we define the notion of distance as the hamming
+distance, then the majority decoding mechanism described above can
+also be seen as choosing the codeword that is closest to the received
+word. This natural strategy of decoding is called {\em nearest
+  neighbor decoding} or {\em maximum likelyhood decoding}.
+
+Now let us observe facts about guarantees. Clearly if the channel is
+such that it will not corrupt more than 2 bits in a sequence of 5
+bits, then Bob will be able to decode the message bit correctly. But
+the channel may actually flip more number of bits but with relatively
+lower probability. Thus if we increase the number of copies we make of
+the original message, with high probability (over the errors)
+introduced by the channel we are going to be able to decode the bit
+correctly.
+
+To fix some notations, we denote $E: \{0,1\}^k \to \{0,1\}^n$ as the
+encoding function where $k$ is the message length (in general) and $n$
+is the length of the codeword (which we will call the {\em block
+  length}. Let $m \in \{0,1\}^k$ be a message, and $E(m) \in
+\{0,1\}^n$ is the transmitted word. The channel corrupts the message
+and let $y \in \{0,1\}^n$ is the received word. The error introduced
+by the channel could also be thought of as a string $\eta \in
+\{0,1\}^n$ where the $\eta_i$ determines whether $y_i = (E(m))_i$ or
+not.
+
+We want the following guarantee for any $m \in \{0,1\}^k$ as
+translating the above intuition:
+\[ Pr_{\eta} ( D(E(m)+\eta) = m ) \ge 1-o(1) \]
+
+where the $o(1)$ term is exponentially small depending on $n$ and hence on $k$ (since $c$ is a constant).
+
+Although the above statement is written in terms of a probability over choice of the channel error vector, a natural combinatorial guarantee that we would want is an encoding and decoding scheme such that if the error string $\eta$ has weight at most $t < \frac{d}{2}$ the decoder retrieves the message correctly. That is, the encoder-decoder pair is guaranteed to get the message across the channel, if the number of corrputions by the chaneel is limited a number $t$. Indeed, the relative redundant information we sent should be minimised (which is the ration of $k$ and $n$ called the rate of the code).
+
+Shannons theorem essentially states that under sutiable choice of the parameters there is a pair of
+encoding-decoding functions that can achieve this high confidence decoding of the original message. We will state the theorem formally only later. But again, the spirit of the theorem is that there does exist good encoding and decoding schemes with respect to the parameters we usually care about (which we make precise later). The area of algorithmic coding theory essentially attempts to address the question of constructing coding schemes for which there is an efficient decoding.
+
+We conclude the lecture by stating that the three mathematical objects that we stated in this lecture do have some interconnections among themselves and also the pseudorandom objects that we are going to state in the next lecture too.
