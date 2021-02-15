@@ -1,0 +1,123 @@
+\Week{3}{Amplification : Making Algorithms Err Less}
+\noindent 
+
+In the last week, we saw algorithm specific techniques of derandomization. More precisely, the derandomization uses the peculiarity of the algorithms in the way they use the random bits and the analysis. In this week, we will go back to the abstract set up where we know nothing about the algorithm other than the resource bounds it uses.
+
+We recall some notations first. A randomized algorithm ${\cal{A}}$ on input $x$ runs in time $t(n)$ (where $n=|x|$) and let $y \in \{0,1\}^{m(n)}$ be the concatenation of the unbiased coin toss experiement that the algorithm does during its execution. Notice that $m(n) \le t(n)$ (we drop the $n$ when it is not required explicitly). If the algorithm runs in polynomial time $t(n) \le n^c$ for a constant $c$ independent of $n$. \\
+
+\begin{minipage}{0.4\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^m$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.5\linewidth}
+\vspace{-7mm}
+The guarantee we have is there is an $\epsilon \in (0,\half]$.
+\vspace{-3mm}
+$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^r} [A(x,y) \textrm{ is correct.}] \ge \half+\epsilon $$
+\end{minipage}
+\vspace{3mm}
+
+\noindent Imagine that we had a success probability of very close to 1. That is, $\epsilon > \half-\frac{1}{2^{m}}$. That is, $\forall x \in \{0,1\}^n$ : 
+$\Pr_{y \in \{0,1\}^m} [A(x,y) \textrm{ is correct.}] > 1-\frac{1}{2^m}$. Notice that, now the algorithm does not need to use randomness and can fix $y$ to be any string in $\{0,1\}^r$ and run the algorithm ${\cal{A}}$ and the answer is guaranteed to be correct. (This is because, if there exists at least one $y \in \{0,1\}^m$ for which the algorithm errs then the success probability would have been $\le 1-\frac{1}{2^m}$.) Thus we would have derandomized the algortithm efficiently.
+
+But how do we achieve such high success probability? Viewing a randomized algorithm as an experiment that we do in physics lab to compute a value, we will repeat the experiment and take the most frequent value in order to reduce the error. However, this also increases the number of random bits which goes against the above plan. Let us formally review this amplifcation method nevertheless.
+
+\section{Success Probability Amplifcation by Repetition}
+
+We first write down the algorithm which follows the simple idea of repetition with independent random bits.
+
+\begin{algorithm}
+\label{alg:trivial-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$.
+\State Choose $k$ independent random strings $y_1, y_2, \ldots y_k \in \{0,1\}^r$. \Comment{Uses $O(kn)$ random bits.}
+\For{\texttt{each $i \in [k]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
+\EndFor
+\State If ~[{\em count} $> \frac{k}{2}$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+
+Why would this improve the success probability? and if so, how does it depend on $k$?. The following lemma answers these. Fix the input $x$. Let ${\cal{E}}$ represent the event that ${\cal{A}}$ accept on the random string $y$.
+
+\begin{lemma}
+If $\mathcal{E}$ is an event that $Pr(\mathcal{E}) \geq \frac{1}{2} + \epsilon $, then the probability the $\mathcal{E}$ occurs atleast $\frac {k}{2}$ times on $k$ independent trials is at least 
+$1-\frac{1}{2}(1-4\epsilon^2)^\frac{k}{2}$
+\end{lemma}
+\begin{proof}
+Let $q$ denote the probability the $\mathcal{E}$ occurs atleast $\frac {k}{2}$ times on $k$ independent trials.
+Let $q_i$ = Pr($\mathcal{E}$ occurs exatly $i$ times in $k$ trials), $0 \leq i \leq k$. Thus,
+$q = 1 - \sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}$ $q_i$. We will analyse the complementary event:
+Pr($\mathcal{E}$ occurs atmost $\frac{k}{2}$ times) = $\sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}$ $q_i$. \\ 
+We show an upper bound on each $q_i$ and thus show an lower bound on $q$.
+\begin{eqnarray*}
+q_i & = & {k \choose i} (\frac{1}{2} + \epsilon)^{i} (\frac{1}{2} - \epsilon)^ {k-i} \\
+& \leq & {k\choose i} \left(\frac{1}{2} + \epsilon\right)^{i} \left(\frac{1}{2} - \epsilon\right)^ {k-i} \left(\frac{\frac{1}{2} + \epsilon}{\frac{1}{2} - \epsilon}\right)^{\frac{k}{2} - i}  (\textrm{because }\epsilon \le \frac{1}{2} ) \\
+& = & {k\choose i}\left(\frac{1}{2} + \epsilon\right)^{\frac{k}{2}}\left(\frac{1}{2} - \epsilon\right)^{\frac{k}{2}} \\
+&= & {k\choose i} \left(\frac{1}{4} - \epsilon^2\right)^{\frac{k}{2}}
+\end{eqnarray*}
+Now we analyse the sum:
+\begin{eqnarray*}
+\sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}q_i & \leq & \sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}{k\choose i} \left(\frac{1}{4} - \epsilon^2\right)^{\frac{k}{2}} \\
+q = 1 - \sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}q_i & \geq & \sum_{i=0}^{\lfloor\frac{k}{2}\rfloor}{k\choose i} \left(\frac{1}{4} - \epsilon^2\right)^{\frac{k}{2}} \\
+& = & 1 - \left(\frac{1}{4} - \epsilon^2\right)^{\frac{k}{2}} 2^{k-1} \\
+& = & 1 - \frac{1}{2} \left(1 - 4\epsilon^2\right)^{\frac{k}{2}} \\
+\textrm {Thus, } q & \ge & 1 - \frac{1}{2} \left(1 - 4\epsilon^2\right)^{\frac{k}{2}}
+\end{eqnarray*}
+\end{proof}
+
+\noindent Thus, if we had an algorithm ${\cal{A}}$ with $\epsilon = \frac{1}{3}$ (that is success probability is at least $\frac{2}{3}$, and we want an algorithm with ${\cal{A'}}$ with $\epsilon = \frac{1}{4}$ (that is, success probability is at least $\frac{3}{4}$). Then, the number of times the iteration that needs to be done can be back calculated as the $k$ that satisfies:
+$$1-\half\left(1-\frac{4}{9}\right)^{\frac{k}{2}} \ge \frac{3}{4}$$
+which will be a constant. Quite interestingly, we can do this even when the required error probability is exponentially small. That is, suppose we require the success probability to be $1-\frac{1}{2^{q(n)}}$ which is quite close to 1. Then the value of $k$ should be :
+
+$$1-\half\left(1-\frac{4}{9}\right)^{\frac{k}{2}} \ge 1-\frac{1}{2^{q(n)}} \Longrightarrow
+\left(\frac{9}{5}\right)^{\frac{k}{2}}\le 2^{q(n)-1}$$
+which in turn would imply $k = p(n)$ to be a polynomial value in terms of $n$.
+Thus we have the following lemma:
+
+\begin{lemma}[{\bf Amplification Lemma}]
+\label{lem:amplification}
+Let ${\cal{A}}$ be a randomized algorithm running in time $\poly(n)$ which has $\half+\epsilon$ as the probability of success. Then for any $q(n)$, we have a randomized algorithm ${\cal{A'}}$ that runs in time $\poly(n)$ with the following success probability. For every input $x \in \{0,1\}^{n}$.
+\[ \Pr_{y} \left[ {\cal{A'}}(x,y) \text{ is {\em correct} } \right] \geq 1-2^{-q(n)} \]
+\end{lemma}
+
+Define $\Gamma_x = \{ y \in \{0,1\}^{p(n)}\mid {\cal{A}}(x,y) \textrm{ is correct }\}$.\\[-2mm]
+
+\begin{minipage}{0.6\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A'}(x,y)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^{p(n)}$};
+\end{tikzpicture}
+
+\vspace{2mm}
+The guarantee we have is : 
+$\forall x,~|\Gamma_x| \geq (1-2^{-q(n)})2^{p(n)}$
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+\vspace{-1cm}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\draw (2,0) ellipse (2cm and 2.5cm) node[midway,yshift=-1cm, xshift=1cm]{$\{0,1\}^{p(n)}$};
+\draw (2,1) ellipse (1cm and 1cm)
+node{$\Gamma_x$};;
+\end{tikzpicture}
+\end{minipage}
+
