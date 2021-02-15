@@ -1,7 +1,9 @@
-\Week{2}{Method of Conditional Expectation}
+\Week{2}{Method of Conditional Expectation, Pessimistic Estimators}
 
 
-\section{{\sc Maxcut} Problem}
+In this week, the plan is to learn the technique of conditional expection which is a derandomization technique that works for several algorithms. However, this is a technique which is specific to algorithms and not to problems. And there is no hard and fast rule by which we can say whether this technique is applicable for an algorithm. We demonstrate it with the {\sc MaxCut} problem.
+
+\section{{\sc Maxcut} Problem and Randomized Approximation}
 
 For an undirected graph $G(V,E)$, a cut is a partition of vertices into two sets $S,T \subseteq V$. The size of a cut is the number of edges that go across these partitions. That is, the size of the set :
 $$cut(S,T) = \{ e=(u,v) \mid (u,v) \in E, u \in S, v \in T \}$$
@@ -36,7 +38,7 @@ We resort to randomized algorithms - which in this context will be called random
 
 Notice that the sets $S$ and $T$ will form a partition of $V$ at the end of the algorithm. Clearly, the algorithm will run in linear time. Indeed, the above description is also equivalent to - choose a random subset $S$ of vertices from $V$ and outputing $cut(S,\overline{S})$. Indeed, we need to give a guarantee about the size of the cut output by the algorithm. Roughly, the claim is that the average size of the cut (where average is taken over the $2^n$ different outcomes of the random choices). We recap some basics of random variables and expections now before stating the correctness claim.
 
-\section{Recap of Probability Basics, Random Variables, Expectation}
+\subsection{Recap of Probability Basics, Random Variables, Expectation}
 
 Fix a set $\Omega$, which is called the {\em sample space}.
 A probability distribution is defined over $\Omega$, is a function $\Pr: \Omega \to [0,1]$ satisfying the additional condition that, $\sum_{w \in \Omega} \Pr(w) = 1$. An event is a subset ${\cal{E}} \subseteq \Omega$. The probability of an even $\cal{E}$ is nothing buy the sum of the probability values by assigned by the distribution functon to the elements in the subset $\cal{E}$. That is, $\Pr({\cal{E}}) = \sum_{w \in E} \Pr(w)$.
@@ -178,7 +180,7 @@ $$\textrm{\bf Chebychev's Inequality : } \Pr[|X-\mu| \ge a] \le \frac{Var[X]}{a^
 We will not discuss the proof of Chebychev's inequality since we do not require it immediately. This concludes the review.
 \end{description}
 
-\section{Analysis of the Algorithm for {\sc Maxcut}}
+\subsection{Analysis of the Algorithm for {\sc Maxcut}}
 Recall Algorithm~\ref{alg:maxcut-rand}. We want to guarantee that th expected size of the cut is at most half of the optimal cut size. In fact, we prove something stronger.
 \begin{claim}
 Let $X$ be the size of the cut output by the algorithm~\ref{alg:maxcut-rand}. Then, $E[X] \ge \frac{m}{2}$ where $m$ is the number of edges in the graph $G$.
@@ -194,7 +196,7 @@ $E[X] \ge \frac{m}{2}$. Hence the proof.
 \end{proof}
 Notice that the claim is stronger. Indeed, since the optimum cut can only cut at most $m$ edges, the above also implies $E[X] \ge \frac{m}{2} \ge \frac{\textrm{\sc OptCut}}{2}$.
 
-\section{Method of Conditional Expectations}
+\section{Method of Conditional Expectation}
 
 We now describe the main technical idea to be learned this week. Mainly an algorithm specific technique of derandomization of randomized algorithms. This presentation is from Salil Vadhan's book on Pseudorandomness.
 
@@ -293,3 +295,106 @@ Let $x_1, x_2, \ldots x_n \in \zo$ be Boolean variables and let $f$ be a Boolean
 \end{enumerate}
 \end{show-ps1}
 \end{exercise-prob}
+
+\section{Method of Pessimistic Estimators}
+
+We now see a more sophisticated adaptation of the method of conditional expectation. For this we need another randomized algorithm, as it is again going to be algorithm specific\footnote{That is, it can be applied for a class of algorithms for the problem which has the property.}.
+
+\subsection{Congestion Minimization Problem}
+
+The problem that we are going to use as the example is called \textsc{Congestion Minimization} problem. We are given a directed graph $G$ with $k$ pairs of vertices $(s_1,t_1),(s_2,t_2), \ldots (s_k,t_k)$ which are sources and destinations respectively. We want to route packets from sources to destination through edge disjoint paths in the graphs so that there is no edge that is used for two paths and hence no change of a congestion. However, even testing whether there are edge-disjoint paths between such pairs of vertices is $\NP$-hard for directed graphs even for $k=2$. Hence, we have to allow congestion, but ideally we would like to minimise congestion. Formally, a collection of paths $P_1, P_2, \ldots P_k$ (which need not be vertex disjoint) in the above problem is a solution with congestion $C$, if every edge takes part in at most $C$ paths in the collection. Indeed, we would like to find out a collection of paths with least congestion. The case when $C=1$ is exactly the edge disjoint path problem which indicates that the optimization problem is hard to solve.
+
+Next step is to look for approximation algorithms. We would like to design algorithm which outputs a set of paths with a guarantess that the congestion is at most $\alpha C$ where $C$ is the optimal congestion possible for the given graph and the $\{(s_i,t_i)\}_{1 \le i \le t}$ pairs. Indeed, the problem admits a randomized approximation algorithm with a reasonable approximation ratio.
+
+\begin{theorem}
+{\sc Congestion Minimization} admits a randomized algorithm where the solution is guaranteed to be at most $\left(\frac{\log n}{\log \log n}\right) \times OPT$ where $OPT$ is the optimal congestion possible for the input instance and $n$ is the size of the graph.
+\end{theorem}
+
+We need some details about this randomized algorithm and the analysis since we have to deal with specifics of the analysis in the method itself. 
+
+\subsection{Randomized Approximation Algorithm}
+
+The algorithm uses a standard and quite effective technique of designing randomized algorithms which is {\em linear programming relaxation and randomized rounding}. Firsly the problem can be written as a linear program as follows: \\[-10mm]
+
+\paragraph*{LP Formulation:} For any $i \in [k]$, let ${\cal P}_i$ denote the set of paths in the graph $G$ which are from vertices $s_i$ to $t_i$. In the solution, exactly one of these paths needs to be chosen. Let $P$ be the notation for one such path. Let us introduce a Boolean variable $x_i^P$ to indicate whether the path $P \in {\cal P}_i$ is chosen for the solution or not. The following $k$ constraints say, that from each ${\cal P}_i$ \textit{exactly one} path must be chosen for the solution : 
+\begin{equation}
+\forall i \in [k], \bigsum_{P \in {\cal P}_i} x_I^P = 1
+\label{lp-const1}
+\end{equation}
+
+And, we need to minimise the congestion bound $C$ subject to above constraints. Writing down this objective function mathematically:
+\begin{equation}
+C = \bigsum_{e \in E} \bigsum_{\substack{P \in {\cal P}_i \\ e \in P}}x_i^P
+\end{equation}
+
+Unfortunately, solving such "integer linear programs" is $\NP$-hard. But a technique is that of linearprogramming relaxation, where we do not insist anymore that the variables must take Boolean values. But instead, we allow them to be real numbers under the constraint -  $\forall i, P, 0 \le x_i^P \le 1$ which are again linear constraints. There are standard techniques by which this can be solved now in polynomial in the number of variables. However, note that the number of variables in our setting is exponential in $n$. But we will ignore this fact\footnote{The trick to address this issue is to formulate a linear program with the granularity of edges - that is introducing variables at the edge-level than path-level as we have done.} for now as the exposition of the technique is easier with the above set up.
+
+\paragraph*{Randomized Rounding:} The solution to the above linear program gives us values for $x_i^P$ (call them $\alpha_i^P$ between $0$ and $1$) for $i \in [k]$ and $P \in {\cal P}_i$ such that the congestion expression is at most $C^*$ (and is optimal). But this does not point to choice of any path $P \in \ P_i$ as they are not Booelan variables. So we need to make that choice (and hence turn th e values to Boolean) and this is the place where randomness is used\footnote{A simple deterministic idea is worth thinking about - namely, for every $i$, choose the $P$ for which $\alpha_i^P$ is maximum to be the path - this amounts to assigning $x_i^P$ to one for that path $P$ but $0$ for the other paths. But this can increase the congestion (constraint~\ref{}) without any reasonable bound.}.
+
+The idea is as follows. For each $i$, we will choose a path $P \in {\cal P}_i$ at random with probability $x_i^P$. Notice that this is a probability distribution because of contstraint~\ref{lp-const1}. This can also be seen as, for each $i$, we will choose one of the $x_i^P$ at random with probability $\alpha_i^P$ and then assign that variable to $1$ and make the rest of the variables for that $i$ to be $0$. This is equivalent to choosing one path $P_i \in {\cal P}_i$ to be in the solution. For example, say we have three paths
+with values $0.2, 0.7$, and $0.1$. Get a random number between $0$ and $1$. If the number is between $0$
+and $0.2$, pick the first path. If the number is between $0.2$ and $0.9$, pick the second path, and if the
+number is between $0.9$ and $1$, pick the third path.
+
+\paragraph{Bounding the Approximation:} We need to analyse how badly the objective function (which was evaluating to optimal value $C$ when $\alpha_i^P$ were the assignments for $x_i^P$s) be affected by this {\em rounding} step. 
+For every edge $e \in E$, define a random variable $Y_i^e$ as follows:
+$$Y_i^e = 
+\begin{cases}
+1 & \textrm{ if $e \in P_i$ }\\
+0 & \textrm{ otherwise }
+\end{cases}
+\textrm{\hspace{6mm} and by definition, }
+\E[Y_i^e] \le \Pr[e \in P_i] \le \bigsum_{\substack{P \in {\cal P}_i \\ e \in P}} \alpha_i^P
+$$
+
+\noindent Define $Y_e = \sum_{i} Y_i^e$. By linearity of expectation, $\E[Y_e] = \sum_i \E[Y_i^e] = C^*$ (because it is exactly the objective function). Now we are in a perfect situation for a tail bound. What is the probability that the random variable (which in this case is a sum of independent random variables). 
+
+\begin{proposition}[Chernoff Bound]
+Let $X = \sum X_i$ be a random variable expressed as a sum of $X_i$'s which are independent random variables. Let $\E[X] \le \mu$. Then for any $\alpha > 1$, 
+$$\Pr\left[ X \ge \alpha \mu \right] \le e^{-\mu \times [\alpha \ln \alpha - \alpha + 1]}$$
+\end{proposition}
+We just need to apply this with a $\alpha = \frac{\log n}{\log \log n}$ is the approximation ratio that we are looking for. Working out the math, this gives $\Pr[Y_e > \alpha C^*] \le \frac{1}{n^3}$. By union bound, probability that there exists an edge $e \in E$ with $Y_e > \alpha C^*$ is at most $\sum_e \Pr[ Y_e > \alpha C^*] \le \frac{1}{n}$. In other words, with probability at least $1-\frac{1}{n}$ the above rounding gives a solution (equivalently a Boolean assignment for the variables) which satisfies all the constraints but at the same time does not make the objective function value worse that a factor of $\alpha$. Hence it is a randomized alpha approximation algorithm.
+
+\subsection{Pessimistic Estimator}
+
+We abstract out a scenario from the above analysis as follows. 
+Let $X = X_1 + X_2 + \ldots + X_k$ be a random variable that is expressed as a sum of independent random variables in $[0,1]$.
+Chernoff Bound is typically applied when we want to estimate $\Pr[\sum_i X_i > \alpha]$. To see the event as a Boolean value, define the indicator function:
+$$I(x_1, x_2, \ldots x_n) = 
+\begin{cases}
+1 & \textrm{ if $\sum_i x_i \ge \alpha$ } \\
+0 & \textrm{ otherwise }
+\end{cases}
+$$
+So one way to descend down the tree to derandomize is to apply the method of conditional expectation on $I(x_1, x_2, \ldots x_n)$. Similar to evaluating $e(r_1, r_2, \ldots r_i)$ in the {\sc MaxCut} algorithm, we should be able to efficiently evaluate:
+$$\E[I(x_1, x_2, \ldots, x_i, X_{i+1}, \ldots X_n)] = \Pr\left[ ~\sum_{j=1}^k X_j \ge \alpha \mid X_1 = x_1, X_2 = x_2, \ldots X_i = x_i~\right]$$
+
+But unfortunately, the RHS expression is not easy to compute since it depends on the distribution of the $X_j$ variables. However, we can still work with the framework, with the idea of replacing it with an upper bound function instead. Since we are bounding a bad event of the sum being large, a function which gives a larger value  would be more "pessimistic" and hence the term {\em pessimistic estimator}.
+
+We can use an exponentiation idea coming from Chernoff Bound proof: For any $t > 0$:
+$$\Pr\left[ ~\sum_{j=1}^k X_j \ge \alpha \right] \le \E \left[ \frac{\prod_{j=1}^k e^{tX_j}}{e^{t\alpha}} \right] $$
+This upper bound is easy to compute when you have substitutions for some of the $X_i$s. That is,
+$$\Pr\left[ ~\sum_{j=1}^k X_i \ge \alpha \mid X_1 = x_1, X_2 = x_2, \ldots X_i = x_i~\right] \le \left( \frac{\prod_{j=1}^i e^{tx_i}}{e^{t\alpha}} \right) \E \left[  \prod_{j={i+1}}^k e^{tX_i} \right]$$
+Since we know the distribution of each $X_j$, we can compute the $\E \left[  \prod_{j={i+1}}^k e^{tX_i} \right]$ in the right hand side as we do in the proof of Chernoff Bound proof itself.
+
+\paragraph{Applying the Method to the Algorithm for Congestion Minimization:}
+
+Recall the random variables involved.
+For every edge $e \in E$, we used random variable 
+$Y_i^e = 
+\begin{cases}
+1 & \textrm{ if $e \in P_i$ }\\
+0 & \textrm{ otherwise }
+\end{cases}
+$
+\noindent Define $Y_e = \sum_{i} Y_i^e$. By linearity of expectation, $\E[Y_e] = \sum_i \E[Y_i^e] = C^*$.
+In the analysis of the algorithm, we proved, by using Chernoff bound that, for $\alpha = \frac{\log n}{\log \log n}$:
+$$\Pr \left[ \sum_i Y_i^e > \alpha C^* \right] \le \frac{1}{n}$$
+
+As per our plan, rather than working with the indicator $I(x_1, x_2, \ldots x_i)$ we will work with the pessimistic esimator, for edge $e \in E$:
+$\left( \frac{\prod_{j=1}^i e^{tr_i}}{e^{t\alpha}} \right) \E \left[  \prod_{j={i+1}}^k e^{tY_i^e} \right]$. We will also incorportate union bound into our estimate to use the pessiminstic estimator for the whole event as :
+
+$$ I(r_1, r_2, \ldots r_i) \le f(r_1, r_2, \ldots r_i) = \left( \frac{\prod_{j=1}^i e^{tr_i}}{e^{t\alpha}} \right) \bigsum_{e \in E} \left( \E \left[  \prod_{j={i+1}}^k e^{tY_i^e} \right] \right) $$
+By notation, we know that $f(r_1, r_2, \ldots r_n) \le \frac{1}{n}$.
+
+\jsay{A few more lines to be completed here about the precise application of the estimators.}
