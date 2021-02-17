@@ -204,12 +204,17 @@ Hence, the theorem (equation~\ref{chebychev:sum}) follows from Markov's inequali
 The general form also has a similar proof. And note that $Var[Y] = \E[Y^2]$ since $\E[Y] = 0$.
 \end{proof}
 
-Chebychev's inequality gives significantly better bounds compared to Markov's inequality. For example, it implies (compare with Equation~\ref{Markovs-inequality}).
-
+Chebychev's inequality gives significantly better bounds compared to Markov's inequality. For example, it implies (compare with Equation~\ref{Markovs-inequality}), by substituting $a = \delta^2 \mu^2$ in Equation~\ref{chebychev:sum}.
 \begin{equation}
-\Pr[X \ge (1 + \delta)\mu] \le \frac{1}{\delta^2 \mu}
+\Pr[X \ge (1 + \delta)\mu] \le \Pr[(X-\mu)^2 \ge \delta^2\mu^2] \le \frac{1}{\delta^2 \mu}
 \label{Chebychev-inequality}
 \end{equation}
+The advantage of working with $(X - \mu)^2$ is that, we can use it to bound the probability of the "lower tail" also.
+\begin{equation}
+\Pr[X \ge (1 - \delta)\mu] \le \Pr[(X-\mu)^2 \ge \delta^2\mu^2] \le \frac{1}{\delta^2 \mu}
+\label{Chebychev-inequality-lowertale}
+\end{equation}
+
 
 \begin{remark}
 Note that we did not use independence fully - we only needed that for all $i \ne j$, $\E[Y_iY_j] = \E[Y_i]\E_[Y_j]$. This is a strictly weaker condition than saying all random variables $Y_1, Y_2, \ldots Y_k$ are independent. Such random variables are called "pairwise independent". We will come across them later in the course.
