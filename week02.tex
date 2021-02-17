@@ -198,8 +198,8 @@ $X = \sum_{i=1}^k X_i$. Let $\E[X_i] = \mu_i$ and $\E[X] = \sum_i \mu_i = \mu$ (
 
 Define $Y_i = X_i - \mu_i$. By linearity of expectation, $\E[Y_i] = 0$. And let $Y = \sum_i Y_i = X - \mu$. The idea is to apply Markov's inequality to a postive random variable that can be formed out of $Y$. Indeed $Y$ can take negative values, hence we can consider $Y^2$. We care about $\E[Y^2]$ in order to apply the Markov's inequality. 
 $$\E[Y^2] = \E\left[\left( \sum_i Y_i \right) \left( \sum_i Y_i \right)\right] =  \E \left[\sum_{i,j} Y_i Y_j \right] = \sum_{i,j} \E[Y_iY_j] = \sum_i \E[Y_i^2] + \sum_{i \neq j} \E[Y_iY_j] $$
-Now we will apply indepenence of the random variables, and conclude that $\E[Y_iY_j] = \E[Y_i]E[Y_j]$ but then in our case $\E[Y_i]=0$. Using this:
-$$\E[Y^2] = \sum_i \E[Y_i^2] + \sum_{i \neq j} \E[Y_i]\E[Y_j] = \sum_i \E[Y_i^2] = \sum_i p_i(1-p_i) < \mu$$
+Now we will apply independence of the random variables, and conclude that $\E[Y_iY_j] = \E[Y_i]\E[Y_j]$ but then in our case $\E[Y_i]=0$. Using this:
+$$\E[Y^2] = \sum_i \E[Y_i^2] = \sum_i \left[ \mu_i(1-\mu_i)^2 + (1-\mu_i)\mu_i^2 \right] = \sum_i \mu_i(1-\mu_i) < \mu$$
 Hence, the theorem (equation~\ref{chebychev:sum}) follows from Markov's inequality.
 The general form also has a similar proof. And note that $Var[Y] = \E[Y^2]$ since $\E[Y] = 0$.
 \end{proof}
