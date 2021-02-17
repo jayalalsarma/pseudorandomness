@@ -121,3 +121,117 @@ node{$\Gamma_x$};;
 \end{tikzpicture}
 \end{minipage}
 
+%
+%\begin{exercise-prob}[See Problem Set 1(Problem~\ref{amplification-one-sided})]
+%\begin{show-ps1}{amplification-one-sided}
+%We saw in class the amplification of success probability by repetition. The analysis involved binomial coefficients simple manipulations involving them. The algorithm and the analysis gets much simpler when the algorithm given is one-sided error. Suppose we are given a randomized algorithm which is one-sided error with error probability, at most $\epsilon \in (0,1]$, modify the algorithm to say {\sc Yes} if at least one of the trials says {\sc Yes}. Derive a relation between $\epsilon$, $k$ (the number of repetitions) and the target bound of error probability (say $\epsilon'$).
+%\end{show-ps1}
+%\end{exercise-prob}
+
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{amplification-by-tailbound})]
+\begin{show-ps1}{amplification-by-tailbound}
+A decision problem $L$ is in a class called $\BPP$ if there exists a randomized polynomial-time algorithm $A$ such that for every $x \in L$ it holds that $\Pr[A(x,y) = 1] \ge \frac{2}{3}$, and for every $x \notin L$ it holds that $\Pr[A(x) = 0] \ge \frac{2}{3}$. For $\epsilon : \mathbb{N} \to [0,1]$, let $\BPP_{\epsilon}$ denote the class of decision problems that can be solved in probabilistic polynomial time with error probability upper-bounded by $\epsilon$. Prove the following two claims:
+\begin{enumerate}[(a)]
+\item 
+For every positive polynomial $p$ and $\epsilon(n) = \frac{1}{2}-\frac{1}{p(n)}$, 
+the class $\BPP_{\epsilon}$ equals $\BPP$.
+\item For every positive polynomial $p$ and $\epsilon(n) = 2^{-p(n)}$, 
+the class $\BPP_\epsilon$ equals $\BPP$.
+\end{enumerate}
+We already proved something similar in class (See Amplication Lemma). This exercise asks you to prove the same using tail bounds. Given an algorithm $A$, consider an algorithm $A'$ that on input $x$ invokes $A$ on $x$ for $t(|x|)$ times, and decided based on majority as we did in class. For Part (a) $t(n) = O(p(n)^2)$ and apply Chebyshev’s Inequality. For Part 2 set $t(n) = O(p(n))$ and apply the Chernoff Bound.
+\end{show-ps1}
+\end{exercise-prob}
+
+
+\section{Sipser's Argument}
+
+From the previous section, we concluded that, for every $x \in \{0,1\}^{p(n)}$, there is a large set $\Gamma_x$ of random strings which are "good" for $x$. However, we do not know how to find even an element $y \in \Gamma_x$ in time $\poly(n)$. If we do, then we have a derandomization for the algorithm ${\cal{A'}}$ (which derandomizes ${\cal{A}}$ too).
+
+It is intuitive to think that since a large fraction of $y \in \{0,1\}^{p(n)}$ are good for each $x \in \{0,1\}^n$, could there be a single $y$ which is good for all $x$? We show that this is indeed the case. This, in fact, is a simple consequence of the amplification lemma in the previous section.
+
+We first apply Lemma~$\ref{lem:amplification}$ with $q(n) = 2n$. Thus we have a randomized polynomial time algorithm with error bound $2^{-2n}$ (i.e. at most $2^{-2n}$ fraction of random strings are ``bad'') using $p(n)$ randomness. More precisely, we have that:
+\begin{align}
+  \textrm{Answer is {\sc Yes} for input $x$} \implies \Pr_{y} \left[ {\cal{A}}(x,y) \text{ accepts } \right] & \geq
+   1-2^{-2n} \\
+  \textrm{Answer is {\sc No} for input $x$} \implies \Pr_{y}\left[ {\cal{A}}(x,y) \text{ accepts } \right] & \geq
+   2^{-2n} 
+\end{align}
+That is in such a machine the number of random strings $y$ which lead
+the machine to output a wrong answer is bounded by $2^{-2n}$. Now let
+us consider a matrix $M$ whose rows are indexed by inputs of length
+$n$ and columns are indexed by random strings of length $p(n)$, and
+the $(x,y)$th entry is $1$ if on fixing the random bits to be $y$ the
+machine $M$ on input $x$ outputs correctly and it is $0$
+otherwise. That is $M[x,y]=1$ if and only if ${\cal{A'}}(x,y)$ is correct for the input $x$. By the amplification we
+are guaranteed that for a given input $x$ at most $2^{-2n}$ fraction
+of the random strings can have $M[x,y]=0$. Hence the total number of
+zeros in the $A$ matrix is at most the number of rows times the
+maximum number of zeros in a row, which is equal to 
+\begin{eqnarray*}
+  \text{\# 0's in matrix }M & \leq 2^n \times 2^{-2n} \times 2^{p(n)}
+  \\
+                            & \leq 2^{p(n)-n}
+\end{eqnarray*}
+
+But the total number of zeros, $2^{p(n)-n}$ is strictly less than the
+number of columns in the matrix $M$. Hence there must be at least one
+column with no zeros in it. If a column in the $M$ matrix has no zeros
+then by the definition of $M$ matrix, the random string $w$ represented by
+this column when fed as random bits to machine ${\cal{A}'}(x,w)$ would output
+the correct answer for every $x\in \{0,1\}^{n}$. Thus we have the follwing lemma.
+
+\begin{lemma}
+For every $n$, there is a $y \in \{0,1\}^{p(n)}$ such that $y \in \Gamma_x$ for every $x \in \{0,1\}^n$.
+\end{lemma}
+
+Thus there is a function $h : \mathbb{N} \to \Sigma^*$ such that the answer to $x$ is {\sc Yes} if we run the algorithm $\calA$ on input $x$ and random string $h(|x|)$ it is guaranteed not to err. This will give a complete deranomization. However, we need the function $h$ to be computable in polynomial time and that is a challege.
+
+\section{Amplification with Dependent Trials using Expanders}
+\label{sec:intro-expanders}
+
+We study another seemingly unrelated graph theoretic object which are called expanders. They have been extensively studied and used in many areas of science and engineering as the set of sparse graph families which has high connectivity connectivity properties. These are particularly desirable in network design such that the network is highly fault tolerant - even the failure of a few links (edges) will not affect the connectivity of the network. The fact that this can be achieved without having too many edges (complete graph is a trivial way to do this) is what makes expander graphs more applicable in this setting.
+
+Expanders have been studied in the theoretical side as well for past few decades and have found numerous applications. Informally, the graph is such that every subset of vertices fetches a large set of vertices in its immediate neighborhood. For a set of vertices in a graph $G$, define $N(S)$ to be the neighbors of $V$. We define the graph class formally now.
+
+\begin{definition}{(\bf Expander Graphs)}
+A graph $G(V,E)$ is said to be a $(\alpha,\beta)$-expander if every $S \subseteq V$ such that $|S| \le \alpha|V|$, the number of new neighbors $|N(S)\setminus S| \ge \beta|S|$.
+\end{definition}
+
+A trivial (but unfortunately useless) example of an expander graph is the complete graph. Indeed, in a complete graph on $n$ vertices, if we choose any $S \subseteq V$, such that $|S| \le \frac{n}{2}$, we have that $N(S)\setminus S = V \setminus S$. Hence, $|N(S)\setminus S| \ge |S|$. This gives that it is a $(\half,1)$-expander as per the above definition. However, it is going to be useless as we will see in our application. In fact, ideally, we would like expander graphs where the degree $d$ and $\alpha, \beta$ are all constants independent of $n$.
+
+Thus, we are looking for graphs with constant degree (if possible, even regular). It implies that the graph must be sparse\footnote{a graph is said to be sparse if $|E| = O(|V|)$, or else it is called dense.}
+Let us also record a non-example of an expander, which is even a sparse graph. Consider an $n \times n$ complete grid graph, which has $n^2$ vertices and all possible {\em grid edges} present. Consider a set $S$ which is of size $\sqrt{n}$, which has $n$ vertices and hence $|S| \le \alpha |V|$ for any constant $\alpha$. However, the number of new neighbors for the set in the grid graph will be $O(\sqrt{n})$ which is not at most $\beta|S|$ for any constant $\beta$. Hence such a graph is not an expander for any constant $\alpha$ and $\beta$.
+
+To ensure that the definition of expander is practiced enough, we suggest the following exericse which derives a combinatorial consequence of the expansion property.
+
+\begin{exercise-prob}[See Problem Set 1(Problem~\ref{expander-diameter})]
+\begin{show-ps1}{expander-diameter}
+Let $G(V,E)$ be an undirected graph $n$ vertices which is $(\frac{1}{2},2)$-expander. Show that the diameter of the graph is at most $O(\log n)$. The diameter of a graph is at most $k$ if and only if between any two vertices in the graph $G$, there is a path of length at most $k$ in the graph $G$.
+\end{show-ps1}
+\end{exercise-prob}
+
+
+\paragraph{Random Walks on Expanders and Our Application:} Although the above definition explains the name expander graphs, the application in our context comes from the fact that if we choose a vertex in the expander at random and then choose the next vertices uniformly at random, the distribution of the $\ell^{th}$ vertex that you get to (as $\ell$ increases) is very close to uniform over the entire connected component of the graph where your starting vertex was lying. Intuitively, this is termed as the {\em rapid mixing} of random walks on expander walks.
+
+We will prove the technical details of this idea at a later point in the course where we introduce expander graphs. Informally, to apply the expander graphs in the context of the success probability amplification, we consider the graph on $G$ as a graph on $2^{p(n)}$ vertices indexed by $\{0,1\}^{p(n)}$. That is, each vertex in the graph can be interpreted as a $y \in \{0,1\}^{p(n)}$. Based on this, the following algorithm gives a good amplification of success probability.
+
+
+\begin{algorithm}
+\label{alg:trivial-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$. 
+\State Let $G(V,E)$ be an expander graph on $2^{p(n)}$ vertices.
+\State Choose a vertex $y_1 \in V$ uniformly at random. \Comment{Uses $O(p(n))$ random bits}
+\State Starting at $v$ perform a random walk for $k$ steps in $G$. Let $y_1, y_2, \ldots y_k \in \{0,1\}^r$ be the vertices representing the walk. \Comment{Uses $O(k \log d)$ random bits.}
+\For{\texttt{each $i \in [k]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
+\EndFor
+\State If ~[{\em count} $> \frac{k}{2}$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+
+The idea of the above algorithm is based on the rapid mixing of random walks. Without the details, the strings $y_1, y_2, \ldots y_k$ are ``almost" as good as randomly chosen $y_i$'s since the random walk mixes fast and hence the amplification (although with weaker parameters) can be derived. This will be done in upcoming lectures.
+
+Notice that the number of random bits used by the algorithm is $O(k \log d)$. This explains why the complete graph (whose degree in this case would have been $2^{p(n)}-1$) would not have been good enough for our purpose.
+

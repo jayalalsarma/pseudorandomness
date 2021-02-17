@@ -172,12 +172,72 @@ E[X] = \bigsum_{\alpha \in \mathbb{R}} \alpha \Pr[X=\alpha]
 a \Pr[X \ge a]$$
 
 For example, this helps us make statements of the form :
-$$\Pr[X > 4\mu] \le \frac{\mu}{4\mu} = \frac{1}{4}$$
-That is the probability that the random variable takes a value which is more than $4$ times the expected value is at most $0.25$. Unfortunately, this does not help us write down a probability bound for $X$ taking value less than say $\frac{\mu}{4}$. Indeed, Markov's inequality is also pretty weak - as demonstrated by the following example - consider tossing $n$ coins and $X$ be the number of heads. Clearly $E[X] = \frac{n}{2}$. By Markov's inequality, $\Pr[X \ge n] \le \frac{1}{2}$ but we know that it is much smaller than that, namely $\frac{1}{2^n}$.
 
-What do we want if we want to bound the probability that the random variable takes a much lower value than the expectation? This is where we require more the next tail bound (without any assumptio of positivity on the random variable).
-$$\textrm{\bf Chebychev's Inequality : } \Pr[|X-\mu| \ge a] \le \frac{Var[X]}{a^2} \textrm{ where, $Var[X] = E[X^2] - E[X]^2$} $$
-We will not discuss the proof of Chebychev's inequality since we do not require it immediately. This concludes the review.
+In particular, Markov’s inequality implies the following bound on the probability that any random variable $X$ is significantly larger than its expectation:
+
+\begin{equation}
+\Pr[X \ge (1 + \delta)\E[X]] \le \frac{1}{1+\delta}
+\label{Markovs-inequality}
+\end{equation}
+
+
+For example, the probability that the random variable takes a value which is more than $4$ times the expected value is at most $0.25$. Unfortunately, this does not help us write down a probability bound for $X$ taking value less than say $\frac{\E[X]}{4}$. Indeed, another form is :
+
+Indeed, Markov's inequality is also pretty weak - as demonstrated by the following example - consider tossing $n$ coins and $X$ be the number of heads. Clearly $E[X] = \frac{n}{2}$. By Markov's inequality, $\Pr[X \ge n] \le \frac{1}{2}$ but we know that it is much smaller than that, namely $\frac{1}{2^n}$.
+
+What do we do if we want to bound the probability that the random variable takes a much lower value than the expectation? This is where we require more the next tail bound (without any assumption of positivity on the random variable).
+$$\textrm{\bf Chebychev's Inequality : } \Pr[|X-\mu| \ge a] \le \frac{Var[X]}{a^2} \textrm{ where, $Var[X] = \E[X^2] - \E[X]^2$} $$
+\begin{proof}[\textit{Proof of Chebychev's Inequality in the sum of random variables case:}]
+More often, we require the Chebychev's inequality when $X$ is a random variable that is expressible as a sum of several independent random variables. We will handle that case. In particular, we will prove that:
+\begin{equation}
+\Pr\left[ (X-\mu)^2 \ge a \right] \le \frac{E[X]}{a}
+\label{chebychev:sum}
+\end{equation}
+
+$X = \sum_{i=1}^k X_i$. Let $\E[X_i] = \mu_i$ and $\E[X] = \sum_i \mu_i = \mu$ (say). 
+
+Define $Y_i = X_i - \mu_i$. By linearity of expectation, $\E[Y_i] = 0$. And let $Y = \sum_i Y_i = X - \mu$. The idea is to apply Markov's inequality to a postive random variable that can be formed out of $Y$. Indeed $Y$ can take negative values, hence we can consider $Y^2$. We care about $\E[Y^2]$ in order to apply the Markov's inequality. 
+$$\E[Y^2] = \E\left[\left( \sum_i Y_i \right) \left( \sum_i Y_i \right)\right] =  \E \left[\sum_{i,j} Y_i Y_j \right] = \sum_{i,j} \E[Y_iY_j] = \sum_i \E[Y_i^2] + \sum_{i \neq j} \E[Y_iY_j] $$
+Now we will apply indepenence of the random variables, and conclude that $\E[Y_iY_j] = \E[Y_i]E[Y_j]$ but then in our case $\E[Y_i]=0$. Using this:
+$$\E[Y^2] = \sum_i \E[Y_i^2] + \sum_{i \neq j} \E[Y_i]\E[Y_j] = \sum_i \E[Y_i^2] = \sum_i p_i(1-p_i) < \mu$$
+Hence, the theorem (equation~\ref{chebychev:sum}) follows from Markov's inequality.
+The general form also has a similar proof. And note that $Var[Y] = \E[Y^2]$ since $\E[Y] = 0$.
+\end{proof}
+
+Chebychev's inequality gives significantly better bounds compared to Markov's inequality. For example, it implies (compare with Equation~\ref{Markovs-inequality}).
+
+\begin{equation}
+\Pr[X \ge (1 + \delta)\mu] \le \frac{1}{\delta^2 \mu}
+\label{Chebychev-inequality}
+\end{equation}
+
+\begin{remark}
+Note that we did not use independence fully - we only needed that for all $i \ne j$, $\E[Y_iY_j] = \E[Y_i]\E_[Y_j]$. This is a strictly weaker condition than saying all random variables $Y_1, Y_2, \ldots Y_k$ are independent. Such random variables are called "pairwise independent". We will come across them later in the course.
+\end{remark}
+
+We now present one of the stronger tools to estimate probability tails in the case of sum of fully independent random variables. In this case, the set up itself is about a random variable $X = \sum_{i=1}^k X_i$. Let $\E[X_i] = \mu_i$ and $\E[X] = \sum_i \mu_i = \mu$ (say). We have the following:
+$$\textrm{{\bf Chernoff Bound :} For any $\alpha > \mu$, } \Pr[X \ge \alpha] \le e^{\alpha-\mu}\left(\frac{\mu}{\alpha}\right)^\alpha$$
+$$\textrm{In particular, it implies: } \Pr[X \ge (1+\delta)\mu] \le \left( \frac{e^{\delta}}{\left(1+\delta\right)^{(1+\delta)}} \right)^\mu$$
+
+\begin{proof}[Proof of Chernoff Bound:]
+Again the idea is to use Markov's inequality for an appropriately defined positive random variable. In this case, we will just use $Y = \left(\frac{\alpha}{\mu}\right)^X$ and it is related to the original probability that we wanted to estimate. More precisely, 
+$$\Pr[X \ge \alpha] = \Pr\left[\left(\frac{\alpha}{\mu}\right)^X \ge \left(\frac{\alpha}{\mu}\right)^\alpha\right] = \Pr\left[Y > \left(\frac{\alpha}{\mu}\right)^\alpha\right] \le \frac{E[Y]}{\left(\frac{\alpha}{\mu}\right)^\alpha}$$
+
+Since $\E[Y]$ is $\E\left[\left(\frac{\alpha}{\mu}\right)^X\right]$, we have the motivation to estimate $\E\left[a^X\right]$ in terms of $\E[X]$. Here we use the fact that $X = \sum_i[X_i]$ and are fully independent. Note that $\E\left[a^X\right] =  \prod_i \E\left[a^{X_i}\right]$. Hence, we need to estimate $\E\left[a^{X_i}\right]$.
+\begin{eqnarray*}
+\E\left[a^{X_i}\right] & = & a^0\Pr[X_i=0]+a^1\Pr[X_i=0] \\
+& = & 1.(1-\E[X_i])+a.\E[X_i] = a\mu_i+(1-\mu_i) = \mu_i(a-1)+1 < e^{(a-1)\mu_i}
+\end{eqnarray*}
+In our context $a = \frac{\alpha}{\mu}$ and $Y = \left(\frac{\alpha}{\mu}\right)^X$. This gives, 
+$$\Pr[X \ge \alpha] 
+\le \frac{E[Y]}{\left(\frac{\alpha}{\mu}\right)^\alpha}
+\le \frac{E\left[\left(\frac{\alpha}{\mu}\right)^X\right]}{\left(\frac{\alpha}{\mu}\right)^\alpha}
+\le \frac{\prod_i E\left[\left(\frac{\alpha}{\mu}\right)^{X_i}\right]}{\left(\frac{\alpha}{\mu}\right)^\alpha}
+\le \frac{\prod_i e^{(a-1)\mu_i}}{\left(\frac{\alpha}{\mu}\right)^\alpha}
+\le \frac{e^{(\frac{\alpha}{\mu}-1)\mu}}{\left(\frac{\alpha}{\mu}\right)^\alpha}
+\le e^{(\alpha-\mu)}\left(\frac{\mu}{\alpha}\right)^\alpha
+$$
+\end{proof}
 \end{description}
 
 \subsection{Analysis of the Algorithm for {\sc Maxcut}}
@@ -279,7 +339,7 @@ We need to explain the second term in the RHS. Consider edges $e=(u,v) \in E$ th
 
 \begin{exercise-prob}[See Problem Set 1(Problem~\ref{maxcut-greedy})]
 \begin{show-ps1}{maxcut-greedy}
-In the derandomization of {\sc Maxcut} algorithm that we described, we derived an expression for $V(r_1, r_2, \ldots r_i)$ for any $i$ and $r_1, r_2, \ldots r_i \in \zo$. We used this to determine, the value of $r_{i+1}$ by computing $V(r_1, r_2, \dots r_i, 0)$ and $V(r_1, r_2, \dots r_i, 0)$ and then choosing the largest.
+In the derandomization of {\sc Maxcut} algorithm that we described, we derived an expression for $V(r_1, r_2, \ldots r_i)$ for any $i$ and $r_1, r_2, \ldots r_i \in \zo$. We used this to determine, the value of $r_{i+1}$ by computing $V(r_1, r_2, \dots r_i, 0)$ and $V(r_1, r_2, \dots r_i, 1)$ and then choosing the value of $r_{i+1}$ to be the one which produces the largest among the two.
 Prove that the choice of $r_{i+1}$ will be $1$ if vertex $i+1$ has more neighbors in $T_i$ than in $S_i$ and vice versa. Hence, write down the derandomized $0.5$-approximation deterministic polynomial time algorithm for {\sc Maxcut} as a simple greedy algorithm in terms of the above rule.
 \end{show-ps1}
 \end{exercise-prob}
