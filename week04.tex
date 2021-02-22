@@ -145,3 +145,94 @@ $$ \frac{n(1+\log(1+\delta))}{1+\delta} $$
 [Hint : Choose a subset $X\subseteq V$ at random (with each vertex in with probability $p$). Let $Y \subseteq V\setminus X$ having no neighbor in $X$. Estimate $X \cup Y$.]
 \end{show-ps2}
 \end{exercise-prob}
+
+\section{Expectation Method}
+
+We now apply the method of expectation with probablistic method. The basic idea is that when we
+want to show the existence of an object for which a parameter (say graph with at least certain number of connected components) satisfy some lower/upper bounds. We first define the parameter as the random variable and show that the expected value satisfies the bounds which implies that there exists an object which satisfies the bounds. The following lemma makes this more precise.
+
+\begin{lemma}[{\bf Expectation Method}]
+\label{lem:expectation-method}
+For any random variable $X$, 
+$$\E[X] \ge t \implies Pr[X \ge t] > 0$$
+\end{lemma}
+
+\begin{proof}
+Assume for the sake of contradiction that $\Pr[X \ge t] = 0$. 
+$$\E[X] = \sum_{w \in \Omega} X(w)P(w)$$
+If $\Pr[X \ge t]$ was zero, then by definition, $$\sum_{\substack{w \in \Omega \\ X(w) \ge t}} P(w) = 0$$ 
+Since $P(w)$ is non-negative, we have that, for every $w \in \Omega$, with $X(w) \ge t$, $P(w) = 0$.
+$$\E[X] = \sum_{w \in \Omega} X(w)P(w) = \sum_{\substack{w \in \Omega \\ X(w) < t}} X(w)P(w) < t \left( \sum_{\substack{w \in \Omega}} P(w) \right) = t$$
+That will be a contradiction.
+
+\end{proof}
+\noindent Question to students : Does the same statement holds when $\ge$ is replaced by any of $\le,<$ or$ >$ ?
+
+\subsection{Sum-free Sets}
+
+To apply the expectation method, we need to make a suitable choice of the random variable $X$ so that it is not difficult to compute its expected value. We demonstrate thetechnique by using the example of sum-free sets. We start witht he definitions.
+
+A subset $A$ of positive integers is called \textit{sum-free}, if $\not\exists x,y,z \in S$ such that $x+y = z$ (the number may repeat). Given a set of positive integers, say $B = \{b_1,b_2, \ldots b_n\}$ how large a sum-free subset is it guaranteed to contain? 
+A simple example to try out is $B = \{1,2,\ldots n\}$. If we choose all odd numbers in the set, or even the elements more than $\frac{n}{2}$, they all are sumfree subsets of size at least $\frac{n}{2}$.
+Erd\"os answered this question using a cute mathematical statement.
+
+\begin{theorem}
+For any set $B = \{b_1,b_2, \ldots b_n\}$ of positive integers, there must exist a sumfree subset $A \subseteq B$ such that $|A| > \frac{n}{3}$.
+\end{theorem}
+\begin{proof}
+We will follow the above outlined strategy to define an appropriate random variable but in an indirect way. We choose a prime $p > 2b_n$ where $b_n$ is the largest number in $B$ and that $p=3k+2$. Now all addition operation between the elements in $B$ are faithfully  captured in the the set $\Z_p$ where addition is done modulo $p$. That is there is a natural mapping from $B$ to $\Z_p$ which preserves the sum operations. The mapping can be thought of as the identity function since $p \ge 2b_n$. Indeed, $\phi(b_i+b_j) = \phi_(b_i)+\phi(b_j)$ from the definitions itself.
+
+\hspace{-5mm}\begin{minipage}{0.65\linewidth}
+{\bf Sum-free sets in $\Z_p$:} Instead of showing a sum-free subset of $B$, we show a sum-free subset $C$ of $\Z_p$ first. We explicitly define $C$ first. Consider the middle third elements of $\Z_p$. That is, $C = \{k+1,k+2, \ldots 2k+1\}$. And $|C| > \frac{p-1}{3}$. We claim that $C$ is sum-free. To see this : $x,y,z \in C$, $x+y \ge 2k+2$ even for the smallest elements in $C$, and $x+y = 4k+2$ (which is at most $k$ modulo $3k+2$) even for the largest elements in $C$. Hence none of these sums will land back in $C$ as a result of the modulo operation. Hence $C$ is sum-free.
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.25\linewidth}
+\vspace{-1cm}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\draw (2,0) ellipse (1cm and 2cm) node[midway,yshift=2cm, xshift=2cm]{$B$~~~~~};
+\draw (2,0) ellipse (0.7cm and 1.1cm)
+node{$A$};;
+\draw (5,0) ellipse (1cm and 2.1cm) node[midway,yshift=2cm, xshift=5.1cm]{$\Z_p$~~~~~};
+\draw (5,0) ellipse (0.5cm and 1cm)
+node{$C$};;
+\end{tikzpicture}
+\end{minipage}
+\vspace{4mm}
+
+\noindent{\bf Pull-back to $B$ - A failed attempt:} Now how do we go back to get a subset of $B$ which is sumfree. A natural idea is to use the "pull back" of the function $\phi$. The pre-image of $C$, namely $\phi^{-1}(C)$ must be sumfree as well. To see this : if there exists $x, y, z \in \phi^{-1}(C)$  such that $x+y = z$, then $\phi(x)+\phi(y) = \phi(z)$. Since $\phi(x),\phi(y),\phi(z) \in C$ by definition, this implies that $C$ is not sumfree and that is a contradiction. But then, why should the size of the pre-image by at least $\frac{n}{3}$? It could even be that none of the elements in $B$ are mapped to $C$, so the pre-image can even be empty !.\\[-3mm]
+
+\noindent{\bf Way forward - random scaling: } Since the above mapping may not be good, we consider variants of $\phi$ which also preserves the addition operation  in $B$. Consider any $\alpha \in \Z_p \setminus \{0\}$, the map $\phi_\alpha : B \to \Z_p$:
+$$\phi_\alpha : b_i \mapsto \alpha b_i \mod p$$
+Let us quickly check if this is a function which respects the sum operation: if $b_i+b_j = b_k$, $\phi_\alpha(b_i)+\phi_\alpha(b_j)=\alpha b_i \mod p +\alpha b_j \mod p = (\alpha b_i+\alpha b_j) \mod p = \phi_\alpha(b_i+b_j) = \phi_\alpha(b_k)$
+As a consequence, the pre-image of $C$ under any $\alpha$, $\phi_\alpha^{-1}(C)$  will be sumfree.
+
+\noindent Now comes the punch line argument. We will argue :
+$$\textrm{\em $\exists \alpha \in \Z_p\setminus\{0\}$ such that $\phi_\alpha^{-1}(C)$ is a large subset of $B$.}$$
+It is to prove this last statement that we apply the expectation method described above. To begin with, let us write the claim more precisely:
+\begin{claim}
+$\exists \alpha \in \Z_p\setminus\{0\}$ such that $|\phi_\alpha^{-1}(C)| > n/3$.
+\end{claim}
+
+Original statement that we wanted to prove said, $\exists A \subseteq B$, now it says $\exists \alpha \in \Z_p \setminus \{0\}$. Let us set up the experiment.
+Choose $\alpha$ uniformly at random from $\Z_p \setminus \{0\}$. Let us defined the random variable $X$ as:
+$$X = |\phi_\alpha^{-1}(C)| = |\{ i \in [n] \mid \phi_\alpha(b_i) \in C \}|$$
+
+As per expectation method, we just need to prove that $\E[X] > \frac{n}{3}$. Let us breakdown this random variable into simpler ones in terms of the individual $b_i$s. Let us define the indicator random variable corresponding to the event $\phi_\alpha (b_i) \in C$.
+
+$$X_i^{\alpha} = \left\{
+\begin{array}{ll}
+1 & \textrm{ if $\phi_\alpha (b_i) \in C$} \\
+0 & \textrm{ otherwise}
+\end{array}
+\right.
+$$
+Note that, $X = \sum_{i=1}^n X_i$. Hence, by linearity of expectation, $\E[X] = \sum_{i=1}^n \E[X_i^{\alpha}]$. Thus, we need to lower bound $\E[X_i^{\alpha}]$. Since it is an indicator random variable, $\E[X_i^{\alpha}] = \Pr_\alpha\left[\phi_\alpha (b_i) \in C\right]$ which we will compute now.
+
+For a $b_i$ and a a target element on RHS (consider a non-zero element on RHS $y \in \Z_p \setminus \{0\}$) how many $\alpha$ can map $b_i$ to $y$? This is exactly one element $\alpha = b_iy^{-1} \mod p$. Thus, if we choose an $\alpha$ uniformly at random, probability that it maps $b_i$ to $y$ is $\frac{1}{p-1}$. If, in addition, this $y$ has to be in the set $C$, then there are exactly $|C|$ choices of $\alpha$ which sends $b_i$ to $C$. That is:
+$$\E[X_i^{\alpha}] = \Pr_\alpha\left[\phi_\alpha (b_i) \in C\right] = \frac{|C|}{p-1} > \frac{1}{3}$$
+
+Thus, as planned, we have shown that $\E[X] = \sum_{i=1}^n \E[X_i^{\alpha}]$ is greater than $\frac{n}{3}$. Hence as per Lemma~\ref{lem:expectation-method} (expectation method), $\Pr_{\alpha}[X \ge \frac{n}{3}] = \Pr_{\alpha}\left[|\phi_\alpha^{-1}(C)| > \frac{n}{3}\right] > 0$. Hence, by probabilistic method, we have that there exists an $\alpha$ such that $|\phi_\alpha^{-1}(C)| > \frac{n}{3}$. Hence there exists an $A$ (namely $\phi_\alpha^{-1}(C)$) which is a subset of $B$ and is sum-free. This completes the argument.
+\end{proof}
+
