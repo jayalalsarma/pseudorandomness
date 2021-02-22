@@ -23,12 +23,12 @@ We recall some notations first. A randomized algorithm ${\cal{A}}$ on input $x$ 
 \vspace{-7mm}
 The guarantee we have is there is an $\epsilon \in (0,\half]$.
 \vspace{-3mm}
-$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^r} [A(x,y) \textrm{ is correct.}] \ge \half+\epsilon $$
+$$\forall x \in \{0,1\}^n,~\Pr_{y \in \{0,1\}^m} [A(x,y) \textrm{ is correct.}] \ge \half+\epsilon $$
 \end{minipage}
 \vspace{3mm}
 
 \noindent Imagine that we had a success probability of very close to 1. That is, $\epsilon > \half-\frac{1}{2^{m}}$. That is, $\forall x \in \{0,1\}^n$ : 
-$\Pr_{y \in \{0,1\}^m} [A(x,y) \textrm{ is correct.}] > 1-\frac{1}{2^m}$. Notice that, now the algorithm does not need to use randomness and can fix $y$ to be any string in $\{0,1\}^r$ and run the algorithm ${\cal{A}}$ and the answer is guaranteed to be correct. (This is because, if there exists at least one $y \in \{0,1\}^m$ for which the algorithm errs then the success probability would have been $\le 1-\frac{1}{2^m}$.) Thus we would have derandomized the algortithm efficiently.
+$\Pr_{y \in \{0,1\}^m} [A(x,y) \textrm{ is correct.}] > 1-\frac{1}{2^m}$. Notice that, now the algorithm does not need to use randomness and can fix $y$ to be any string in $\{0,1\}^m$ and run the algorithm ${\cal{A}}$ and the answer is guaranteed to be correct. (This is because, if there exists at least one $y \in \{0,1\}^m$ for which the algorithm errs then the success probability would have been $\le 1-\frac{1}{2^m}$.) Thus we would have derandomized the algortithm efficiently.
 
 But how do we achieve such high success probability? Viewing a randomized algorithm as an experiment that we do in physics lab to compute a value, we will repeat the experiment and take the most frequent value in order to reduce the error. However, this also increases the number of random bits which goes against the above plan. Let us formally review this amplifcation method nevertheless.
 
@@ -41,7 +41,7 @@ We first write down the algorithm which follows the simple idea of repetition wi
 \caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
 \begin{algorithmic}[1]
 \State {\em count} $\gets 0$.
-\State Choose $k$ independent random strings $y_1, y_2, \ldots y_k \in \{0,1\}^r$. \Comment{Uses $O(kn)$ random bits.}
+\State Choose $k$ independent random strings $y_1, y_2, \ldots y_k \in \{0,1\}^m$. \Comment{Uses $O(kn)$ random bits.}
 \For{\texttt{each $i \in [k]$}}
 	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
 \EndFor
@@ -223,7 +223,7 @@ We will prove the technical details of this idea at a later point in the course 
 \State {\em count} $\gets 0$. 
 \State Let $G(V,E)$ be an expander graph on $2^{p(n)}$ vertices.
 \State Choose a vertex $y_1 \in V$ uniformly at random. \Comment{Uses $O(p(n))$ random bits}
-\State Starting at $v$ perform a random walk for $k$ steps in $G$. Let $y_1, y_2, \ldots y_k \in \{0,1\}^r$ be the vertices representing the walk. \Comment{Uses $O(k \log d)$ random bits.}
+\State Starting at $v$ perform a random walk for $k$ steps in $G$. Let $y_1, y_2, \ldots y_k \in \{0,1\}^m$ be the vertices representing the walk. \Comment{Uses $O(k \log d)$ random bits.}
 \For{\texttt{each $i \in [k]$}}
 	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
 \EndFor
@@ -233,5 +233,168 @@ We will prove the technical details of this idea at a later point in the course 
 
 The idea of the above algorithm is based on the rapid mixing of random walks. Without the details, the strings $y_1, y_2, \ldots y_k$ are ``almost" as good as randomly chosen $y_i$'s since the random walk mixes fast and hence the amplification (although with weaker parameters) can be derived. This will be done in upcoming lectures.
 
-Notice that the number of random bits used by the algorithm is $O(k \log d)$. This explains why the complete graph (whose degree in this case would have been $2^{p(n)}-1$) would not have been good enough for our purpose.
+Notice that the number of random bits used by the algorithm is $O(k \log d)$. This explains why the complete graph (whose degree in this case would have been $2^{p(n)}-1$) would not have been good enough for our purpose because it leads to an exponential running time for our algorithm.
 
+\section{Amplification for One-sided Error Algorithms using Dispersers}
+
+Now we handle the case of one-sided error algorithms. These algorithms have the following peculiarity. For a one-sided error algorithm ${\cal{A}}$:
+\begin{align}
+  \textrm{Answer is {\sc Yes} for input $x$} \implies \Pr_{y} \left[ {\cal{A}}(x,y) \text{ accepts } \right] & \geq
+   \half+\epsilon \\
+  \textrm{Answer is {\sc No} for input $x$} \implies \Pr_{y}\left[ {\cal{A}}(x,y) \text{ accepts } \right] & =
+   0 
+\end{align}
+The success probability amplification of such algorithms is easier.
+
+\begin{algorithm}
+\label{alg:onesided-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State Choose $k$ independent random strings $y_1, y_2, \ldots y_k \in \{0,1\}^m$. \Comment{Uses $O(km)$ random bits.}
+\For{\texttt{each $i \in [k]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, {\sc Accept}.
+\EndFor
+\State {\sc Reject}.
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+If ${\cal{A}}$ has success probability at least $1-\epsilon$ then ${\cal{A}'}$ has success probability at least $1-\epsilon^k$.
+\end{lemma}
+\begin{proof}
+The argument is rather straightforward. Suppose the answer is {\sc No}, then we know that no matter what $y_i$ we choose, ${\cal{A}}(x,y_i)$ rejects and hence the algorithm ${\cal{A}'}$ rejects. Suppose the answer is {\sc Yes}, then ${\cal{A}'}$ rejects (which is an error), if none of the $y_i$ chosen makes ${\cal{A}}(x,y_i)$ accept in step 3. Since each $y_i$ is chosen uniformly at random:
+$$Pr[ \forall i, {\cal{A}}(x,y_i) \textrm{ rejects }
+ ] = \prod_{i} \left( Pr[ {\cal{A}}(x,y_i) \textrm{ rejects }] \right) \le \epsilon^k $$
+Hence, the probability that  ${\cal{A}'}$ accepts is at least $1-\epsilon^k$.
+\end{proof}
+
+Again, we can use the ideas from the previous section on expanders in order to do more randomness efficient amplification of success probability. However, since the algorithm is one-sides, we have other methods too. 
+We now define a new combinatorial object called \textit{disperser} which is useful for amplifying the success probability of an algorithm which has one-sided error, using much less number of random bits.
+
+\begin{definition}[{\bf Dispersers}]
+A bipartite graph $G=(U \cup V, E)$ is called an $(1- \epsilon)$-disperser with threshold $T$ if, for
+all $S \subseteq U$ of size $|S|\ge T$, we have that the size of the set of neighbors of $S$ in $V$,$|\Gamma(S)|$, is more than $\epsilon|V|$.
+\end{definition}
+
+Notice the difference between the definition of expanders and dispersers. Here a large set should have large fraction on the right side as the neighbors. Intuitively, disperser will ``disperse" from a large to set to a good fraction of vertices on the right side.
+
+We will now use a disperser to do randomness efficient amplification for one sided error algorithms. Notice that the algorithm ${\cal{A}}$ is using $r$ random bits. 
+
+\begin{theorem}
+Suppose we have an explicit $\half$-disperser with threshold $T$, degree $d$, $U = \{0,1\}^R$ and $V = \{0,1\}^m$. Then a one-sided error algorithm running in time $t$, using $r$ random bits to achieve error probability $\half$ can be converted to a one-sided error algorithm, running in time $(R+d+t)^{O(1)}$ using $R$ random bits to achieve error probability $\frac{T}{2^R}$.
+\end{theorem}
+\begin{proof}
+We write down a formal proof of the above theorem. Suppose the algorithm that we start with is ${\cal{A}}$ with success probability $\half$. The amplification algorithm is as follows. Suppose we have an explicit disperser with the above parameters. For a vertex $y \in U$, denote $N(y)$ to be the neighbors of $y$. Indeed, $N(y) \subseteq V$.
+
+\begin{algorithm}
+\label{alg:onesided-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State Choose $y \in U=\{0,1\}^R$ uniformly at random. \Comment{Uses $R$ random bits.}
+\State Let $N(y)$ be $\{y_1, y_2, \ldots y_d\}$.
+\For{\texttt{each $i \in [d]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, {\sc Accept}.
+\EndFor
+\State {\sc Reject}.
+\end{algorithmic}
+\end{algorithm}
+
+\noindent We analyse the probability of error in the {\sc Yes} case. For the algorithm ${\cal{A}}$ consider the following set of good random strings.
+$$\Gamma_x = \{ y \in \{0,1\}^m \mid {\cal{A}}(x,y) \textrm{ says {\sc Yes} }\}$$
+From the fact that the success probability of ${\cal{A}}$ is at least $\half$, we have $|\Gamma_x| \ge \half|U|$.
+Notice that for any $y \in \{0,1\}^R$, $y$ is bad for ${\cal{A}'}$ if none of $N(y) = \{y_1, y_2, \ldots y_d\}$ is in $\Gamma_x$. Define $S \subseteq U$ as follows.
+$$S = \{ y \in \{0,1\}^R \mid N(y) \cap \Gamma_x = \phi \}$$
+
+\noindent Suppose the error probability is more than $\frac{T}{2^R}$. This implies that $|S| > T$. However, $N(S) \cap \Gamma_x \ne \phi$. This set $S$ contradicts the definition of disperser. Hence the proof.
+\end{proof}
+
+\section{Deranomization of One-sided Error Algorithms using Hitting Set Generators}
+
+We now give a method of completely derandomizing One-sided error algorithms using the combinatorial objects called hitting sets.
+
+\begin{definition}[{\bf Hitting Sets}]
+Let ${\cal{C}}$ be a collection of subsets over a finite universe $U$. A $(1-\epsilon)$-hitting set for ${\cal{C}}$ is a set $H \subseteq U$ such that for every $S \in {\cal{C}}$ of size at least $(1-\epsilon)|U|$, we have:
+$ S \cap H \ne \phi$
+\end{definition}
+
+What is the connection to deranomization. Define $\Gamma_x = \{ y \in \{0,1\}^{p(n)}\mid {\cal{A}}(x,y) \textrm{ is correct }\}$. 
+If the success probability of ${\cal{A}}$ is at least $1-\epsilon$, we have $|\Gamma_x| \ge (1-\epsilon)|U|$.
+
+\begin{minipage}{0.6\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A'}(x,y)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} (q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {$y \in \{0,1\}^{p(n)}$};
+\end{tikzpicture}
+
+\noindent Hence a hitting set in the above definition is usefu
+l, if the collection of sets is the set of possible $\Gamma_x$ for every $x$ of length $n$ and for every algorithm ${\cal{A}}$ which runs in polynomial time.
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.25\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\draw (2,0) ellipse (2cm and 2.5cm) node[midway,yshift=-1cm, xshift=1cm]{$\{0,1\}^{p(n)}$};
+\draw (2,1) ellipse (1cm and 1cm)
+node{$\Gamma_x$};;
+\end{tikzpicture}
+\end{minipage}
+
+\noindent This motivates the following definition.
+\begin{definition}[{\bf Hitting Set Generator}]
+Let ${\cal{C}}$ be a collection of subsets over a finite universe $U$. For ${\cal{C}}$, a $(1-\epsilon)$-hitting set generator is a deterministic algorithm which on input $r$, the set $H_r \subseteq \{0,1\}^r$ which is a $(1-\epsilon)$-hitting set for ${\cal{C}}$.
+\end{definition}
+
+If we consider ${\cal{C}}$ to be the set of possible $\Gamma_x \subseteq \{0,1\}^r$ for every $x$ of length $n$ and for every algorithm ${\cal{A}}$ which runs in polynomial time. From the definitions itself the following theorem follows.
+\begin{theorem}
+If there is a $\half$-hitting set generator that runs in time $\poly(n)$ for the above set system, then any one-sided error randomized algorithm that has success probability at least $\half$ has an equivalent deterministic polynomial time algorithm.
+\end{theorem}
+
+\begin{proof}
+The deterministic algorithm is as follows:
+\begin{algorithm}
+\label{alg:hittingset-algo}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State Using the generator, compute $H_r = \{y_1, y_2, \ldots y_\ell\}$ \Comment{Runs in $\poly(n)$, hence $\ell=\poly(n)$}
+\For{\texttt{each $i \in [\ell]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, {\sc Accept}.
+\EndFor
+\State {\sc Reject}.
+\end{algorithmic}
+\end{algorithm}
+
+Indeed, if the answer if {\sc No}, then $\Gamma_x=0$, so the algorithm reaches step 5 and rejects. If the answer is {\sc Yes}, then $|\Gamma_x| \ge \half$ and since $H_r$ is a $\half$-hitting set, we have that $H_r \cap \Gamma_x \ne \phi$. Let us say $y_i \in \Gamma_x \cap H_r$. Hence, ${\cal{A}}(x,y_i)$ accepts. Thus, ${\cal{A}'}(x)$ accepts. The algorithm is deterministic and runs in polynial time.
+\end{proof}
+
+\section{Connections between various objects}
+
+In the past few lectures, we informally introduced several mathematical objects in relation to our main task - derandomizing randomized algorithms. We also stated that they all have the following common feature.
+{\em By non-constructive arugments, we can prove that these objects exists for the range of paramters we want, but the question that remains is whether they can be constructed explicitly or not.}
+
+It turns out that there are lots of interconnections between these objects (although sometimes for weaker set of parameters). The remaining part of the course also will demonstrate these connections, in addition to detailing out the applications of these objects in connection to the derandomization task.\\
+
+\begin{tikzpicture}
+[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\draw (2,3) node (hs) { Hitting Set Generators};
+\draw (2,1) node (prg) {Pseudorandom Generators};
+\draw (8,1) node (ext){Randomness Extractors};
+\draw (2,-2) node (code){Linear Codes};
+\draw (8,-2) node (exp){Expander Graphs};
+\draw (14,-2) node (disp){Dispersers};
+\draw[<->,line width=1mm](code.east)--(exp.west);
+\draw[->,line width=1mm](prg.east)--(ext.west);
+\draw[<->,line width=1mm]([yshift=2mm,xshift=8mm]code.north)--([yshift=-3mm,xshift=-3mm]ext.south);
+\draw[<->,line width=1mm]([yshift=-3mm,xshift=3mm]ext.south)--([yshift=2mm,xshift=-8mm]disp.north);
+\draw[->,line width=1mm](exp.east)--(disp.west);
+\draw[->,line width=1mm](exp.north)--([yshift=-3mm]ext.south);
+\draw[<->,line width=1mm](hs.south)--(prg.north);
+\end{tikzpicture}
+
+\vspace{5mm}
+In the next lecture, we will first introduce the tools to show non-constructive existence and demonstrate them with various examples.
