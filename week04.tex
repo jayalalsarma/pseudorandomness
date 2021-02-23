@@ -236,3 +236,73 @@ $$\E[X_i^{\alpha}] = \Pr_\alpha\left[\phi_\alpha (b_i) \in C\right] = \frac{|C|}
 Thus, as planned, we have shown that $\E[X] = \sum_{i=1}^n \E[X_i^{\alpha}]$ is greater than $\frac{n}{3}$. Hence as per Lemma~\ref{lem:expectation-method} (expectation method), $\Pr_{\alpha}[X \ge \frac{n}{3}] = \Pr_{\alpha}\left[|\phi_\alpha^{-1}(C)| > \frac{n}{3}\right] > 0$. Hence, by probabilistic method, we have that there exists an $\alpha$ such that $|\phi_\alpha^{-1}(C)| > \frac{n}{3}$. Hence there exists an $A$ (namely $\phi_\alpha^{-1}(C)$) which is a subset of $B$ and is sum-free. This completes the argument.
 \end{proof}
 
+\subsection{Crossing Number Lower Bound}
+
+Now we discuss a totally different application of expectation which is not necessarily an incarnation of probabilistic method, but still is a fun example.
+We set up the context first.
+
+Planar graphs are graphs which can be embedded on the plan without any crossing of the edges. Indeed, there are non-planar graphs. How do we measure non-planarity? There are many ways - one of them is the crossing number of the graph. The crossing number $cr(G)$ of a graph $G$ is the least number of crossings in any embedding of the graph on the plane. Indeed, if the graph $G$ is planar, then $cr(G)=0$. As an exercise, check out the crossing number of the non-planar graphs $K_{3,3}$ and $K_5$. Have fun !.
+
+What can be the bounds on crossing number in terms of the edges and vertices of the graph? Clearly, if the graph is highly dense, then we do expect the crossing number to be high. Hence one should expect a lower bound in terms of the number of edges.
+
+We quickly review the Euler's formula for planar graphs which can also be used to bound the crossing number.
+
+\begin{proposition}[{\bf Euler's Formula for Planar Graphs}]
+Any planar graph $G$, with $n$ vertices, $m$ edges and $f$ faces, and $c$ components, must satisfy:
+\begin{equation}
+n-m+f = c+1
+\label{eqn:Euler-formula}
+\end{equation}
+\end{proposition}
+\begin{proof}
+The proof is an induction on $m$. If there are no edges ($m=0$), then $f=1$, $c=n$. The formula gets satisfied. Let $m > 0$, and assume that the statement is true for graphs with less than $m$ edges. Consider an edge $e=(u,v)$. Remove this edge from $G$ to obtain a new graph $G'$. Let $c' \ge c$ be the number of components in $G'$. We have two cases:
+\begin{description}
+\item{\bf Case 1: $c'>c$ : }
+The number of components can increase at most bt $1$. $c'=c+1$. By removing the edge, the number of faces does not change since the removed edge would have been the boundary for the outer face of the embedding. Hence $m' = m-1$, $f' = f$. Hence the equation \ref{eqn:Euler-formula} will still be satisfied.
+\item{\bf Case 2: $c'=c$ : }
+By removing the edge, we would have decreased the number of faces by $1$. Hence $m' = m-1$, $f' = f-1$. Hence the equation \ref{eqn:Euler-formula} will still be satisfied.
+\end{description}
+\end{proof}
+
+\begin{corollary}
+Any connected planar graph $G$ on $n\ge 4$ vertices cannot have more than $3n-6$ edges.
+\end{corollary}
+\begin{proof}
+Let the number of edges in the boundary of the $i^{th}$ face be $m_i$. Observe that each edge can be the boundary of at most two faces. This gives:
+$\sum_{i=1}^f m_i \le 2m$. Since $m_i \ge 3$ (even for outer face, since $G$ is connected), this gives $f \le \frac{2m}{3}$. Applying this relation to Euler's formula gives, $m = n+f-2 \le n+\frac{2m}{3}-2$. This gives that $m \le 3n-6$.
+\end{proof}
+The next corollary is about a lower bound on the crossing number.
+\begin{corollary}
+\label{cor:euler-crlb}
+For any graph with $n$ vertices and $m$ edges, we have that $$cr(G) \ge m-3n+6$$
+\end{corollary}
+\begin{proof}
+The idea is quite simple. Take the best embedding of the graph which achieves the crossing number. For each crossing put in a vertex at the geometric point of the crossing edges. What we get is a planar embedding of a new planar graph $G'$. Indeed the number of vertices have increased by $cr(G)$. The number edges have increased by $2cr(G)$. $n' = n+cr(G)$ and $m' = m+2cr(G)$. Applying the above corollary to the graph $G'$:
+$$m+2cr(G) \le 3(n+cr(G)-6$$
+This gives that, $cr(G) \ge m-3n+6$, thus completing the proof.
+\end{proof}
+
+Thus we have one lower bound for crossing number. We will use our expectation method to derive a much stronger lower bound.
+
+\begin{theorem}[\cite{Bec78}]
+Let $G$ be a simple graph with $m > 4n$. Then,
+$$cr(G) \ge \frac{1}{64}\frac{m^3}{n^2}$$
+\end{theorem}
+\begin{proof}
+Again, our aim is to define an appropriate experiment and a random variable whose expectation will be lower bounded. Let $G$ be the graph, and let $\tilde{G}$ be the embedding of $G$ on the plane which achieves the crossing number $cr(G)$. That is, the emebedding witnesses $cr(G)$ crossings.
+
+We design the following experiment. Choose a subset of vertices $V$ by choosing each vertex of $G$ independently with probability $p = \frac{4n}{m}$. Let $H$ be the induced subgraph on these vertices and let $\tilde{H}$ be the embedding of $H$ derived from $\tilde{G}$. Notice that $H$ may have a better embedding which achieves a lower crossing number than what $\tilde{H}$ witnesses.
+
+The crossing number of $H$, $cr(H)$ is a random variable. In addition, the number of vertices, number of edges, and the number of crossings of $\tilde{H}$ are all random variable. Let $X,Y,Z$ be these random variables respectively. 
+
+Since $\tilde{H}$ is only one of the possible embeddings of $H$, $Z \ge cr(H)$. Since the number of vertices is independent of the embedding, by applying Corollary~\ref{cor:euler-crlb}, we have that $cr(H) \ge Y-3X$ (we are ignoring the additive constant 6 but the lower bound is still valid), Thus we have that :
+$$Z \ge Y-3X \textrm{ which implies that } \E[Z] \ge \E[Y]-3\E[X]$$
+Now we need to compute each of them. Since we are choosing each vertex to be in $H$ indendently with probability $p$, $\E[X] = pn$. Since for an edge from $G$ to be chosen, both of its end points must be chosen, $\E[Y] = p^2m$. For a crossing in $\tilde{G}$ to appear in $\tilde{H}$, all the 4 vertices involved in the crossing must be chosen. Hence $\E[Z] = p^4cr(G)$. Plugging this in yields that:
+$$p^4cr(G) \ge p^2m - 3pn \implies cr(G) \ge \frac{pm-3n}{p^3} = \frac{n}{(4n/m)^3} = \frac{1}{64}\frac{m^3}{n^2}$$ the required lower bound.
+\end{proof}
+
+\begin{exercise-prob}[See Problem Set 2(Problem~\ref{bipartite})]
+\begin{show-ps2}{bipartite}
+Use expectation method to show that every graph having a matching of size $m$ has a bipartite subgraph with at least $\half(|E(G)|+m)$ edges. (Hint: how can we choose a random bipartition such that the edges of the matching have their endvertices in opposite parts?)
+\end{show-ps2}
+\end{exercise-prob}
