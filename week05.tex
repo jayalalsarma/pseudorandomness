@@ -1,0 +1,253 @@
+\Week{5}{Pairwise and $t$-wise Independence}
+
+As mentioned in the previous lecture, we do error reduction using limited independence now. We will show that if we use {\em pairwise independent} random variables, then it can still achieve error bounds of the form $\frac{1}{k}$ with only $O(\log n)$ additional random bits.
+
+\section{Pair-wise Independence}
+Although not related to expanders, we use this context to introduce one of the basic tools of pseudorandomness - {\em pairwise independent distributions}. We first recall the basic set up about amplification of success probability by repeating the algorithm.\\
+
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=6cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}'(x,y_1,y_2, \ldots y_k)$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=4cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-5cm,yshift=0mm]{};
+\path[->](q_r) edge [midway] node {\sc Yes/No} ([xshift=4mm]q_0);   
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm,xshift=-25mm]q_1) -- ([yshift=0mm,xshift=-25mm]q_r.south)node[midway,swap] {$y_1$};
+\draw[->] ([yshift=-2mm,,xshift=-15mm]q_1) -- ([yshift=0mm,,xshift=-15mm]q_r.south)node[midway,swap] {$y_2$};
+\draw[->] ([yshift=-2mm,,xshift=-5mm]q_1) -- ([yshift=0mm,,xshift=-5mm]q_r.south)node[midway,swap] {$y_3$};
+\draw[->] ([yshift=-2mm,,xshift=+5mm]q_1) -- ([yshift=0mm,,xshift=+5mm]q_r.south)node[midway,swap] {$\ldots$};
+\draw[->] ([yshift=-2mm,,xshift=+15mm]q_1) -- ([yshift=0mm,,xshift=+15mm]q_r.south)node[midway,swap] {$y_k \in \zo^m$};
+\end{tikzpicture}
+
+\noindent In the trivial method, we supplied fully independent random strings $y_i \in \zo^m$ for each $i \in [k]$. Now we will allow some dependence among them. A set of random variables $Y_1, Y_2 \ldots Y_m$ is said to be {\em pairwise independent} if for all $i \ne j$, $Y_i$ and $Y_j$ are independent. That is, 
+$$\forall a,b : \Pr\left[(Y_i = a) \land (Y_j = b)\right] = \Pr\left[Y_i = a\right] \Pr\left[Y_j = b\right]$$
+
+\paragraph{Constructing Pair-wise Independent Bits:}
+We want $k$ ``dependent" random strings produced from fewer number of bits. We first do a simpler setting where instead of strings we ask for bits.
+
+Suppose we want $k$ bits of pairwise independent random bits. How many random bits do we need to spend? And from those pure random bits how do we produce the $k$ bits? These questions are answered by an explicit construction now.
+
+\begin{definition}[\textbf{Construction 1}]
+\label{defn:pairwise-indep-bits}
+We produce $k = 2^r - 1$ bits from $r$ bits. The $m$ Boolean random variables are indexed by $w \in \{0,1\}^r \setminus \{0^r\}$. The size of the space is $2^r$.
+Fix $a \in \{0,1\}^r$, and for any $w \in \{0,1\}^r \setminus \{0^r\}$.
+$$Y_w = ( \sum_i a_iw_i )\mod 2$$
+\end{definition}
+\noindent We need to prove that the set of random variables are pairwise independent.
+\begin{claim}
+The set of variables $\left\{ Y_w \mid w \in \zo^r \setminus \{0^r\} \right\}$ are pairwise independent.
+\end{claim}
+\begin{proof}
+\noindent We first prove the following two observations about the construction:
+\begin{description}
+\item{{\sf Subclaim 1 }: For any fixed $w \in \zo^r \setminus \{0^r\}$, the random variable $Y_w$ is uniformly distributed.}
+Since $w \ne 0^r$, there must be $i$ such that $w_i = 1$. Consider the non-empty subset of indices: $S = \{ i \mid w_i=1\}$. Hence $Y_w = 0$ if and only if $\card{\{ i \mid a_i = 1 \land i \in S \}}$ is odd. Since the number of sequences $(a_i)_{i \in S}$ with even weight is exactly equal to the number of sequences $(a_i)_{i \in S}$ odd weight ones, the probability is exactly $\half$.
+\item{{\sf Subclaim 2 }: For any fixed $w, w
+ \in \zo^r \setminus \{0^r\}$, such that $w \ne w'$, the random variable $Y_{w} \oplus Y_{w'}$ is uniformly distributed.}
+ This can be argued in a similar way to Subclaim 1. Only thing to note is that 
+$$Y_{w} \oplus Y_{w'} = \left( \sum_i a_iw_i \mod 2\right) \oplus \left( \sum_i a_iw_i' \mod 2\right) = \left( \sum_i a_i (w_i \oplus w_i') \right)\mod 2 = Y_{w \oplus w'}$$
+where $w \oplus w'$ is the bit-wise $\oplus$ of the bits in $w$ and $w'$.
+Since $w \ne w'$, $w \oplus w' \in \zo^r$ and $w \oplus w' \ne 0$, and hence the same argument as in claim 1 applies.
+\end{description}
+Now we are ready to argue pairwise independence of $Y_w$ and $Y_{w'}$. Let $w \ne w' \in \zo^r$. We need to show that for $\Pr\left[(Y_w = a) \land (Y_{w'} = b)\right] = \frac{1}{4}$. Let $\Pr\left[(Y_w = 0) \land (Y_{w'} = 1)\right] = p$. Since $w \ne w'$, there is an $i \in[r]$ such that $w_i \ne w_i'$. Hence, 
+\begin{eqnarray*}
+\text{ Note that, } \half = \Pr\left[(Y_w = 0)\right] & = & \Pr\left[(Y_w = 0) \land (Y_{w'}=0)\right]+\underbrace{\Pr\left[(Y_w = 0) \land (Y_{w'}=1)\right]}_\text{$p$} \\
+\implies \Pr\left[(Y_w = 0) \land (Y_{w'}=0)\right] & = & \half-p  \\
+\text{ Using this, }\half = \Pr\left[(Y_{w'} = 0)\right] & = & \underbrace{\Pr\left[(Y_{w'} = 0) \land (Y_{w}=0)\right]}_{\half-p}+\Pr\left[(Y_{w'} = 1) \land (Y_w=1)\right] \\
+\implies \Pr\left[(Y_w = 1) \land (Y_{w'}=0)\right] & = & p 
+\end{eqnarray*}
+Hence, $\Pr\left[ Y_{w} \oplus Y_{w'} = 1\right] = 2p$. Because of subclaim 2, this gives $p = \frac{1}{4}$ and hence shows: 
+$$\Pr\left[(Y_w = a) \land (Y_{w'} = b)\right] = \frac{1}{4} = \Pr\left[(Y_w = a)\right] \Pr \left[(Y_{w'} = b)\right]$$
+\end{proof}
+
+\paragraph{Constructing Pair-wise Independent Strings:}
+While easy to analyze, the disadvantage of the inner product construction in the previous construction is that it outputs bits. However, for our purposes of amplification, we require pairwise independent strings $y_1, y_2, \ldots y_k \in \{0,1\}^m$. We now show a second construction which yields strings instead.
+
+\begin{definition}[\textbf{Construction 2}]
+Fix $q \ge k$. Choose $\alpha, \beta \in \F_q$ uniformly at random. Output $Y_w = \alpha w+\beta$ where $w \in \F_q$. This produces $q$ bits from $2\log q$ bits as seed. The size of the space is $q^2$.
+\end{definition}
+
+\begin{claim}
+The random variables $\{ Y_w \mid w \in \F_q\}$ are pairwise independent.
+\end{claim}
+\begin{proof}
+Let $w \ne w' \in \F_q$. Consider $a,b \in \F_q$. We need to show 
+\begin{equation}
+\Pr\left[(Y_w = a) \land (Y_{w'} = b)\right] = \Pr\left[(Y_w = a)\right] \Pr \left[(Y_{w'} = b)\right]
+\label{eqn:pairwiseindep}
+\end{equation}
+
+\begin{description}
+\item{\sf Estimating RHS:}
+We first observe that, for a fixed $w \in \F_q$, $\Pr\left[(Y_w = a)\right] = \frac{1}{q}$. To see this, note that for any $\alpha \in \F_q$, there is exactly one $\beta \in \F_q$ which satisfies $\alpha w + \beta = a$. Hence, there are $q$ pairs $(\alpha,\beta)$ (among the $q^2$ possible pairs) which satisfies $\alpha w+\beta = a$. Hence RHS of Equation~\ref{eqn:pairwiseindep} is $\frac{1}{q^2}$.
+\item{\sf Estimating LHS:}
+The event $(Y_w = a) \land (Y_{w'} = b)]$ translates to the pair of equations: $\alpha w + \beta = a \textrm{ and } \alpha w' + \beta = a$.
+Since $w, w'$ (and $w \ne w'$) and $a,b$ are fixed, this is possible only for a unique pair of values $(\alpha, \beta) \in \F_q \times \F_q$. In other words the matrix equation:
+\[
+\begin{pmatrix}
+w & 1 \\
+w' & 1
+\end{pmatrix}
+\begin{pmatrix}
+\alpha \\
+\beta
+\end{pmatrix}
+=
+\begin{pmatrix}
+a \\
+b
+\end{pmatrix}
+\textrm{ and hence, }
+\begin{pmatrix}
+\alpha \\
+\beta
+\end{pmatrix}
+=
+\begin{pmatrix}
+w & 1 \\
+w' & 1
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+a \\
+b
+\end{pmatrix}
+\]
+
+defines a bijection between the set of $(\alpha,\beta)$ pairs and $(a,b)$ pairs. Hence, for every $(a,b) \in \F_q \times \F_q$, there is only one $(\alpha,\beta)$ (out of the $q^2$ choices) which will make $(Y_w = a) \land (Y_{w'} = b)$. Hence LHS of the Equation~\ref{eqn:pairwiseindep} is $\frac{1}{q^2}$.
+\end{description}
+\end{proof}
+
+\begin{exercise-prob}[See Problem Set 2~(Problem \ref{matrix-family})]
+\begin{show-ps2}{matrix-family}
+For an $n \times m$ matrix $A$ with Boolean entries and
+$b \in \zo^n$, define a function $h_{A,b} : \zo^m \to \zon$ by
+$h_{A,b}(x)= (Ax + b) \mod 2$ where the modulo 2 is applied component-wise. Show that 
+$$H_{m,n} = \{h_{A,b} \mid A \in \zo^{n \times m} \textrm{ and } b \in \zo^n\}$$
+is a pairwise independent family of functions. Compare the number of random bits needed to generate a random function in $H_{m,n}$ to the construction that we did in class.
+\end{show-ps2}
+\end{exercise-prob}
+
+\section{Error Reduction using Pairwise Independence}
+We first describe the algorithm for amplification first. We choose $q = 2^m$ : elements in $\F_q$ can be interpreted as strings of length $m$.
+
+\begin{algorithm}
+\label{alg:pairwise-indep-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$. 
+\State Choose a pair $(\alpha,\beta) \in \F_q \times \F_q$ uniformly at random. \Comment{(Uses $2m$ random bits)}. 
+\State Let $y_1, y_2, \ldots y_k$ be the first $k$ elements of the pairwise independent space 
+\vspace{-3mm}
+$$\{ \alpha w + \beta \mid w \in \F_q \}$$
+\vspace{-10mm}
+\For{\texttt{each $i \in [k]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
+\EndFor
+\State If ~[{\em count} $> \frac{k}{2}$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+One immediate remark is that although it may look like we are wasting bits by generating more pairwise independent random bits than required, we cannot make use of them efficiently anyway since there are $2^m$ many of them.
+
+We now prove the correctness lemma which indicates that if we need to reduce the error probability to $1/t$, then we need to repeat the algorithm for $k=O(t)$ times.
+\begin{lemma}
+\label{lem:paiewise-amplification}
+The probability of error for $\calA'$ is bounded by:
+$$\Pr\left[\calA' \textrm{ errs }\right] \le \left(\frac{1}{\delta^2}\right)\frac{1}{k} \textrm{~~~~where $\delta = \frac{1}{2}-\epsilon$}$$
+\end{lemma}
+\begin{proof}
+As in the previous cases, for a given input $x \in \zon$, we define $B$ to be the set of bad random strings - which makes the algorithm err on input $x$. We need to understand the probability that majority of $y_i \in B$. For this, let us define the indicator random variable.
+\[
+    Y_i = 
+\begin{cases}
+    1 & \text{if $y_i \in B$} \\
+    0 & \text{otherwise}
+\end{cases}
+\]
+$\E[Y_i] = Pr[y_i \in B] = \epsilon$. We will define a translation of $Y_i$ to make the expectation $0$. Define $Z_i = Y_i - \epsilon$. Notice that $\E[Z_i]=0$. In terms of these random variables, to bound the error for $\calA'$, we want to analyze the probability that:
+$$\Pr \left[ \sum_{i=1}^k Y_i > \frac{k}{2}\right] = \Pr \left[ \sum_{i=1}^k Z_i > k\left(\frac{1}{2}-\epsilon\right) \right] = \Pr \left[ \sum_{i=1}^k Z_i > \delta k \right] =\Pr \left[ Z > \delta k \right] $$
+where $Z = \sum_{i=1}^k Z_i$.
+The random variable $Z$ has expectation $0$ and we want to estimate the probability that it is greater than $\delta k$. A natural situation is to apply Markov's inequality\footnote{For a random variable $X$ which takes only positive values in $\mathbb{R}$, $\Pr[X > a] \le \frac{\E[X]}{a}$} which helps us estimate such a tail bound for positive random variables.
+Hence we plan to upper bound:
+\begin{eqnarray*}
+\Pr \left[ Z > \delta k \right] \le \Pr[Z^2 > \delta^2 k^2] \le \frac{\E[Z^2]}{\delta^2k^2}
+\end{eqnarray*}
+Hence we need to estimate $\E[Z^2]$:
+\begin{eqnarray*}
+\E[Z^2] = \E\left[ \left(\sum_{i=1}^k Z_i\right)^2 \right] = \sum_{i=1}^k \E\left[Z_i^2\right] + 2\sum_{i<j} \E[Z_iZ_j] & \le & \sum_{i=1}^k \E\left[Z_i^2\right] + 2\sum_{i<j} \E[Z_i]\E[Z_j] \\
+& \le & k \textrm{~~~~~~~~$\because \E[Z_i] = 0$ and $\E[Z_i^2] \le 1$}
+\end{eqnarray*}
+Hence we have :
+$$\Pr \left[ Z > \delta k \right] \le \frac{1}{\delta^2 k}$$
+thus completing the proof.
+\end{proof}
+\begin{remark}
+As mentioned earlier, if we need $\frac{1}{t}$ as an upper bound on the error probability, we need to run the algorithm for $k=O(t)$ times.
+\end{remark}
+
+
+\begin{exercise}
+Let $X$ be a random variable and $\E[X] = \mu$ be the expectation. Variance captures the expected square deviation from the mean $\mu$. That is $\V{X}$ is defined as $\E[(X-\mu)^2]$. It can be shown to be equal to $\E[X^2]-(\E[X])^2$ and that $\V{aX} = a^2\V{X}$. And more importantly, when the random variables $X_1, X_2, \ldots X_n$ are pairwise independent, then show that:
+$$\V{X_1+X_2+\ldots+X_n} = \V{X_1}+\V{X_2}+\ldots+\V{X_n}$$
+(Hint: Use the technique used in the proof of Lemma~\ref{lem:paiewise-amplification})
+
+Provide an example that shows that the variance of the sum of two random variables is not necessarily equal to the sum of their variances, when the random variables are not independent. Indeed, one dramatic example when $n=2$ is to take $X_2 = -X_1$. Find less dramatic ones !.
+\end{exercise}
+
+
+\section{Derandomization using Pairwise Independent Bits}
+
+We now show an application of pairwise independent bits that we generated (instead of strings) in earlier section. This also will demonstrte algorithmic specific derandomization that we can do, at times, for certain problems. 
+
+Recall the {\sc MaxCut} problem. A cut in a graph is a partition of vertex set $V$ into two $(S,\bar{S})$ and the size of a cut is the number of edges that go across the cut $|E(S,\overline{S})|$. The {\sc MaxCut} problem is as follows : \textit{Given a graph $G(V,E)$ output the maximum cut in the graph.}
+
+We will first give a simple randomized algorithm for the problem. Note that this is not a decision problem and hence the measure of how good the algorithm is based on the expected size of the cut that the algorithm outputs.
+
+\begin{algorithm}
+\label{alg:maxcut-randomized}
+\caption{(${\sc MaxCutAlgo}$) : input $G(V,E)$, $|V|=n$} 
+\begin{algorithmic}[1]
+\State $S \gets \phi$. 
+\For{each $w \in [V]$}
+	\State Choose $b_w \in \zo$ uniformly at random.
+	\State If ($b_w = 1$) then add $w$ to $S$.
+\EndFor
+\State Output the cut $(S,\bar{S})$.
+\end{algorithmic}
+\end{algorithm}
+
+We quickly analyse the algorithm. For each edge $e=(u,v) \in E$ define the random variable $X_e$ which will be $1$ if the above algorithm makes the edge contribute to the cut and $0$ otherwise.
+For a given edge the expected value of this random variable is :
+\begin{equation}
+\label{eqn:maxcut-exp}
+\E[X_e] = \Pr[X_e = 1] = \Pr[(u \in S) \land (v \in \bar{S})] + \Pr[(u \in \bar{S}) \land (v \in S)] = \frac{1}{4}+\frac{1}{4} = \half
+\end{equation}
+
+\noindent The expected size of the cut then is obtained by estimating the expectation of $X = \sum_{e \in E} X_e$:
+$$\E[X] = \E\left[\sum_{e \in E} X_e\right] = \sum_{e \in E} \E[X_e] = \half |E| \ge \half |OPT|$$
+where $OPT$ is the size of the maximum cut in the graph and it can be at most $|E|$. Thus the above algorithm gives a $\half$ approximation for the {\sc MaxCut} problem on expectation.
+
+The algorithm uses $O(n)$ random bits where $n=|V|$. We claim that the analysis of the algorithm still guarantees the expected size of the cut to be $\half|OPT|$ even if we do not use pure randombits, but instead supply the pairwise indepednent randbom bits we generate (from definition~\ref{defn:pairwise-indep-bits}). We choose $n = 2^r - 1$ which uses $r = O(\log n)$ seed in order to choose from the pairwise independent space that we constructed.
+Let the bits that we provided by $b_1, b_2, \ldots b_n$ produced from construction ~\ref{defn:pairwise-indep-bits}.
+
+\noindent Equation~\ref{eqn:maxcut-exp} can be rederived as:
+\begin{eqnarray*}
+\E[X_e] = \Pr[X_e = 1] & = & \Pr[(b_u=1) \land (b_v=0)] + \Pr[(b_u=0) \land (b_v=1)] \\
+& = & \Pr[b_u=1]\Pr[b_v=0] + \Pr[b_u=0]\Pr[b_v=1] = \frac{1}{2}.\frac{1}{2}+\frac{1}{2}.\frac{1}{2} = \half
+\end{eqnarray*}
+were we use the pairwise independence in the third equality (which we wrote earlier because of full independence.
+
+Hence, we have an algorithm which uses $O(\log n)$ random bits (call the string $y'$) and provides a $\half$-approximation for the maximum cut on expectation. Hence there must be a random string setting for $y'$ which produces the $\half$-approximation such that $\card{E(S,\bar{S})} \ge \half|OPT|$. Hence, this leads to a polynomial time deterministic algorithm, which runs over all the possible assignments for the string $y'$ (only $\poly(n)$ in number) and runs the algorithm using each setting of $y'$ as random string, and outputs the maximum sized cut produced. By the above argument, this algorithm is guranteed to produce a $\half$-approximation for the maximum cut in the graph.
+
+\begin{exercise}
+%-prob}[See Problem Set 3~(Problem \ref{ramsey-graph})]
+%\begin{show-ps3}{ramsey-graph}
+Recall the discussion on Ramsey graph's where we applied probablistic method to show bounds on Ramsey number $R(k,k)$. Let us define a graph to be a \textit{$k$-Ramsey graph} if it has no clique or independent set of size at least $k$. We had shown by the probabilistic method that there exists a graph on $n$ vertices that $O(\log n)$-Ramsey. An interesting open problem is to give an \textit{explicit} construction of a $O(\log n)$-Ramsey graph. The best known construction runs in time $O(2^{2^{\log^\epsilon n}})$ for some small $\epsilon=0.99$. In this problem you are asked give a construction for $O(\log n)$ Ramsey graph that runs in time $O(n^{\log^2 n})$. [Hint : Check if full independence of random choices is necessary in our proof by probabilistic method. Show that the proof actually gives a set of $O(n^{\log^2 n})$ graphs, one of which is guaranteed to be $O(\log n)$-Ramsey]
+%\end{show-ps3}
+%\end{exercise-prob}
+\end{exercise}
+
+\begin{curiousity}
+The best approximation ration for maximum cut problem is not $\half$. It is $0.878$, and it comes from the semidefinite programming (SDP) relaxation for maxcut problem LP. Define $n+m$ variables $x_u$ for each $u \in V$ and $e_{uv} \in E$. These variables are supposed to represent the information $e_{uv} = 1$ if and only if $(u,v)$ is in the cut, and $x_u = 1$ if and only if $u \in S$. The LP objective function is to maximise $\sum_{(u,v) \in E} e_{uv}$ subject to the constraints (1) $\forall u,v \in E$, $e_{uv} \le x_u+x_v$ and $e_{uv} \le 2-(x_u+x_v)$, (2) all of them are Boolean variables. The idea due to \cite{GW95} is to relax this condition (2) by using vector valued variables (rather than Boolean). Not only that this relaxation can be solved efficiently, but \cite{GW95} gave a method of rounding the variables to Boolean values and proving that the approximation ratio is atleast $0.878 \ldots$.
+
+Complementing this, an optimal inapproximability result was proven for {\sc MaxCut} by \cite{Kho07}, based on a conjectured hardness for the approximation problem known as the label cover problem (this is also called the {\em unique games conjecture}~(UGC) - see ~\cite{Kho10}).
+\end{curiousity}
