@@ -119,11 +119,15 @@ defines a bijection between the set of $(\alpha,\beta)$ pairs and $(a,b)$ pairs.
 
 \begin{exercise-prob}[See Problem Set 2~(Problem \ref{matrix-family})]
 \begin{show-ps2}{matrix-family}
-For an $n \times m$ matrix $A$ with Boolean entries and
+\begin{enumerate}[(a)]
+\item For an $n \times m$ matrix $A$ with Boolean entries and
 $b \in \zo^n$, define a function $h_{A,b} : \zo^m \to \zon$ by
 $h_{A,b}(x)= (Ax + b) \mod 2$ where the modulo 2 is applied component-wise. Show that 
 $$H_{m,n} = \{h_{A,b} \mid A \in \zo^{n \times m} \textrm{ and } b \in \zo^n\}$$
 is a pairwise independent family of functions. Compare the number of random bits needed to generate a random function in $H_{m,n}$ to the construction that we did in class.
+\item A matrix $A$ is a {\em Toeplitz matrix} if it is constant on
+diagonals, i.e., $A_{i+1,j+1} = A_{i,j}$ for all $i$, $j$. Show that even if we restrict the family $H_{m,n}$ in Part 1 to only include $h_{A,b}$ for Toeplitz matrices $A$, we still get a pairwise independent family. How many random bits are needed now?
+\end{enumerate}
 \end{show-ps2}
 \end{exercise-prob}
 
