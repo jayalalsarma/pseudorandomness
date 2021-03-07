@@ -255,3 +255,143 @@ The best approximation ration for maximum cut problem is not $\half$. It is $0.8
 
 Complementing this, an optimal inapproximability result was proven for {\sc MaxCut} by \cite{Kho07}, based on a conjectured hardness for the approximation problem known as the label cover problem (this is also called the {\em unique games conjecture}~(UGC) - see ~\cite{Kho10}).
 \end{curiousity}
+
+
+\begin{curiousity}
+\jsay{Write about Luby's algorithm}
+\end{curiousity}
+
+\section{$t$-wise Independence Spaces}
+
+The notion of pairwise independence that we learned in the previous section can be generalized further. We say that a set of random variables $Y_1, Y_2, \ldots Y_k$ to be $t$-wise independent if any subset of $t$ random variables among them are independent. In other words, for any $I \subseteq [k]$ such that $|I|\le t$, and any set of distinct elements $a_1, a_2, \ldots a_k$ 
+\begin{equation}
+\Pr\left[ \bigwedge_{i\in I} (Y_i = a_i) \right] = \prod_{i \in I}\left(\Pr\left[ Y_i = a_i \right]\right)
+\label{eqn:twise-indep}
+\end{equation}
+
+\begin{definition}[\textbf{Constructing $t$-wise Independent Strings}]
+Fix $q \ge k$. Choose $c_0, c_1, \ldots c_{t-1} \in \F_q$ uniformly at random. Output $Y_w = c_0+c_1w+c_2w^2+ \ldots c_{t-1}w^{t-1}$ where $w \in \F_q$. This produces $q$ bit string from $O(t\log q)$ bit seed. The size of the space is $q^t$.
+\end{definition}
+
+\begin{claim}
+The random variables $\{ Y_w \mid w \in \F_q\}$ are $t$-wise independent.
+\end{claim}
+\begin{proof}
+For any $I \subseteq [k]$ such that $|I|\le t$, and any set of elements distinct $a_1, a_2, \ldots a_k \in \F_q$, we need to show, Equation~\ref{eqn:twise-indep}. 
+
+\begin{description}
+\item{\sf Estimating RHS:} 
+We first observe that, for a fixed $w \in \F_q$, $\Pr\left[(Y_w = a)\right] = \frac{1}{q}$. To see this, note that for any $c_1, c_2, \ldots c_k \in \F_q$, there is exactly one $c_0 \in \F_q$ which satisfies $c_0+c_1w+c_2w^2+ \ldots c_{t-1}w^{t-1} = a$. Hence, there are $q$ different $t$-tuples $(c_0, c_1, \ldots c_{t-1})$ (among the $q^t$ possible pairs) which satisfies $c_0+c_1w+c_2w^2+ \ldots c_{t-1}w^{t-1} = a$. Hence RHS of Equation~\ref{eqn:twise-indep} is $1/q^t$.
+\item{\sf Estimating LHS:}
+Let the index set be $I = \{w_1, w_2, \ldots w_t\}$.
+The event $(Y_{w_1} = a_1) \land (Y_{w_2} = a_2) \land (Y_{w_3} = a_3) \ldots \land (Y_{w_t} = a_t)]$ translates to the $t$
+equations: 
+\begin{eqnarray*}
+c_0+c_1w_1+c_2w_1^2+ \ldots c_{t-1}w^{t-1} & = & a_1 \\
+c_0+c_1w_2+c_2w_2^2+ \ldots c_{t-1}w^{t-1} & = & a_2 \\
+\vdots & & \vdots \\
+c_0+c_1w_t+c_2w_t^2+ \ldots c_{t-1}w^{t-1} & = & a_t
+\end{eqnarray*}
+
+Since $I$ is fixed, $w_i$s are fixed, and given tuples $(a_1, a_2, \ldots a_t)$, there is exactly one tuple $(c_0, c_1, \ldots c_{t-1})$ which satisfies the above equation.
+This can also be written as the matrix equation:
+\[
+\begin{pmatrix}
+c_0 \\
+c_1 \\
+\vdots \\
+c_{t-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+1 & w_1 & w_1^2 & \ldots & w_1^{t-1} \\
+1 & w_2 & w_2^2 & \ldots & w_2^{t-1} \\
+\vdots & \vdots & \vdots & \vdots \\
+1 & w_t & w_t^2 & \ldots & w_t^{t-1} \\
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+a_1 \\
+a_2 \\
+\vdots \\
+a_t
+\end{pmatrix}
+\]
+The matrix is invertible since it is in the Vandermonde form with distinct rows. Hence, for every $(a_1, a_2 \ldots a_t) \in \F_q^t $, there is only one $(c_0, c_1, \ldots c_{t-1})$ (out of the $q^t$ choices) which will make $Y_{w_i} = a_i$ for all $i \in [t]$. Hence LHS of the Equation~\ref{eqn:pairwiseindep} is $\frac{1}{q^t}$.
+\end{description}
+\end{proof}
+
+\section{Error Reduction using $t$-wise Independence}
+Again we choose $q = 2^m$ : elements in $\F_q$ can be interpreted as strings of length $m$.
+
+\begin{algorithm}
+\label{alg:twise-indep-amplification}
+\caption{(${\cal{A}'}$) : input $x \in \{0,1\}^n$} 
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$. 
+\State Choose $(c_0, c_1, \ldots c_{t-1}) \in \F_q^t$ uniformly at random. \Comment{(Uses $tm$ random bits)}. 
+\State Let $y_1, y_2, \ldots y_k$ be the first $k$ elements of the pairwise independent space 
+\vspace{-3mm}
+$$\{  c_0+c_1w+c_2w^2+ \ldots c_{t-1}w^{t-1} \mid w \in \F_q \}$$
+\vspace{-10mm}
+\For{\texttt{each $i \in [k]$}}
+	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
+\EndFor
+\State If ~[{\em count} $> \frac{k}{2}$]~ then output {\sc Yes} else output {\sc No}.
+\end{algorithmic}
+\end{algorithm}
+
+We now prove the correctness lemma which indicates that if we need to reduce the error probability to $1/t$, then we need to repeat the algorithm for $k=O(t)$ times.
+\begin{lemma}
+The probability of error for $\calA'$ is bounded by:
+$$\Pr\left[\calA' \textrm{ errs }\right] \le \left(\frac{1}{\delta^2}\right)\frac{1}{k} \textrm{~~~~where $\delta = \frac{1}{2}-\epsilon$}$$
+\end{lemma}
+\begin{proof}
+The proof and the notations are same as Proof of Lemma~\ref{lem:paiewise-amplification} in the case of pairwise independence. We present only the different parts here.
+$Y_i$ is the indicator random variable, as defined, and $Z_i = Y_i -\epsilon$ and $\E[Z_i]=0$. In terms of these random variables, to bound the error for $\calA'$, we want to analyze the probability that:
+$$\Pr \left[ \sum_{i=1}^k Y_i > \frac{k}{2}\right] = \Pr \left[ \sum_{i=1}^k Z_i > k\left(\frac{1}{2}-\epsilon\right) \right] = \Pr \left[ \sum_{i=1}^k Z_i > \delta k \right] =\Pr \left[ Z > \delta k \right] $$
+where $Z = \sum_{i=1}^k Z_i$. Hence we plan to upper bound (assume that $t$ is even:
+\begin{eqnarray*}
+\Pr \left[ Z > \delta k \right] \le \Pr[Z^t > \delta^t k^t] \le \frac{\E[Z^t]}{\delta^tk^t}
+\end{eqnarray*}
+Hence we need to estimate $\E[Z^t]$:
+\begin{eqnarray*}
+\E[Z^t] = \E\left[ \left(\sum_{i=1}^k Z_i\right)^t \right] & = &  \sum_{i=1}^k \E\left[Z_i^t\right] + \textrm{(terms with at least one odd degree $\E$ term)} \\ 
+&& + \textrm{(terms with all even degree $\E$ terms)}
+\end{eqnarray*}
+Thus, the only terms that survive are those where every term appears an even number of times. For example, when $t = 4$,
+\begin{eqnarray*}
+\E[Z^4] & = &  \sum_{i=1}^k \E\left[Z_i^4\right] + {4 \choose 2} \sum_{0 \le i < j \le k} \E[Z_i^2]\E[Z_j^2] \\ 
+& \le & k+{4 \choose 2}{k \choose 2} \le 4k^2
+\end{eqnarray*}
+\begin{eqnarray*}
+\textrm{For a general $t \le k$, }\E[Z^t] & \le & O(k^{t/2}) \\
+\textrm{Hence, } \Pr \left[ Z > \delta k \right] & \le & O\left(\frac{1}{k^{t/2}}\right)
+\end{eqnarray*}
+Thus, if we take $2\ell$-independence, the error reduces to $O(1/k^\ell)$. If we are targeting to get to an error bound of $\gamma$ then the number of repetitions must be $\sqrt[\ell]{1/\gamma}$. This is indeed better than the number of repetitions required if we were using pairwise indepedence space.
+%\jsay{Bounds are weak. To be fixed.}
+%Hence we have :
+%$$\Pr \left[ Z > \delta k \right] \le \frac{1}{\delta^2 k}$$
+%thus completing the proof.
+\end{proof}
+
+We conclude this part by providing a table of the various amplifcation methods that we have seen so far.
+
+\renewcommand{\arraystretch}{2}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline 
+Approach & Error bound & Random bits used  \\ 
+\hline 
+Trivial & $\half(1-4\epsilon^2)^{k/2}$ & $km$ \\ 
+%\hline 
+%Expander Neighborhood & $\frac{\displaystyle 2\epsilon\lambda^2}{\displaystyle (1-2\epsilon)}$ & $m$ \\ 
+%\hline 
+%Expander Walk & $2^k(\epsilon+\lambda)^{k/2}$ & $m+k\log d$ \\ 
+\hline 
+Pairwise Independence & $\frac{\displaystyle 4}{\displaystyle k(1-2\epsilon)^2}$ & $2m$ \\ 
+\hline
+$t$-wise Independence & $\frac{\displaystyle 1}{\displaystyle k^{t/2}(1-2\epsilon)^t}$ & $tm$ \\ 
+\hline
+\end{tabular} 
+\end{center}
+\renewcommand{\arraystretch}{1}
