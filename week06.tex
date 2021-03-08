@@ -1,0 +1,144 @@
+\Week{7}{Expander Graphs : Existence and Algebraic Constructions}
+
+We now use the tools that we have developed in order to construct show existance and then explict constructions of expanders. We recall the definition of expanders from Section~\ref{sec:intro-expanders} but now we make the paramters more precise.
+
+\begin{definition}{(\bf Expander Graphs)}
+A graph $G(V,E)$ is said to be a $(n,d,\alpha,\beta)$-expander if, $|V|=n$, it is $d$-regular, and every $S \subseteq V$ such that $|S| \le \alpha|V|$, the number of new neighbors $|N(S)\setminus S| \ge \beta d|S|$.
+\end{definition}
+
+\noindent {\bf Note :} We are changing the notation slightly from what we followed in the lecture to ensure that both $\alpha$ and $\beta$ are in $(0,1)$.
+
+\noindent A weaker setting is to consider bipartite graphs where we insist the above only for subset of vertices from one side of the bipartite graph, so that $|N(S)\setminus S| = |N(S)|$ since there is no edge from a set to itself in this case.
+
+\begin{definition}{(\bf Bipartite Expander Graphs)}
+A graph $G(U \cup V,E)$ is said to be a $(n,d,\alpha,\beta)$-expander if, $|U|=n$, it is $d$-regular and every $S \subseteq U$ such that $|S| \le \alpha|U|$, the number of new neighbors $|N(S)| \ge \beta d|S|$.
+\end{definition}
+\section{Existence of Left regular Bipartite expanders}
+
+What kind of parameters should we expect for expanders and what do we need. Looking at the possible application in the case of randomness efficient amplification, we would like the degree of the graph to be much much smaller than the number of vertices (ideally a constant). It is natural to keep the graph regular because then the mathematical constraints are easier to handle (as we will see). We can also allow the graph to have multiple edges between two vertices since we do not require the neighbors to be distinct.
+
+Ideally, we would want $\beta$ to be as close to $1$ as possible. In fact, for many of the applications, it is enough to have $\beta > \half$. We will show the existance of a $(n,d,\alpha,\frac{d-2}{d})$ expander which will be good as long as $d \ge 5$. We show the following theorem (which not only shows existence but also implies abundance).
+
+\begin{theorem}
+For every constant $d$, there is an $\alpha > 0$ such that for all large enough $n$: a uniformly chosen random bipartite graph $G(U \cup V, E)$ which is left $d$-regular and $|U|=|V|=n$, is an $(n,d,\alpha,\frac{d-2}{d})$ with probability at least $\half$.
+\end{theorem}
+\begin{proof}
+We spell out the details of the experiment first. Each vertex $u \in U$ is assigned $d$ neighbors from the right side (with replacement) chosen uniformly at random, each indepedently. 
+
+We will compute probability that the outcome of the experiment is not an expander and show that this probability is less than $\half$.
+
+\noindent The graph is not an expander with the required parameters if there exists a set $S \subseteq U$, $|S|\le \alpha n$ such that $|N(S)| < (d-2)|S|$. We will use union bound over all such $S$.
+$$
+\Pr\left[\begin{array}{l}
+\exists S \subseteq U, \textrm{ with } |S|\le \alpha n \\
+\textrm{ s.t. } |N(S)| < (d-2)|S|
+\end{array}
+\right] 
+\le \bigsum_{\substack{S \subseteq U\\
+|S|\le \alpha n}} Pr[|N(S)| < (d-2)|S|] 
+\le \bigsum_{k=1}^{\alpha n} {n \choose k} p_k
+$$
+where $p_k$ is the upper bound we hope to derive for $Pr[|N(S)| < (d-2)|S|]$ for any $S \subseteq U$ with $|S|=k$.
+
+Now, we just need to estimate $p_k$. First, we observe that the only way the number of neighbors of a vertex $u \in U$ can go below $d$ is when the random choice ends up choosing the same vertex $v \in V$ more than once in the experiment for $u$. To use this, let $M=\{\{v_1, v_2, \ldots v_{kd}\}\}$ be the multiset of $kd$ outcomes when $d$ neighbors are chosen uniformly at random for each of the vertices in $S$. If $|N(S)| < (d-2)k$, then it must be because there exists $2k$ repetitions in this sequence. The repetitions can be any of the $2k$ sub-multi-subsets out of these $kd$ neighbors. We apply union bound over all the subsets. Thus,
+\begin{eqnarray*}
+p_k = \Pr\left[\begin{array}{l}
+\exists T \subseteq M, \textrm{ with } |T|=2k \\
+\textrm{ s.t. all elements in $T$ are repeats}
+\end{array}
+\right] 
+& = & \bigsum_{\substack{{T \subseteq M}\\|T|=2k}}
+\Pr\left[\begin{array}{l}
+\textrm{all elements in $T$}\\
+\textrm{are repeats}
+\end{array}
+\right] \\
+& \le & \bigsum_{\substack{{T \subseteq M}\\|T|=2k}} \left(\frac{kd}{k}\right)^{2k}
+\le {kd \choose 2k}\left(\frac{kd}{n}\right)^{2k}
+\end{eqnarray*}
+The last inequality is by noting that the probability of any particular element repeating is at most $\frac{kd}{n}$ (the worst case is for the last element in $T$ chosen). Hence,
+\begin{eqnarray*}
+\Pr\left[\begin{array}{l}
+\exists S \subseteq U, \textrm{ with } |S|\le \alpha n \\
+\textrm{ s.t. } |N(S)| < (d-2)|S|
+\end{array}
+\right] 
+&\le &\bigsum_{k=1}^{\alpha n} {n \choose k}  {kd \choose 2k}\left(\frac{kd}{n}\right)^{2k} \\
+& \le & \bigsum_{k=1}^{\alpha n} \left(\frac{ne}{k}\right)^k \left(\frac{kde}{2k}\right)^{2k} \left(\frac{kd}{n}\right)^{2k}
+\textrm{~~~~~~~~using ${n \choose k} \le \left(\frac{ne}{k}\right)^k$} \\
+& \le & \bigsum_{k=1}^{\alpha n} \left(\frac{e^3d^4k}{4n}\right)^k \le \bigsum_{k=1}^{\alpha n} 4^{-k} \textrm{~~~~~~~~~~~choose $\alpha = \frac{1}{e^3d^4}$} \\
+& < & \half
+\end{eqnarray*}
+Hence the proof.
+\end{proof}
+
+\section{Variants of Expanders}
+The discussion in the beginning of the previous section motivates the definition of variants of expander definition. What we defined in the previous section is called the boundary expansion where we insisted that $|N(S)\setminus S|$ must be large. We define two variants of the same.
+\begin{definition}[{\bf Vertex Exapansion}]
+A graph $G(V,E)$ is said to be a $(n,d,\alpha,\beta)$-expander if, $|V|=n$, it is $d$-regular, and every $S \subseteq V$ such that $|S| \le \alpha|V|$, the number of new neighbors $$|N(S)| \ge \beta d|S|$$
+\end{definition}
+Notice that when we consider bipartite graphs $N(S) \cap S \ne \phi$, but still the above definition is stronger since it asks for all $S \subseteq V$ and not the subsets only in one side.
+\begin{definition}[{\bf Edge Exapansion}]
+A graph $G(V,E)$ is said to be a $(n,d,\alpha,\beta)$-expander if, $|V|=n$, it is $d$-regular, and every $S \subseteq V$ such that $|S| \le \alpha|V|$, the number of new neighbors
+\begin{equation}
+|E(S,\overline{S})| \ge \beta d|S|
+\label{eqn:edge-expansion}
+\end{equation}
+\end{definition}
+
+Viewing it from the graphs side, we can define the edge expansion ratio of a $d$-regular graph $G$ as,
+
+$$h(G) = \min_{\{S \subseteq [n] :  
+|S| \le \frac{n}{2}\}}\frac{|E(S,\overline{S})|}{d|S|}$$
+
+In other words, for a given graph $G$, what is the smallest $\beta$ for which it satisfies Equation~\ref{eqn:edge-expansion}. The answer is the edge expansion ratio $h(G)$.
+
+\begin{exercise}
+Let $n,d \in \mathbb{N}$, $\alpha, \beta > 0$.
+Every $(n,d,\alpha,\beta)$-boundary-expander is also a $(n,d,\alpha,\frac{\beta}{d})$-edge-expander. Conversely, every $(n,d,\alpha,\beta)$-edge-expander is also a $(n,d,\alpha,\beta)$-boundary-expander.
+\end{exercise}
+\begin{exercise-prob}[See Problem Set 3~(Problem~\ref{expander-defn})]
+\begin{show-ps3}{expander-defn}
+Let $G=(V,E)$ be a graph. For every subset $S$ of its vertices $V$ we say, that vertex $v \in V\setminus S$ is a neighbor of $S$ if $E(S,{v}) \ge 1$, an odd neighbor of $S$ if $E(S,{v})$ is odd, a unique neighbor of $S$ if $E(S,{v})=1$. Further, we denote:
+\begin{eqnarray*}
+B(S) & = & \{v \in V \setminus S \mid v \textrm{ is a neighbor of } S\}\\
+B_{odd}(S) & = & \{v \in V \setminus S  \mid v \textrm{ is an odd neighbor of } S\}\\
+B_{unique}(S) & = & \{v \in V \setminus S \mid v \textrm{ is a unique neighbor of } S\}
+\end{eqnarray*}
+A graph $G$ is said to be an $(n,d,\alpha,\beta)$-odd-neibhor (resp. unique-neighbor) expandor if for every $S \subseteq V$, where $|S| \le \alpha n$, the set $B_{odd}$ (resp. $B_{unique}$)  is of size at least $\beta d |S|$.
+\begin{enumerate}[(a)]
+\item Show that every $(n,d,\alpha,\beta)$ unique-neighbor expander is an $(n,d,\alpha,\beta)$ odd-neighbor expander.
+\item Show that every $(n,d,\alpha,\beta)$ odd-neighbor expander is also an $(n,d,\alpha,\beta)$ boundary expander.
+\item Show that every $(n,d,\alpha,\frac{1}{2}+\frac{\epsilon}{d})$-boundary expander is also a $(n,d,\alpha,\frac{2\epsilon}{d})$-unique-neighbor expander.
+\end{enumerate}
+\end{show-ps3}
+\end{exercise-prob}
+
+It is usually assumed that $\alpha = \half$. In fact, if we have an edge expander with $\alpha = \half$, then we have one for larger $\alpha$ as well. The following exercise will ascertain that.
+
+\begin{exercise-prob}[See Problem Set 3~(Problem~\ref{expander-alpha})]
+\begin{show-ps3}{expander-alpha}
+Let $n \in \mathbb{N}$ and $\half < \alpha < \frac{n-1}{n}$, and $G(V,E)$ by an $(n,d,\half,\beta)$ edge-expander, then $G$ is also an $(n,d,\alpha,(1-\alpha)\beta)$ edge expander.
+\end{show-ps3}
+\end{exercise-prob}
+
+We showed in the last section that, bipartite expanders exist with good parameters. Now we will show edge-expanders exists using the expectation method. The following problem is designed for that.
+
+\begin{exercise-prob}[See Problem Set 3~(Problem~\ref{expander-exists})]
+\begin{show-ps3}{expander-exists}
+Through the following steps, show that there exists a family of $(n,d,\half,\beta)$ edge-expander.
+\begin{enumerate}[(a)]
+\item Choose $\beta$ later. Choose a random $d$-regular graph on $n$ vertices. Let $S \subseteq V$, with $s=|S| \le \frac{n}{2}$. Define the random variable $E_S = |E(S,V\setminus S)|$. Let $0 \le k \le \beta d |S|$. Prove that if $sd-k$ is an odd number, then, $\Pr[E_S = k] = 0$.
+\item If $sd-k$ is even, then show that 
+$$\Pr[E_S=k] \le \left(\frac{3s}{2n}\right)^{ds/4}
+\textrm{ \hspace{1cm} Use ${a \choose b} \left( \frac{ae}{b}\right)^b$ and choose $\beta$ such that $\left(\frac{e}{\beta}\right)^{4\beta} \le \frac{9}{8}$} 
+$$
+The intuition behind this part is that every edge with one endpoint in the subset $S$ has probability roughly $s/n$ that the other endpoint is contained in $S$
+as well.
+\item Use the previous part to show that :
+$$ \Pr\left[E_S < \beta ds\right] \le \left(\frac{5s}{3n}\right)^{ds/4} \textrm{ \hspace{1cm} Assume $d \ge 140$ and do approximations.}$$
+\item Prove that the probability that there exists a set of size at most $\frac{n}{2}$, is $<1$. Hence conclude the theorem.
+\end{enumerate}
+\end{show-ps3}
+\end{exercise-prob}
+
