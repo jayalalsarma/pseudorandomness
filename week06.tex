@@ -1,4 +1,4 @@
-\Week{7}{Expander Graphs : Existence and Algebraic Constructions}
+\Week{6}{Expander Graphs : Existence and Algebraic Constructions}
 
 We now use the tools that we have developed in order to construct show existance and then explict constructions of expanders. We recall the definition of expanders from Section~\ref{sec:intro-expanders} but now we make the paramters more precise.
 
@@ -142,3 +142,67 @@ $$ \Pr\left[E_S < \beta ds\right] \le \left(\frac{5s}{3n}\right)^{ds/4} \textrm{
 \end{show-ps3}
 \end{exercise-prob}
 
+\section{Marguilis-Gabber-Galil Expander}
+
+Although we showed the existence arguments only for left-regular bipartite expanders, similar arguments exists for other kinds of objects in the above lists too. Now we turn into explicit constructions of families of expander graphs.
+
+There are two major approaches to constructing expander graphs. One regime is purely algebraic, in which the expander graphs are defined over algebraic structures and connectivity is determined by algebraic properties. They are very easy to describe (more formally, they are very explicit). However, the arguments that they are indeed expanders is more complicated (in fact, even beyond the scope of this course, in terms of background required). Hence we will not be proving that they are expanders, but we will describe them. 
+
+The other regime of constructions is more combinatorial and are based on graph operations. It takes care to make them explicit, but the proof of expansion is somewhat more amenable for the background of this course.
+
+\begin{description}
+\item{\bf Marguilis-Gabber-Galil Expander:}
+First family was studied by \cite{Mar73} where the proof of expansion was based on representation theory and did not provide any specific bound on the expansion ratio $h$. Later \cite{GG81} derived such a bound
+using harmonic analysis.
+
+We now describe the family which is on $n^2$ vertices 
+is $V = \Z_n \times \Z_n$. The neighbors of the vertex $(a,b) \in V$ are :
+$$N(a,b) = \left\{\begin{array}{l}
+(a+b,b)\\
+(a-b,b)\\
+(a,b+a)\\
+(a,b-a)\\
+(a,b+a+1)\\
+(a,b-a+1)\\
+(a+b+1,b)\\
+(a-b+1,b)
+\end{array}
+\right\}
+$$
+\item{\bf Expanders from Number Theory:}
+These graphs can be constructed when the number of vertices expected is a prime. The family of $3$-regular contains $p$-vertex graphs for every prime $p$. Here $V = \Z_p$, and for a vertex $a \in V$: 
+$$N(a) = \{a+1,a-1,a^{-1}\}$$
+where all operations are in $\Z_p$.
+\end{description}
+
+Although we will not describe the proof of expansion of the above graphs, they all go through a special connection between edge expansion and the spectrum of a graph. We quickly introduce this in the next section.
+
+\section{Spectral Expansion}
+\label{sec:spectral-expansion}
+
+We consider simple graphs for simplicity. For a $d$-regular undirected graph, define the normalized adjacency matrix as follows:
+$$
+A_{uv} = \left\{ \begin{array}{ll}
+\frac{1}{d} & (u,v) \in E \\
+0 & \textrm{ otherwise }
+\end{array}
+\right.
+$$
+Since $G$ is undrected, the matrix is symmetric and hence the eigen values of the matrix are all real numbers\footnote{We reviewed the basic related definitions about eigen values in the lecture, but we are not writing them here to avoid digression.}. Since the graph is $d$-regular, the matrix is also doubly stochastic. Hence the all $1$ vector (and any scalar multiple of it) is an eigen vector and $1$ is the eigen value corresponding to it. The largest eigen value of a doubly stochastic matrix is $1$ (Prove this as an exercise !). Notice that there are at most $n$ eigen values and some of them could be with higher multiplicity.
+
+All eigen values of the matrix are in the interval $[-1,1]$. Folding this range, by taking absolute values, 
+let the absolute values of the eigen values of the normalized adjacency matrix\footnote{We denote them as $\lambda_i(G)$.} $1=\lambda_1 \ge \lambda_2 \ge \lambda_3 \ldots \lambda_k \ge 0$ where $k \le n$. This sequence is called the {\em spectrum of the graph}. Spectrum of a graph contains surprising information about the combinatorial structure of the graph. Spectral graph theory studies the relationship between spectrum and combinatorial properties of the graph (for example, connectedness, bipartiteness, number of connected components).
+
+The gap between the first two eigen values is called the \textbf{spectral gap} of a graph. And a $d$-regular graph is called a spectral expander if the second largest eigen value $\lambda_2(G)$ is below $1$ by a constant gap. More formally:
+
+\begin{definition}[\textbf{Spectral Expanders}]
+A $d$-regular graph is said to be $(n,d,\lambda)$ spectral expander if $\lambda_2(G) \le \lambda$. Equivalently, the spectral gap of the graph is at least $1-\lambda$.
+\end{definition}
+
+There are two questions that we will address now. First of all, why study spectral expansion? We show that spectral expanders in fact have edge expansion too. Thus to show that a graph is an edge expander, it suffices to show that it is an spectral expander. This is the approach taken for proving that the algebraic constructions the we described in the previous section are expanders. However, the way to achieve that is still through harmonic anlaysis and number theory etc.
+
+The second question is to do the curious statement that spectral expanders are in fact edge expanders too. We try to make this precise through the following statement.
+
+\begin{theorem}[\textbf{Spectral Expansion Implies Edge Expansion}]
+If $G$ is an $(n,d,\lambda)$ spectral expander, then it is also a $(n,d,\half,\frac{1-\lambda}{2})$ edge expander.
+\end{theorem}
