@@ -343,7 +343,7 @@ $$\{  c_0+c_1w+c_2w^2+ \ldots c_{t-1}w^{t-1} \mid w \in \F_q \}$$
 We now prove the correctness lemma which indicates that if we need to reduce the error probability to $1/t$, then we need to repeat the algorithm for $k=O(t)$ times.
 \begin{lemma}
 The probability of error for $\calA'$ is bounded by:
-$$\Pr\left[\calA' \textrm{ errs }\right] \le \left(\frac{1}{\delta^2}\right)\frac{1}{k} \textrm{~~~~where $\delta = \frac{1}{2}-\epsilon$}$$
+$$\Pr\left[\calA' \textrm{ errs }\right] \le \left(\frac{1}{\delta^t}\right)\frac{1}{k^{t/2}} \textrm{~~~~where $\delta = \frac{1}{2}-\epsilon$}$$
 \end{lemma}
 \begin{proof}
 The proof and the notations are same as Proof of Lemma~\ref{lem:paiewise-amplification} in the case of pairwise independence. We present only the different parts here.
@@ -374,7 +374,7 @@ Thus, if we take $2\ell$-independence, the error reduces to $O(1/k^\ell)$. If we
 %thus completing the proof.
 \end{proof}
 
-We conclude this part by providing a table of the various amplifcation methods that we have seen so far.
+We conclude this part by providing a table of the various amplifcation methods that we have seen so far. Note that $\epsilon$ is less than half and $\delta$ denotes how close it is to $\half$. That is, $\delta = \half - \epsilon$.
 
 \renewcommand{\arraystretch}{2}
 \begin{center}
@@ -388,10 +388,11 @@ Trivial & $\half(1-4\epsilon^2)^{k/2}$ & $km$ \\
 %\hline 
 %Expander Walk & $2^k(\epsilon+\lambda)^{k/2}$ & $m+k\log d$ \\ 
 \hline 
-Pairwise Independence & $\frac{\displaystyle 4}{\displaystyle k(1-2\epsilon)^2}$ & $2m$ \\ 
+Pairwise Independence & $\frac{\displaystyle 1}{\displaystyle k\delta^2}$ & $2m$ \\[2mm]
 \hline
-$t$-wise Independence & $\frac{\displaystyle 1}{\displaystyle k^{t/2}(1-2\epsilon)^t}$ & $tm$ \\ 
+$t$-wise Independence & $\frac{1}{\displaystyle k^{t/2}\delta^t}$ & $tm$ \\[2mm] 
 \hline
 \end{tabular} 
 \end{center}
+In the trivial method, the dependence on $k$ is on the exponent, and hence we will need to do only logarithmic (in the target error) repetitions in order to achieve a given error bound. But in the pairwise independence, the dependence on $k$ is linear and hence we will have to do linear (in the target error bound) number of repetitions. And $t$-wise independence strikes the middle of these two.
 \renewcommand{\arraystretch}{1}
