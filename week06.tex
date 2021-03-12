@@ -206,3 +206,191 @@ The second question is to do the curious statement that spectral expanders are i
 \begin{theorem}[\textbf{Spectral Expansion Implies Edge Expansion}]
 If $G$ is an $(n,d,\lambda)$ spectral expander, then it is also a $(n,d,\half,\frac{1-\lambda}{2})$ edge expander.
 \end{theorem}
+
+In fact, the converse of the above theorem is also true. We show the formal proof of the above statement in the next lecture (in fact, a much stronger form too) with the converse.
+
+In the rest of this lecture, we make an informal handwavy attempt to justify why one should expect such a connection between spectral expansion and edge expansion. The argument is through the idea of random walks on graphs. A random walk on a graph $G$ is a random experiment performed on the $G$ as follows. Starting from a vertex $v$ and choosing the next neighbor among the neighbors of the current vertex. The walk produces a sequence of vertices. The relevant question is - fix an integer $\ell \in \N$ - {\em what does the distribution of the $\ell^{th}$ vertex in the walk look like?} Of course, the answer depends on the graph. Then the question is what parameter of the graph governs the distribution of the vertex after $\ell$ steps of the walk? Are there graphs for which it will be the uniform distribution or even close to uniform distribution.
+
+If the distribution gets closer and closer to uniform - then it is termed as {rapid mixing of the random walk}. The rate at which it gets closer is a paramter. If there was no edge expansion, then we would have had random walks initiating from the set $S$ (which did not have edge expansion) to not get distributed uniform easily. Hence we would expect random walks to not mix fast. In the contrapositive, this says that, intuitively, \textit{if random walks in a graph mixes well, then there must be edge expansion in the graph}.
+
+Now we need to address the question, why does spectral gap imply that random walks in the graph mix well? This has a very cute linear algebraic reason. To answer this at least informally, we take an example graph. To keep track of the distribution that evolves with the length of the walk, we denote by $p_i \in \mathbb{R}^n$ the probability distribution vector after the $i$th step in the random walk.
+
+Suppose we are starting from the topmost vertex. Let $X_i$ be the random variable denoting the vertex after the $i^{th}$ step. Define the vector $p_i$, with entries as $p_i[j] = \Pr[X_{i} = j]$.
+\hspace{-6mm}\begin{minipage}{0.75\linewidth}
+\begin{center}
+\begin{tabular}{c|cccccccc}
+& 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+$p_0$ & 1   & 0    & 0    & 0   & 0 & 0 & 0 & 0 \\
+$p_1$ & 0   & 0.5  & 0.5  & 0   & 0 & 0 & 0 & 0 \\
+$p_2$ & 0.5 & 0    & 0    & 0.5 & 0 & 0 & 0 & 0 \\
+$p_3$ & 0   & 0.42 & 0.42 & 0   & 0.17 & 0 & 0 & 0 \\
+$\vdots$ &   &  & $\vdots$ &    & & $\vdots$ & & \\
+\end{tabular}
+\end{center}
+$$p_{i+1}[j] = \Pr[X_{i+1} = j] = \bigsum_k \Pr[X_{i} = k]\Pr[\textrm{ $(k,j)$ edge is chosen }] $$
+This implies that $p_{i+1} = Ap_i$. 
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.15\linewidth}
+
+\SetGraphUnit{1}
+\GraphInit[vstyle=Classic]
+\SetUpVertex[FillColor=blue!60]  
+\tikzset{VertexStyle/.append style={minimum size=2pt,inner sep=1pt}}
+\begin{tikzpicture}
+  \Vertex[x=4,y=1,L=1]{A}
+  \Vertex[x=4,y=-1,L=4]{B}
+  \Vertex[x=5,y=0,L=3]{C}
+  \Vertex[x=3,y=0,L=2]{D}      
+  \Vertex[x=4,y=-2,L=5]{E}
+  \Vertex[x=4,y=-4,L=8]{F}
+  \Vertex[x=5,y=-3,L=7]{G}    
+  \Vertex[x=3,y=-3,L=6]{H}
+  \Edges(A,C,B,D,A)
+  \Edges(E,G,F,H,E)
+  \Edges(B,E)
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{3mm}
+Now let $v_1, v_2, \ldots v_n$  be an orthonormal basis of $\mathbb{R}^n$ where each $v_i$ is an eigen vector of $\lambda_i$. By definition any vector can be written as a linear combinationof vectors in $\mathbb{R}^n$.
+Let $p_i = \alpha_1v_1+\alpha_2v_2+\cdots+\alpha_nv_n$.
+\begin{eqnarray*}
+p_{i+1} = Ap_i & = & \alpha_1 Av_1 + \alpha_2Av_2+\cdots+\alpha_nAv_n \\
+& = & \alpha_1v_1 + \alpha_2\lambda_2v_2+\cdots+\alpha_n\lambda_nv_n
+\end{eqnarray*}
+Notice that the component corresponding to the eigen value $1$, remains unchanged in the vector,and the other components gets multiplied by at least $\lambda_2$ and hence gets reduced. Thus the vector will go closer and closer to uniform distribution as the walk goes further and further. The rate of mixing (to uniform distribution) will depend on how small $\lambda_2(G)$ is. Thus, \textit{if there is a constant spectral gap, then the random walk mixes fast.} 
+
+Together with the earlier statement - \textit{if random walks in a graph mixes well, then there must be edge expansion in the graph}, this implies that we should expect a connection between second largest eigen value and edge expansion ratio. This is indeed, the topic of discussion for next lecture.
+
+
+\begin{curiousity}[\textbf{Gershgorin's Circle Theorem}]
+This is a digression. We used the following statement (where we left the proof as an exercise).
+\textit{The largest eigen value of a doubly stochastic matrix is $1$ }
+For graphs without self-loops, this is a special case of a more general theorem called \textit{Gershgorin circle theorem} may be used to bound the spectrum of a square matrix. It was first published by the Gershgorin in 1931. The statement is as follows:
+
+Let $A$ be an $n \times n$ matrix with entries from $\mathbb{C}$, 
+with entries $a_{ij}$. For $i \in [n]$ let $R_{i}=\sum _{j\neq i}\left|a_{ij}\right|$ be the sum of the absolute values of the non-diagonal entries in the $i$-th row. Let $D(a_{ii},R_{i}) \subseteq \mathbb{C}$ be a closed disc centered at $a_{ii}$ with radius $R_{i}$. Such a disc is called the \textit{Gershgorin disc}.\\[-4mm]
+
+\noindent \textbf{Gershgorin's Circle Theorem} : \textit{Every eigenvalue of $A$ lies within at least one of the Gershgorin discs.}\\[-4mm]
+
+\noindent Indeed, in our case, for every $i$, $R_i = 1$, $a_{ii} = 0$. This immediately implies the statement we wanted to conclude.
+For a diagonal matrix, the Gershgorin discs coincide with the spectrum.For a diagonal matrix, the Gershgorin discs coincide with the spectrum. Conversely, if the Gershgorin discs coincide with the spectrum, the matrix is diagonal.
+\end{curiousity}
+
+\section{Cheeger's Inequality}
+
+We described the vague reason why we might expect that graphs with a constant spectral gap should be expected to be good edge expanders as well. Now, we make this precise.
+
+Recall from the previous lecture about the edge expansion ratio.
+
+$$h(G) = \min_{\{S \subseteq [n] :  
+|S| \le \frac{n}{2}\}}\frac{|E(S,\overline{S})|}{d|S|}$$
+
+Cheeger's inequality establishes a strong connection between the edge expansion ratio and the the second largest eigen value.
+
+\begin{theorem}[{\bf Cheeger's Inequality}]
+\label{thm:Cheeger}
+For any undirected $d$-regular graph $G$:
+$$\frac{1-\lambda_2(G)}{2} \le h(G) \le \sqrt{2(1-\lambda_2(G))}$$
+\end{theorem}
+
+
+The idea of the proof is to use a new parameter called {\em conductance} of the graph which is closely related to edge expansion ration and then it use it to prove the bound. We define conductance first.
+\begin{equation}
+\Phi(G) = \min_{\{\phi \subseteq S \subseteq [n]\}} \frac{|E(S,\overline{S}|}{d|S|\left(|\overline{S}|/|V|\right)}
+\label{eqn:conductance}
+\end{equation}
+
+The way we will interpret $\Phi(G)$ is as follows. For any set $S$, if the neighbors of each vertex was chosen at random (total of $d|S|$ neighbors would have been chosen). The probability that each neighbor chosen in this way falls outside $S$, is $\left(|\overline{S}|/|V|\right)$. Hence the denominator is the expected number of crossing edges from $S$ for a random graph. Thus, the conductance, intutively, denotes how much ``random" the given graph is.
+
+We first claim that conductance is related to edge expansion ratio.
+\begin{claim}
+\label{claim:hphi}
+$$h(G) \le \Phi(G) \le 2h(G)$$
+\end{claim}
+\begin{proof}
+Note that the role of $S$ and $\overline{S}$ are interchangable. Hence, without loss of generality, there is an $S$ for which $|S| \le \frac{n}{2}$ where the minimum is achieved in equation~\ref{eqn:conductance} and for that minimum, the factor $\frac{\overline{|S|}}{|V|}$ in the denominator is at least $\frac{1}{2}$ and at most $1$. Hence the minimum achieved for equation~\ref{eqn:conductance} can be at most $2h(G)$ and at least at $h(G)$.
+\end{proof}
+
+\begin{exercise}
+Prove Claim~\ref{claim:hphi} for a general $\alpha$.
+\end{exercise}
+
+\section{Proof of Cheeger's Inequality: From Spectral to Combinatorial}
+We now prove the LHS of the Cheeger's inequality ( (Theorem~\ref{thm:Cheeger})). Because of the above claim, it suffices to prove that $\Phi(G) \ge 1-\lambda_2(G)$. 
+
+\noindent{\em Approach:} We prove this by a general idea which is useful in other context too and hence we present it in the general form, before applying it here. Consider a minimization question with an objective function $\psi(z_1, z_2, \ldots, z_n)$ in terms of variables $z_1, z_2, \ldots z_n \in \{0,1\}$. Let $k$ be the optimum value. Now suppose we optimize the same function without the constraint of the values being Boolean, that is $z_1, z_2, \ldots z_n \in \mathbb{R}$. Clearly the optimal value of $\psi$ can only be smaller. It is this simple trick that we will apply in the context of the above two parameters too. We will write an objective function for which $\Phi(G)$ is the solution when the variables are restricted to $\{0,1\}$ and $1-\lambda_2(G)$ is the solution when the variables are relaxed to be arbitrary real numbers.
+
+\paragraph{\textbf{Writing $\Phi(G)$ as the result of a minimization:}} We start by writing $\Phi(G)$ as the result of an optimization problem. We encode $S \subseteq V$ as a bit string $x \in\{0,1\}^n$, and $x_i$ denote the $i^{th}$ bit of $x$.
+\begin{eqnarray}
+\Phi(G) & = & \min_{\{\phi \subseteq S \subseteq [n]\}} \frac{|E(S,\overline{S})||V|}{d|S||\overline{S}|}\\
+& = & \min_{\substack{x \in \{0,1\}^n\setminus \{0^n,1^n\}}} \frac{\frac{n}{2}\sum_{i,j}dA_{ij}(x_i-x_j)^2}{d(\sum_{i} x_i)(n-\sum_i x_i)}\\
+& = & \min_{\substack{x \in \{0,1\}^n\setminus \{0^n,1^n\}}} \frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{2(\sum_{i} x_i)(n-\sum_i x_i)} \\
+& = & \min_{\substack{x \in \{0,1\}^n\setminus \{0^n,1^n\}}} \frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{\sum_{i,j}(x_i-x_j)^2} \\
+& \ge & \min_{\substack{x \in \mathbb{R}^n\setminus \{0^n,1^n\}}} \frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{\sum_{i,j}(x_i-x_j)^2} 
+\end{eqnarray}
+
+Now we decompose the vector $x$ as: $x = \alpha\overrightarrow{\mathbf 1}+w$ where $w \perp \overrightarrow{\mathbf 1}$. In the above expression, noting that $x_i-x_j = w_i-w_j$, we can restrict the optimization to $x \perp \overrightarrow{\mathbf 1}$. \footnote{A consequence is that $\sum_{ij} x_ix_j = \sum_i x_i (\sum_j x_j) = \sum_i x_i (\langle x, \overrightarrow{1} \rangle) = 0$.} 
+
+\begin{eqnarray}
+\Phi(G) & \ge & \min_{\substack{
+x \in \mathbb{R}^n\setminus \{0^n,1^n\}\\
+x \perp \mathbf{\overrightarrow{1}}}}
+\frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{\sum_{i,j}(x_i-x_j)^2}\\
+& \ge & \min_{\substack{
+x \in \mathbb{R}^n\setminus \{0^n,1^n\}\\
+x \perp \mathbf{\overrightarrow{1}}}}
+\frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{2x^Tx-2\sum_{i,j} x_ix_j} \\
+& = & \min_{\substack{
+x \in \mathbb{R}^n\setminus \{0^n,1^n\}\\
+x \perp \mathbf{\overrightarrow{1}}}}
+\frac{n\sum_{i,j}A_{ij}(x_i-x_j)^2}{2x^Tx}
+\label{eqn:cheeger-optimization}
+\end{eqnarray}
+
+\paragraph{\textbf{Writing $\lambda_2(G)$ as the result of a maximization:}} A natural starting point is the following expression of top two eigen values:
+
+\begin{lemma}[{\bf Courant-Fischer Formula for $\lambda_2(G)$}]
+If $\lambda_2(G)$ is the second largest eigen value of the normalized adjacency matrix of a graph $G$: Then,
+\begin{equation}
+\lambda_2 = \max_{\substack{x \in \mathbb{R}\setminus\{0\}\\x\perp 1}} \frac{x^TAx}{x^Tx}
+\label{eqn:cf2}
+\end{equation}
+\end{lemma}
+\begin{proof}
+In fact, we start by deriving a similar formula for $\lambda_1(G)$ first and then adapt it to $\lambda_2(G)$. We prove:
+\begin{equation}
+\lambda_1 = \max_{x \in \mathbb{R}\setminus\{0\}} \frac{x^TAx}{x^Tx}
+\label{eqn:cf1}
+\end{equation}
+We will estimate the numerator and denominator separately. We start with an orthonormal basis $v_1, v_2, \ldots v_n$ of $\mathbb{R}^n$ such that $v_i$ is an eigen vector of $\lambda_i$. Any vector $x$ can be expressed as $x = \sum_i \alpha_i v_i$ where $\alpha_i = \langle x,v_i \rangle$.
+
+$$ x^TAx = \left(\sum_{i=1}^n \alpha_iv_i\right)^T A \left(\sum_{i=1}^n \alpha_i v_i \right) = \left(\sum_{i=1}^n \alpha_iv_i\right)^T \left(\sum_{i=1}^n \alpha_i \lambda_iv_i \right) = \sum_{i=1}^n \lambda_i \alpha_i^2  \le \lambda_1 \sum_{i=1}^n  \alpha_i^2 $$
+
+$$ x^Tx = \left(\sum_{i=1}^n \alpha_iv_i\right)^T \left(\sum_{i=1}^n \alpha_i v_i \right) = \sum_{i=1}^n \alpha_i^2$$
+
+Dividing the two and taking max over all $x \in \mathbb{R}^n\setminus\{0\}$, we have proved Equation~\ref{eqn:cf1} (Equality follows from the fact that $x$ can also be $\textbf{1}$). The formula for $\lambda_2$ follows if we restrict ourselves to $x \perp \textbf{1}$, $\alpha_1 = 0$. Thus, $\forall x \in \mathbb{R}^n \setminus \{0\}$, $x^TAx \le \lambda_2 \sum_{i=1}^n  \alpha_i^2$ (and considering the case of $x$ as the eigen vector corresponding to $\lambda_2$ establishes equality and hence Equation~\ref{eqn:cf2}.
+\end{proof}
+
+Now we will just modify the Courant-Fischer formula to see it as the optimization of the same objective function as in Equation~\ref{eqn:cheeger-optimization}. We use the lemma, whose proof is left as an exercise.
+\begin{exercise}
+If $A$ is the normalized adjacency matrix of $G$ and $x \in \R^n\setminus\{0\}$:
+$$\sum_{i,j} A_{ij}(x_i-x_j)^2 = 2x^Tx - 2x^TAx$$
+\end{exercise}
+Applying this, $x^TAx = x^Tx - \half \sum_{i,j} A_{ij}(x_i-x_j)^2$.
+$$\lambda_2 = \max_{\substack{
+x \in \mathbb{R}^n\setminus \{0^n,1^n\}\\
+x \perp \mathbf{\overrightarrow{1}}}}
+\frac{x^Tx - \half\sum_{i,j}A_{ij}(x_i-x_j)^2}{x^Tx} = 1-\min_{\substack{
+x \in \mathbb{R}^n\setminus \{0^n,1^n\}\\
+x \perp \mathbf{\overrightarrow{1}}}}
+\frac{\sum_{i,j}A_{ij}(x_i-x_j)^2}{2x^Tx}$$
+This matches with the objective function in Equation~\ref{eqn:cheeger-optimization}. Thus, $\Phi(G) \ge 1-\lambda_2(G)$.
+
+\section{Proof of Cheeger's Inequality: From Combinatorial to Spectral}
+
+\jsay{Write down this proof}
