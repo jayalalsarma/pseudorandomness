@@ -468,3 +468,18 @@ then $\lambda_2(G)$ is $O\left(\delta+\delta\log\left(d/\delta\right)\right)$.
 Ramanujan graph, is a regular graph whose spectral gap is almost as large as possible. Such graphs are excellent spectral expanders. The complete graph $K_{d+1}$  has spectrum $d,-1, -1 \ldots -1$ and thus $\lambda_2(K_{d+1}) = d$ and hence is a Ramanujan graph for every $d > 1$. The complete bipartite graph $K_{d,d}$ has spectrum $d,0,0, \ldots 0, -d$ and hence is a bipartite Ramanujan graph for every $d$. \cite{LRS88} showed\footnote{The proof uses what is called Ramanujan conjecture, which led to the name of Ramanujan graphs.} how to construct an infinite family of $(p+1)$-regular Ramanujan graphs, whenever $p$ is a prime number and $p \equiv 1 \mod 4$. This was extended for any prime power later.See \cite{Mur03} for a survey. 
 It is still an open problem whether there are infinitely many $d$-regular (non-bipartite) Ramanujan graphs for any $d \geq 3$.
 \end{curiousity}
+
+\begin{exercise-prob}
+[See Problem Set 3~(Problem~\ref{stronger-mixing-lemma})]
+\begin{show-ps3}{stronger-mixing-lemma}
+Using techniques similar to what we used for mixing lemma, prove the following stronger version of the mixing lemma. Let $G$ be a $d$-regular graph with $n$ vertices and let $\lambda_2<1$ be the second largest eigen value of the normalized adjacency matrix of $G$. Then, for any $S, T \subseteq [n]$:
+$$\left||E(S,T)|-\frac{d|S||T|}{n}\right| \le d\lambda_2 \left(\sqrt{|S||T|\left(1-\frac{|S|}{n}\right)\left(1-\frac{|T|}{n})\right)}\right)$$
+\end{show-ps3}
+\end{exercise-prob}
+
+\begin{exercise-prob}
+[See Problem Set 3~(Problem~\ref{mixing-lemma-application})]
+\begin{show-ps3}{mixing-lemma-application}
+An independent set in a graph $G(V,E)$ is a subset $V' \subseteq V$ such that no pair of vertices in $V$ has an edge among them. Use expander mixing lemma to show that the size of the independent set in an $(n,d,\lambda)$ spectral expander is at most $\lambda_2 n$. Use this to show that the chromatic number (the minimum number of colors required to properly color the graph vertices of $G$) is at least $1/\lambda_2$.
+\end{show-ps3}
+\end{exercise-prob}
