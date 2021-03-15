@@ -407,3 +407,64 @@ In this problem, we will apply Cheeger's inequality and also show that it is tig
 
 \end{show-ps3}
 \end{exercise-prob}
+
+\section{Expander Mixing Lemma}
+We close this lecture by proving the expander mixing lemma, which is the reason expander graphs are thought of as having properties of random graphs yet being explicitly constructible. Recall the definition and interpretation of conductance of a graph that we saw in the last lecture, which measures, as a ration how much the cut of $E(S,\overline{S})$ is, compared to the expected number of edges across the sets if the graph (and hence the edges) were chosen at random. In this, we bound this in an additive fashion:
+
+\begin{lemma}[{\bf Expander Mixing Lemma}]
+\label{lem:expander-mixing-lemma} 
+Let $G$ be a $d$-regular graph with $n$ vertices and let $\lambda_2<1$ be the second largest eigen value of the normalized adjacency matrix of $G$. Then, for any $S, T \subseteq [n]$:
+$$\left||E(S,T)|-\frac{d|S||T|}{n}\right| \le d\lambda_2 \left(\sqrt{|S||T|}\right)$$
+\end{lemma}
+
+\begin{remark}
+This lemma can be interpreted as follows. For any $S,T \subseteq V$, the expected number of edges between them if the edges are chosen at random is the second term. Indeed, the probability that a randomly chosen vertex is in the set $T$ is $(|T|/n)$. Since there $d|S|$ vertices being chosen (as the other end point of edges where one endpoint is in $S$). Hence the expected number of edges that cross from $S$ to $T$ is $\frac{d|S||T|}{n}$.
+\end{remark}
+
+\begin{proof}
+We will again use the orthonormal basis of $\mathbb{R}^n$ : $v_1,v_2, \ldots v_n$ such that $Av_i = \lambda v_i$ for each $i$. Consider the characterestic vectors of the two sets $S$ and $T$ as $1_S$ and $1_T$. Express each of them in terms of the basis:
+\[1_S = \sum_i \alpha_i v_i \textrm{ where } 
+\alpha_i = \langle 1_S, v_i \rangle
+\textrm{~~ and ~~} 1_T = \sum_i \beta_j v_j \textrm{ where } \beta_i = \langle 1_T, v_i \rangle
+\]
+Note that :  $v_1 = (\frac{1}{\sqrt{n}},\frac{1}{\sqrt{n}},\ldots,\frac{1}{\sqrt{n}})$ and hence 
+$\alpha_1 = \frac{|S|}{\sqrt{n}}$ and 
+$\beta_1 = \frac{|T|}{\sqrt{n}}$
+\begin{eqnarray*}
+|E(S,T)| = 1_S^tdA1_T & = & \left( \sum_i \alpha_i v_i \right) dA \left( \sum_i \beta_j v_j \right) = 
+d\alpha_1\beta_1 + d\sum_{i=2}^n \lambda_i \alpha_i \beta_i \\
+& \le &
+d\alpha_1\beta_1 + d\lambda_2 \sum_{i=2}^n \alpha_i \beta_i \\ 
+& \le &
+\frac{d|S||T|}{n} + d\lambda_2 \left(\sum_{i=2}^n \alpha_i \beta_i \right)\\
+\end{eqnarray*}
+Hence : 
+\begin{eqnarray*}
+\left||E(S,T)| - \frac{d|S||T|}{n}\right| \le d\lambda_2 \left(\sum_{i=2}^n \alpha_i \beta_i \right) \le d\lambda_2 \left(\sum_{i=1}^n \alpha_i \beta_i \right) 
+\le d\lambda_2\|\alpha\|\|\beta\|
+\end{eqnarray*}
+Note that $$||\alpha|| = \sqrt{\sum_i \alpha_i^2} = \sqrt{\sum_i \langle 1_S, v_i \rangle^2} = ||1_S||$$
+Hence the above inequality gives:
+\begin{eqnarray*}
+\left||E(S,T)| - \frac{d|S||T|}{n}\right| \le d\lambda_2 \|1_S\|\times\|1_T\| \le d\lambda_2\sqrt{|S||T|}
+\end{eqnarray*}
+\end{proof}
+
+\begin{curiousity}[{\bf Converse of Expander Mixing Lemma}]
+Expander Mixing Lemma (Lemma~\ref{lem:expander-mixing-lemma}) says that the edges acorss $S$ and $T$ for any two subsets of matrices behaves like that of the random graphs. In fact, even the converse is also true. For any two subsets of vertices if the density of the subsets of matrices behaves like that of random graphs, then it must necessarily have a good spectral gap.
+
+In fact, the converse of Expander Mixing Lemma (Lemma~\ref{lem:expander-mixing-lemma}) is also known~\cite{BL06}. The statement is as follows:
+Let $G$ be a $d$-regular graph and suppose that
+$$\left||E(S,T)|-\frac{d|S||T|}{n}\right| \le d\delta \left(\sqrt{|S||T|}\right)$$
+then $\lambda_2(G)$ is $O\left(\delta+\delta\log\left(d/\delta\right)\right)$.
+\end{curiousity}
+
+%\begin{curiousity}[{\bf Generalization to Hypergrahps}] Can we define spectrum for hypergraphs? In particular, is adjacency matrix and its eigen value well-defined? See \cite{FW95}. They show:
+%let $H(V,E)$￼ be a $k$￼-uniform hypergraph, for any choice of subsets $V_1,\ldots V_k \subseteq V$,
+%$$\left| \card{E(V_1,V_2,\ldots,V_k)}-\frac{k!\card{E}}{n^k}\card{V_1}\card{V_2}\ldots\card{V_k}\right| \le \lambda_2(H) \sqrt{\card{V_1}\card{V_2}\ldots\card{V_k}}$$
+%\end{curiousity}
+%
+\begin{curiousity}[{\bf Ramanujan Graphs}]
+Ramanujan graph, is a regular graph whose spectral gap is almost as large as possible. Such graphs are excellent spectral expanders. The complete graph $K_{d+1}$  has spectrum $d,-1, -1 \ldots -1$ and thus $\lambda_2(K_{d+1}) = d$ and hence is a Ramanujan graph for every $d > 1$. The complete bipartite graph $K_{d,d}$ has spectrum $d,0,0, \ldots 0, -d$ and hence is a bipartite Ramanujan graph for every $d$. \cite{LRS88} showed\footnote{The proof uses what is called Ramanujan conjecture, which led to the name of Ramanujan graphs.} how to construct an infinite family of $(p+1)$-regular Ramanujan graphs, whenever $p$ is a prime number and $p \equiv 1 \mod 4$. This was extended for any prime power later.See \cite{Mur03} for a survey. 
+It is still an open problem whether there are infinitely many $d$-regular (non-bipartite) Ramanujan graphs for any $d \geq 3$.
+\end{curiousity}
