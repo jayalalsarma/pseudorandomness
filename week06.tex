@@ -133,10 +133,9 @@ Through the following steps, show that there exists a family of $(n,d,\half,\bet
 $$\Pr[E_S=k] \le \left(\frac{3s}{2n}\right)^{ds/4}
 \textrm{ \hspace{1cm} Use ${a \choose b} \left( \frac{ae}{b}\right)^b$ and choose $\beta$ such that $\left(\frac{e}{\beta}\right)^{4\beta} \le \frac{9}{8}$} 
 $$
-The intuition behind this part is that every edge with one endpoint in the subset $S$ has probability roughly $s/n$ that the other endpoint is contained in $S$
-as well.
+(\textit{Hint: Suppose $sd-k$ is even, to calculate probability of $k$ edges leaving the set - select which edges are those $k$, matching them with any of the $nd-sd$ possible endpoints outside of the set $S$. Every edge with one endpoint in the subset $S$ has probability roughly $s/n$ that the other endpoint is contained in $S$ as well.}).
 \item Use the previous part to show that :
-$$ \Pr\left[E_S < \beta ds\right] \le \left(\frac{5s}{3n}\right)^{ds/4} \textrm{ \hspace{1cm} Assume $d \ge 140$ and do approximations.}$$
+$$ \Pr\left[E_S < \beta ds\right] \le \left(\frac{5s}{3n}\right)^{ds/4} \textrm{ \hspace{1cm} Assume $d \ge 140$ and approximate : $\frac{sd}{4} \le \left(\frac{10}{9}\right)^{sd/4}$}$$
 \item Prove that the probability that there exists a set of size at most $\frac{n}{2}$, is $<1$. Hence conclude the theorem.
 \end{enumerate}
 \end{show-ps3}
@@ -477,9 +476,9 @@ $$\left||E(S,T)|-\frac{d|S||T|}{n}\right| \le d\lambda_2 \left(\sqrt{|S||T|\left
 \end{show-ps3}
 \end{exercise-prob}
 
-\begin{exercise-prob}
-[See Problem Set 3~(Problem~\ref{mixing-lemma-application})]
-\begin{show-ps3}{mixing-lemma-application}
-An independent set in a graph $G(V,E)$ is a subset $V' \subseteq V$ such that no pair of vertices in $V$ has an edge among them. Use expander mixing lemma to show that the size of the independent set in an $(n,d,\lambda)$ spectral expander is at most $\lambda_2 n$. Use this to show that the chromatic number (the minimum number of colors required to properly color the graph vertices of $G$) is at least $1/\lambda_2$.
-\end{show-ps3}
-\end{exercise-prob}
+%\begin{exercise-prob}
+%[See Problem Set 3~(Problem~\ref{mixing-lemma-application})]
+%\begin{show-ps3}{mixing-lemma-application}
+%An independent set in a graph $G(V,E)$ is a subset $V' \subseteq V$ such that no pair of vertices in $V$ has an edge among them. Use expander mixing lemma to show that the size of the independent set in an $(n,d,\lambda)$ spectral expander is at most $\lambda_2 n$. Use this to show that the chromatic number (the minimum number of colors required to properly color the graph vertices of $G$) is at least $1/\lambda_2$.
+%\end{show-ps3}
+%\end{exercise-prob}
