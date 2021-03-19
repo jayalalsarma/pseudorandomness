@@ -116,8 +116,9 @@ As stated along with the algorithms description, the number of random bits used 
 
 \begin{lemma}
 \label{lem:expwalk-amplification-bound}
-$\Pr\left[\calA' \textrm{ errs }\right] \le 2^{-m}$
+$\Pr\left[\calA' \textrm{ errs }\right] \le 2^{-k}$
 \end{lemma}
+
 \begin{proof}
 Again $B$ will denote the set of strings that makes the algorithm $\calA$ err on input $x$. Thus we have: $\card{B} \le \epsilon 2^m$. To analyse the algorithm $\calA'$, we need to bound the probability that at least $\frac{d}{2}$ of the neighbors of the algorithm is in the set $B$. Let $I = \{1,2,\ldots k\}$ be the index set we use for denoting the repetition iteration. We need to estimate the probability:
 $$\Pr\left[ \begin{array}{c}
@@ -128,7 +129,7 @@ $$\Pr\left[ \begin{array}{c}
 $$
 where the probability is over the $m+O(k\log d)$ random bits used in the algorithm. As we have done before, the strategy is to remove the existential quantifier first (and then apply union bound later). Fix an $I \subseteq [k]$ of size $k/2$. We need to estimate the probability of the event $\left[ \forall i \in I,~y_i \in B \right]$. We will first do a simpler task - to estimate the probability when $I=[k]$.
 
-Let us denote $\pi_0 \in \mathbb{R}^{2^m}$ to be the distribution corresponding to the first variable $y_0 \in \zo^m$. We first understand the case when $I = \{1\}$. We know that $\Pr[y_0 \in B] = \frac{|B|}{2^m}$. To express it in a form which we can use to iterate, define the operator $\Gamma : \mathbb{R}^{2^m} \to \mathbb{R}^{2^m}$ which for any $\phi \in \mathbb{R}^{2^m}$ projects to co-ordinates in $B$. More formally,
+Let us denote $\pi_1 \in \mathbb{R}^{2^m}$ to be the distribution corresponding to the first variable $y_1 \in \zo^m$. We first understand the case when $I = \{1\}$. We know that $\Pr[y_1 \in B] = \frac{|B|}{2^m}$. To express it in a form which we can use to iterate, define the operator $\Gamma : \mathbb{R}^{2^m} \to \mathbb{R}^{2^m}$ which for any $\phi \in \mathbb{R}^{2^m}$ projects to co-ordinates in $B$. More formally,
 \[
 \Gamma(\pi)_i = \left\{
 \begin{array}{ll}
@@ -138,6 +139,100 @@ Let us denote $\pi_0 \in \mathbb{R}^{2^m}$ to be the distribution corresponding 
 \right.
 \]
 
-\jsay{to be continued ....}
+For shorthand notation, we denote $\Gamma(\pi)$ as $\Gamma \pi$. Now $\Pr[y_1 \in B]$ can be written as $|\Gamma \pi|_1$. We need to understand when $I = \{1,2\}$, recall that the steps in the random walk is represented by the linear transformation corresponding to the normalized adjacency matrix $A$.
+\begin{eqnarray*}
+\Pr[y_1 \in B \land y_2 \in B] & = & \Pr[y_2 \in B \mid y_1 \in B] \Pr[y_1 \in B] \le |\Gamma A \Gamma \pi_0|_1 \\
+\Pr[y_1 \in B \land y_2 \in B \ldots y_k \in B] & \le & |(\Gamma A)^{k-1} \Gamma \pi_0|_1
+\end{eqnarray*}
+Thus, we need to upper bound $|(\Gamma A)^{k-1} \Gamma \pi_0|_1$. Note that $\Gamma \circ \Gamma = \Gamma$. Hence, $(\Gamma A)^{k-1} \Gamma \equiv (\Gamma A \Gamma)^{k-1} \Gamma$. We will replace $k-1$ with $k$ in the expression from now on, for easy representation, but this is only going make the upper bound bigger, so it does not affect us.
+
+Now here comes the advantage of moving to vectors. Instead of bounding the $\ell_1$ norm, we will upper bound the $\ell_2$ norm\footnote{This is enough since, for any $v \in R^n$, $\frac{|v|_1}{\sqrt{n}} \le \norm{v} \le |v|_1$. To see first inequality which we are using, $|v|_1 = \sum_i |v_i| = \sum_i |v_i|.1 \le \sqrt{\sum_i v_i^2 \sum_i 1^2} = \|v\|_2 \sqrt{n} $ where the second last inequality follows from Cauchy-Schwartz inequality.}.
+
+To do this, we use the following claim which indicates that this $\ell_2$ norm actually gets closer and closer to $\epsilon\norm{\pi_1}$ if $k$ is large enough.
+\begin{claim}
+\label{claim:pigamma}
+For all $k$, and for all $\pi$:
+$$\norm{(\Gamma A \Gamma)^k \pi} \le (\epsilon+\lambda)^k \norm{\pi}$$
+$$\norm{(\Gamma A^k \Gamma) \pi} \le (\epsilon+\lambda^k) \norm{\pi}$$
+\end{claim}
+\begin{proof}
+We prove the second inequality (which is needed in the next step too). Applying the second inequality for $k=1$ repeatedly will yield the first inequality. 
+
+We need to prove : 
+\[ \norm{\Gamma A^k (\Gamma \pi)} \le (\epsilon+\lambda) \norm{\pi} \]
+The natural attack, given the above is to write $\Gamma \pi$ vector in terms of the orthonormal basis $v_1, v_2 \ldots v_{2^n}$ of the eigen spaces of the eigen values of the matrix $A$. Notice that since $\norm{v_1} = 1$, we have that the vector : 
+$v_1 = \left(\frac{1}{\sqrt{2^m}},\frac{1}{\sqrt{2^m}}, \ldots,\frac{1}{\sqrt{2^m}} \right)$.
+
+Let $\Gamma\pi$ be written as $\Gamma\pi = \alpha_1 v_1 + w$ where $\alpha_1 = \langle \Gamma \pi, v_1 \rangle$ and $w \perp v_1$. 
+Hence, the term that we wanted to bound, $\norm{\Gamma A^k (\Gamma \pi)} \le \alpha_1 \norm{\Gamma A^k v_1} + \norm{\Gamma A^k w}$. We bound the two terms in the summation separately.
+\begin{description}
+\item{\textsc{Sub-Claim 1} : ${\alpha_1 \norm{\Gamma A^k v_1} \le \epsilon\norm{\pi}}$:}
+$$ \alpha_1 \norm{\Gamma A^k v_1} = \alpha_1 \norm{\Gamma v_1} = \alpha_1 \sqrt{\sum_{i=1}^{|B|} \left( \frac{1}{\sqrt{2^{m}}} \right)^2 } = \alpha_1 \sqrt{\frac{|B|}{2^m}} \le \alpha_1 \sqrt{\epsilon}$$
+Moreover, 
+$$
+\alpha_1 \le \langle \Gamma \pi, v_1 \rangle \le \norm{\Gamma \pi}\norm{v_1} \le \norm{\Gamma \pi} \le \sqrt{\sum_{i \in B} \pi_i^2} \le  \sqrt{\epsilon} \norm{\pi}
+$$
+
+\jsay{the last inequality is clear when $\pi$ is a uniform distribution, but that is not enough for us since we are applying it for arbitrary $\pi$ as well. So this needs a fix.}
+\item{\textsc{Sub-Claim 2} : $\norm{\Gamma A^k w} \le \lambda^k\norm{\pi}$}
+
+Since $\Gamma$ only inhibits certain co-ordinates, it can only diminish norms and this give $\norm{\Gamma A^k w} \le \norm{A^kw} \le (\lambda)^k\norm{w}$. The last inequality follows because  $\lambda = \max_{w \perp v_1} \frac{\norm{Aw}}{\norm{w}}$. Now we just need to use the fact that $\norm{w} \le \norm{\Gamma \pi} \le \norm{\pi} $ and this gives $\norm{\Gamma A^k w} \le \lambda^k\norm{\pi}$ as needed.
+\end{description} 
+
+\noindent The claimed bound in Claim~\ref{claim:pigamma} follows from the two subclaims. 
+\end{proof}
+\noindent Using Claim~\ref{claim:pigamma} first part, we derive the probability bound that we wanted to estimate.
+
+\begin{eqnarray*}
+\Pr[y_0 \in B \land y_1 \in B \ldots y_k \in B] & \le & |(\Gamma A\Gamma)^k \pi_0|_1 \le \sqrt{2^m}\norm{(\Gamma A\Gamma)^k \pi_0}\\
+& \le & \sqrt{2^m} (\epsilon+\lambda)^k \norm{\pi_0} \le \sqrt{2^m} (\epsilon+\lambda)^k \frac{1}{\sqrt{2^m}} \le (\epsilon+\lambda)^k
+\end{eqnarray*}
+
+\noindent Now we understand how to estimate the membership in $B$ for the whole of the index set, we take the next step to estimate it for a subset of $[k]$ of size $\frac{k}{2}$. Let $I \subseteq [k]$, $|I|=\frac{k}{2}$.
+\begin{eqnarray*}
+\Pr\left[\bigwedge_{i \in I} y_i \in B\right] & \le & |(\Gamma A) A (\Gamma A) (A) (A) (\Gamma A) \Gamma \pi_0|_1
+\end{eqnarray*}
+where, in the expression, we should see exactly $\frac{k}{2}$ $(\Gamma A)$s. We collect all of the $A$s together and write:
+\begin{eqnarray*}
+\Pr\left[\bigwedge_{i \in I} y_i \in B\right] & \le & |(\Gamma A^{k_1} \Gamma) (\Gamma A^{k_2} \Gamma) \ldots (\Gamma A^{k_t} \Gamma) \pi_0|_1 \\
+& \le & \sqrt{2^m}\norm{(\Gamma A^{k_1} \Gamma) (\Gamma A^{k_2} \Gamma) \ldots (\Gamma A^{k_t} \Gamma) \pi_0} \\
+& \le & \sqrt{2^m}(\epsilon+\lambda^{k_1}) (\epsilon+\lambda^{k_2}) \ldots (\epsilon+\lambda^{k_t}) \frac{1}{\sqrt{2^m}} \\
+& \le & (\epsilon+\lambda)^{(k/2)} \le \frac{1}{4^k} 
+\textrm{\hspace{1cm} $\because$ choose $\lambda$ such that $\epsilon+\lambda \le \frac{1}{16}$.}
+\end{eqnarray*}
+\noindent Now we apply the union bound as per our plan.
+
+\begin{eqnarray*}
+\Pr\left[ \begin{array}{c}
+\exists I \subseteq [k], |I|=k/2 \\
+\left[ \forall i \in I,~y_i \in B \right]
+\end{array}
+\right] & \le & \left(\textrm{ \# of Is of size $\frac{k}{2}$}\right) \times  \Pr\left[\bigwedge_{i \in I} y_i \in B\right] \\
+& \le & 2^k \times (\epsilon+\lambda)^{(k/2)} \le \frac{1}{2^k}
+\end{eqnarray*}
+
+Hence the proof.
 
 \end{proof}
+
+We conclude this part by providing a table of the various amplification methods that we have seen so far.
+
+\renewcommand{\arraystretch}{2}
+\begin{center}
+\begin{tabular}{|l|c|c|c|}
+\hline 
+Approach & Error bound & Random bits used  \\ 
+\hline 
+Trivial & $\half(1-4\epsilon^2)^{k/2}$ & $km$ \\ 
+\hline 
+Expander Neighborhood & $\frac{\displaystyle 2\epsilon\lambda^2}{\displaystyle (1-2\epsilon)}$ & $m$ \\ 
+\hline 
+Expander Walk & $2^k(\epsilon+\lambda)^{k/2}$ & $m+k\log d$ \\ 
+\hline 
+Pairwise Independence & $\frac{\displaystyle 4}{\displaystyle k(1-2\epsilon)^2}$ & $2m$ \\ 
+\hline
+$t$-wise Independence & $\frac{\displaystyle 1}{\displaystyle k^{t/2}(1-2\epsilon)^t}$ & $tm$ \\ 
+\hline
+\end{tabular} 
+\end{center}
+\renewcommand{\arraystretch}{1}
