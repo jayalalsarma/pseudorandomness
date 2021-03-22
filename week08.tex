@@ -51,7 +51,9 @@ This says that $Ax$ ``crunches" the vector $x$ since the difference between the 
 \sum_{i,j} A_{ij}(y_i-x_j)^2 \ge \epsilon
 \label{eqn:weak-exp}
 \end{equation}
-We show that there are summands in the above summation, which adds up to more than $\epsilon$. Since $x$ is a unit vector, there must exist an $i$ such that $|x_i| \ge \frac{1}{\sqrt{n}}$. Since $x \perp 1$, there must exist a $j$ such that $x_i$ and $x_j$ are of opposite signs and this implies that $|x_i-x_j|$ is at least $\frac{1}{\sqrt{n}}$. Notice that there must be a path between vertex $i$ and vertex $j$ in the graph $G$ of length at most $n-1$ (edges). By appropriately renaming it, let the path be $1,2, \ldots n$ where the $i$-th vertex is renamed to $1$ and $j$-th vertex is renamed to $n$. With this renaming:
+We show that there are terms in the above summation, which adds up to more than $\epsilon$. This is sufficient since no term is negative in value.
+
+Since $x$ is a unit vector, there must exist an $i$ such that $|x_i| \ge \frac{1}{\sqrt{n}}$. Since $x \perp 1$, there must exist a $j$ such that $x_i$ and $x_j$ are of opposite signs and this implies that $|x_i-x_j|$ is at least $\frac{1}{\sqrt{n}}$. Notice that there must be a path between vertex $i$ and vertex $j$ in the graph $G$ of length at most $n-1$ (edges). By appropriately renaming it, let the path be $1,2, \ldots n$ where the $i$-th vertex is renamed to $1$ and $j$-th vertex is renamed to $n$. With this renaming:
 \begin{eqnarray*}
 \frac{1}{\sqrt{n}} \le |x_1 - x_n| & = & \left|(x_1 - y_1) + (y_1 - x_2) + (x_2 - y_3) + (y_3-x_4) \ldots (y_n -  x_n)\right| \\
 & \le & |x_1 - y_1| + |y_1 - x_2| + |x_2 - y_3| + \ldots |y_n -  x_n| \\
