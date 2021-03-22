@@ -1,0 +1,71 @@
+\Week{9}{Construction of Spectral Expanders}
+
+We now get into explicit construction of expanders. As discussed earlier, we rely on combinatorial constructions. Even though combinatorial, they go via spectral expandors. The outline of the approach is as follows. Suppose we have a graph $G$ with spectrum as $1=\lambda_1 \ge \lambda_2 \ldots \ge \lambda_n$. We want to amplify the gap between $\lambda_1$ and $\lambda_2$. 
+
+We will build expanders from graphs which may not have expansion. To begin with, we have a small expansion for every regular graph. We prove the following theorem in the next section.
+
+\begin{theorem}[{\bf Every graph has noticable Spectral gap}]
+\label{thm:spectralgap-graphs}
+If $G$ is a regular connected graph with self-loops at each vertex, then $$\lambda_2(G) \le 1-\frac{1}{4n^3}$$
+\end{theorem}
+
+Thus there is a spectral gap of $\frac{1}{4n^3}$. To convert this to an expander, a natural method to increase the gap is to power the eigen values - since $\lambda_1 = 1$ and $\lambda_2 < 1$. What opertation on the matrix will imply powering of the eigen values? Indeed, matrix powering. What combinatorial operation on the graph will imply a matrix powering of the adjacency matrix? We formally define this operation now.
+
+\begin{definition}[\textbf{Graph Powering}]
+If $G(V,E)$ is a $d$-regular
+digraph, then $G^k =(V,E')$ is a $d^k$-regular digraph on the same vertex set, every disinct walk of length $k$ in $G$ is replaced with a single edge in $E'$.
+\end{definition}
+
+The following observation follows from the fact that eigen values of the matrix $A^k$ is exactly the square of the eigven values of $A$. This will incease the spectral gap.
+\begin{lemma}
+If $G$ is an $(n,d,\lambda)$ spectral expander graph, then $G^k$ is an $(n,d^k,\lambda^k)$ spectral expander.
+\end{lemma}
+
+The question then is, if we want the spectral gap to be at least $\half$, what should be the value of $k$? Indeed:
+$$ 1-\left(1-\frac{1}{4n^3}\right)^k \ge \half \textrm{\hspace{1cm} which solves to $k \le \poly(n)$}$$
+
+But we should be worried about the degree. Although the new graph is regular, it is a $d^{\poly(n)}$-regular graph. However, we require a constant degree graph.  Hence we need to decrease the degree. It is a delicate operation and it should not decrease the spectral gap too much. It turns out that we can do this in a very precise way using some basic combinatorial tools which we describe in the next lecture. 
+
+\section{Every Graph has a Noticable Spectral Gap}
+
+We prove Theorem~\ref{thm:spectralgap-graphs} which shows that every graph with self loops has a small spectral gap already.
+
+\begin{proof}[{Proof of \bf Theorem~\ref{thm:spectralgap-graphs}}]
+Let $\epsilon = \frac{1}{2n^3}$. We will show that $\lambda_2(G) \le 1-\frac{\epsilon}{2}$. Consider a unit vector $x \perp \textbf{1}$ vector in $\mathbb{R}^n$, it suffices to show that $\norm{Ax} \le 1 -\frac{\epsilon}{2}$. Denote $y = Ax$. We need to show that $\norm{y} \le 1-\frac{\epsilon}{2}$.
+
+\noindent We can simplify the target. Imagine that, $\norm{y} > 1-\frac{\epsilon}{2}$. Then, $\norm{y}^2 > \left(1-\frac{\epsilon}{2}\right)^2 = 1-\epsilon+\frac{\epsilon^2}{4} > 1-\epsilon$. Hence it suffices to prove that $\norm{y}^2 \le 1-\epsilon$. We view this as: 
+
+$$\norm{x}^2-\norm{y}^2 \ge \epsilon$$
+
+This says that $Ax$ ``crunches" the vector $x$ since the difference between the norms of $x$ and $Ax$ is high. We will reinterpret the LHS of the above equvation in the following way. We use the fact that $\norm{y}^2 = \langle Ax,y \rangle$.
+\begin{eqnarray*}
+\norm{x}^2-\norm{y}^2 & = & \norm{x}^2-2\langle Ax,y \rangle+\norm{y}^2 \\
+& = & \sum_{j} \left( \sum_i A_{ij}x_j^2 \right) - 2 \sum_{ij} \left(\sum_{j} A_{ij}x_j\right) y_i + \sum_{i} \left( \sum_j A_{ij}y_i^2 \right) \\
+& = & \sum_{ij} A_{ij}x_j^2 - \sum_{ij} A_{ij}(2x_jy_i) + \sum_{ij} A_{i,j}y_i^2 \\
+& = & \sum_{ij} A_{ij} (x_j^2 - 2x_jy_i + y_i^2) \\
+& = & \sum_{ij} A_{ij} (x_j-y_i)^2
+\end{eqnarray*}
+
+\noindent Hence, it suffices to prove the following equation.
+\begin{equation}
+\sum_{i,j} A_{ij}(y_i-x_j)^2 \ge \epsilon
+\label{eqn:weak-exp}
+\end{equation}
+We show that there are summands in the above summation, which adds up to more than $\epsilon$. Since $x$ is a unit vector, there must exist an $i$ such that $|x_i| \ge \frac{1}{\sqrt{n}}$. Since $x \perp 1$, there must exist a $j$ such that $x_i$ and $x_j$ are of opposite signs and this implies that $|x_i-x_j|$ is at least $\frac{1}{\sqrt{n}}$. Notice that there must be a path between vertex $i$ and vertex $j$ in the graph $G$ of length at most $n-1$ (edges). By appropriately renaming it, let the path be $1,2, \ldots n$ where the $i$-th vertex is renamed to $1$ and $j$-th vertex is renamed to $n$. With this renaming:
+\begin{eqnarray*}
+\frac{1}{\sqrt{n}} \le |x_1 - x_n| & = & \left|(x_1 - y_1) + (y_1 - x_2) + (x_2 - y_3) + (y_3-x_4) \ldots (y_n -  x_n)\right| \\
+& \le & |x_1 - y_1| + |y_1 - x_2| + |x_2 - y_3| + \ldots |y_n -  x_n| \\
+& \le & \sqrt{2n}\left( \sqrt{(x_1 - y_1)^2 + (y_1 - x_2)^2 + (x_2 - y_3)^2 + \ldots (y_n -  x_n)^2} \right) 
+\end{eqnarray*}
+
+\noindent The last inequality is using the relationship between $\ell_1$ and $\ell_2$ norm of vectors\footnote{Ineed, it is known that for any vector $x \in \mathbb{R}^n$, $\frac{\Vert x \Vert_1}{\sqrt{n}} \le \norm{x} \le \Vert x \Vert_1$}.
+This implies that:
+$$(x_1 - y_1)^2 + (y_1 - x_2)^2 + (x_2 - y_3)^2 + \ldots (y_n -  x_n)^2 \ge \frac{1}{2n}$$
+
+Notice that each of the terms (in RHS) is  in the above equation are positive and they appear in the RHS of the Equation~\ref{eqn:weak-exp} with a multiplication factor of $\frac{1}{d}$ (which is the entry\footnote{Notice that since $G$ has selfloops, the terms of the form $x_i-y_i$ also appears.} $A_{ij}$). Hence the above lower bound should imply a lower bound for Equation{eqn:weak-exp} as well. Since $d \le n$.
+$$\sum_{i,j} A_{ij}(y_i-x_j)^2 \ge \frac{1}{2dn} \ge \frac{1}{2n^3}$$
+This implies the theorem.
+\end{proof}
+\begin{remark}
+The above theorem can be improved on the parameter side by applying a better upper bound on the diameter. Use the fact that between $i$ and $j$ there will be a path of length $\frac{3n}{d+1}$. (Prove this!) This will improve the spectral gap to $\frac{1}{12n^2}$. Another improvement known is the proof of the claim when it is not bipartite but does not have self-loops.
+\end{remark}
