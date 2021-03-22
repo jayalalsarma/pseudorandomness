@@ -103,8 +103,8 @@ We have seen the following amplification approach in Section~\ref{sec:intro-expa
 \begin{algorithmic}[1]
 \State {\em count} $\gets 0$. 
 \State Let $G(V,E)$ be an expander graph on $2^{m}$ vertices.
-\State Choose a vertex $y_0 \in V$ uniformly at random. \Comment{Uses $m$ random bits}
-\State Starting at $v$ perform a random walk for $k$ steps in $G$. Let $y_0, y_1, y_2, \ldots y_k$ each in $\{0,1\}^m$ be the vertices representing the walk. \Comment{Uses $O(k \log d)$ random bits.}
+\State Choose a vertex $y_1 \in V$ uniformly at random. \Comment{Uses $m$ random bits}
+\State Starting at $v$ perform a random walk for $k$ steps in $G$. Let $y_1, y_1, y_2, \ldots y_k$ each in $\{0,1\}^m$ be the vertices representing the walk. \Comment{Uses $O(k \log d)$ random bits.}
 \For{\texttt{each $i \in [k]$}}
 	\State If ${\cal{A}}(x,y_i)$ accepts, if so increment {\em count}
 \EndFor
@@ -170,7 +170,7 @@ Hence, the term that we wanted to bound, $\norm{\Gamma A^k (\Gamma \pi)} \le \al
 $$ \alpha_1 \norm{\Gamma A^k v_1} = \alpha_1 \norm{\Gamma v_1} = \alpha_1 \sqrt{\sum_{i=1}^{|B|} \left( \frac{1}{\sqrt{2^{m}}} \right)^2 } = \alpha_1 \sqrt{\frac{|B|}{2^m}} \le \alpha_1 \sqrt{\epsilon}$$
 Moreover, 
 $$
-\alpha_1 \le \langle \Gamma \pi, v_1 \rangle \le \norm{\Gamma \pi}\norm{v_1} \le \norm{\Gamma \pi} \le \sqrt{\sum_{i \in B} \pi_i^2} \le  \sqrt{\epsilon} \norm{\pi}
+\alpha_1 \le \langle \Gamma \pi, v_1 \rangle \le \norm{\Gamma \pi}\norm{v_1} \le \norm{\Gamma \pi} \le \sqrt{\sum_{i \in B} \pi_i^2} \le  \sqrt{\sum_{i \in B} \pi_i.\pi_i} \le \sqrt{\sum_{i \in B} 1.\pi_i}  \le  \sqrt{\epsilon} \norm{\pi}
 $$
 
 \jsay{the last inequality is clear when $\pi$ is a uniform distribution, but that is not enough for us since we are applying it for arbitrary $\pi$ as well. So this needs a fix.}
