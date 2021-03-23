@@ -2,6 +2,7 @@
 
 We now get into explicit construction of expanders. As discussed earlier, we rely on combinatorial constructions. Even though combinatorial, they go via spectral expandors. The outline of the approach is as follows. Suppose we have a graph $G$ with spectrum as $1=\lambda_1 \ge \lambda_2 \ldots \ge \lambda_n$. We want to amplify the gap between $\lambda_1$ and $\lambda_2$. 
 
+\section{The Plan}
 We will build expanders from graphs which may not have expansion. To begin with, we have a small expansion for every regular graph. We prove the following theorem in the next section.
 
 \begin{theorem}[{\bf Every graph has noticable Spectral gap}]
@@ -71,3 +72,134 @@ This implies the theorem.
 \begin{remark}
 The above theorem can be improved on the parameter side by applying a better upper bound on the diameter. Use the fact that between $i$ and $j$ there will be a path of length $\frac{3n}{d+1}$. (Prove this!) This will improve the spectral gap to $\frac{1}{12n^2}$. Another improvement known is the proof of the claim when it is not bipartite but does not have self-loops.
 \end{remark}
+
+\section{Amplifying the Spectral Gap : Power Product}
+
+As outlined in the beginning of this lecture, we defined graph operations which implies the required changes in the spectral gap. We start with the following.
+
+\begin{definition}[{\bf Graph Powering}]
+Given a graph $G$, the $k$-th power of $G$, denoted by $G^k$ is defined on $V$ itself where there is an edge between two vertices $v$ and $w$ for every path of length $k$ in G. Described in terms of adjacency matrix, the adjacency matrix of $G^k$ is $A^k$ where $A$ is the adjacency matrix of $G$.
+\end{definition}
+
+\begin{theorem}
+If $G$ is an $(n,d,\lambda)$ spectral expander, then $G^k$ is an $(n,d^k,\lambda^k)$ spectral expander.
+\end{theorem}
+
+As mentioned before this is good for the spectral gap amplification, but it is not good for maintaining constant degree. So we need a method for reducing the degree of a graph, without reducing the spectral gap by much. We will introduce this in the next section.
+
+\section{Increasing the Number of Vertices : Tensor Product}
+
+We will discuss a graph operation which increases the number of vertices drastically, but at the same time does not affect the spectral gap much. The operation is called graph tensoring. It is exactly emulating the matrix tensoring, which we review first. Let $A$ be an $n \times n$ matrix and $B$ be an $m \times m$ matrix as follows.
+
+\begin{eqnarray*}
+A = \begin{bmatrix}
+a_{11} & a_{12} & \ldots & a_{1n} \\
+a_{21} & a_{22} & \ldots & a_{2n} \\
+\vdots & \vdots & \vdots & \\
+a_{n1} & a_{n2} & \ldots & a_{nn} \\
+\end{bmatrix}
+\hspace{2cm}
+B = \begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+\end{eqnarray*}
+$$
+A \otimes B = \begin{vmatrix}
+a_{11} 
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+& a_{12} 
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+& \ldots & a_{1n}
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+\\
+\vdots & \vdots & \vdots & \\
+a_{n1} 
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+& a_{n2} 
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+& \ldots & a_{nn}
+\begin{bmatrix}
+b_{11} & b_{12} & \ldots & b_{1n} \\
+b_{21} & b_{22} & \ldots & b_{2n} \\
+\vdots & \vdots & \vdots & \\
+b_{n1} & b_{n2} & \ldots & b_{mm} \\
+\end{bmatrix}
+\\
+\end{vmatrix}_{mn \times mn}
+$$
+
+\vspace{4mm}
+\noindent What happens to the eigen values? 
+We leave this as the following exercise.
+\begin{exercise}
+If $A$ has eigen values $\lambda_1 \ge \lambda_2 \ge \ldots \ge \lambda_n$, and $B$ has eigen values $\lambda_1' \ge \lambda_2' \ge \ldots \ge \lambda_m'$, then $A \otimes B$ has eigen values as :
+$$\{ \lambda_i \lambda_j' \mid 1 \le i \le n, 1 \le j \le m\}$$
+\end{exercise}
+
+Now we ask the question, what combinatorial graph operation will have the above effect on the adjacency matrices of the graphs?
+
+\begin{definition}[\textbf{Tensor Product of Graphs}]
+If $G$ is an $(n,d,\lambda)$ spectral expander and $H$ is an $(n',d',\lambda')$ spectral expander, then the tensor product graph $G \otimes H$ is a graph on $nn'$ vertices defined as follows:
+\begin{description}
+\item{\bf $H$ replaces each vertex of $G$ :} For every vertex $x$ of G, the graph $G \otimes H$ has a copy of $H$ (with only vertices). We call this the cluster at $x$, denoted by $H_x$.
+\item{\bf Edges Across Copies of $H$ :}
+For each edge $(x,y)$ in $G$, we place a bipartite version of the edges in $H$ across the clusters $H_x$ and $H_y$.
+\end{description}
+\end{definition}
+
+The above statement implies that the second largest eigen value of $A \otimes B$ is $\max\{\lambda_2(G),\lambda_2(H)\}$ which  we record as the following lemma.
+
+\begin{lemma}
+If $G$ is an $(n,d,\lambda)$ spectral expander and $H$ is an $(n',d',\lambda')$ spectral expander, then $G \otimes H$ is an $(nn',dd',\max\{\lambda,\lambda'\})$ spectral expander.
+\end{lemma}
+
+\section{Reducing to Constant Degree : Replacement Product}
+The replacement product will be used to reduce the degree of the graph without decreasing the spectral gap by much (or equivalently without increasing $\lambda_2$ by much). Let $G$ be an $(n,D,\lambda)$ where $D$ is presumably very large. We take a graph $H$ which is $(D,2d,\delta)$ spectral expander. We formally define the replacement product as below.
+
+\begin{definition}[{\bf Replacement Product}]
+$G$ is an $(n,D)$-graph and $H$ is a $(D,d)$-graph\footnote{We are dropping the spectral gap in this since it is not relevant for the combinatorial definition of the replacement product.}, then the replacement product $G \circled{R} H$ is defined as follows: Fix an ordering of vertices in $G$ and $H$.
+\begin{description}
+\item{\bf $H$ replaces each vertex of $G$ :} For every vertex $x$ of G, the graph $G \circled{R} H$ has a copy of $H$. We call this the cluster at $x$.
+\item{\bf Edges Across Copies of $H$ :}
+For each edge $(x,y)$ in $G$ where $y$ is the $i$-th neighbor of $x$ and $x$ is the $j$-th neighbor of $y$ - , we place $d$ parallel edges between the $i$-th vertex in the copy of $H$ that replaces $x$ and $j$-th vertex in the copy of $H$ that replaces $y$. 
+\end{description}
+\end{definition}
+
+Thus for any vertex, the degree is exactly $d$ within the same copy of $H$ and there are $d$ parallel edges to another vertex in another copy of $G$. Hence the degree of the resulting graph is exactly $2d$.
+Intuitively, we should expect the resulting graph to be still a good expander - because random walk is still set to mix almost equally fast (this is the reason we put in $d$ parallel edges between two vertices in $G$ in two copies of $H$. Hence the resulting graph should be a reasonably good expander. This can be proved in both worlds - both as a spectral expander and as an edge expander. We present these in the next two subsections.
+
+\subsection{Effect of Replacement Product : Spectral View}
+
+We now prove how good the graph $G \circled{R} H$ is, as a spectral expander, if $G$ and $H$ are good spectral expanders. The following lemma makes this precise.
+
+\begin{lemma}\textbf{Spectral Expansion in Replacement Product}
+If $G$ is an $(n,D,1-\epsilon)$ spectral expander and $H$ is an $(D,2d,1-\delta)$ spectral expander, then $G \circled{R} H$ is a $(nD,2d,1-\frac{\epsilon\delta^2}{24})$ spectral expander.
+\end{lemma}
