@@ -1,0 +1,160 @@
+\Week{10}{Random Walks on Expanders, Reachability}
+
+In this lecture, we make the statement "random walk in expanders mixes rapidly" precise and prove the same. We introduce it through the following running example.
+
+\section{Reachability Problem}
+
+The graph reachability problem takes input as a directed graph $G$ and two vertices source ($s$) and desination ($t$) and asks to check if there is a path from $s$ to $t$ in $G$. Indeed, the trivial algorithm for the problem based on DFS or BFS, and the algorithm runs in time polynomial in $n$ and uses $O(n)$ space of storage (for example, storing the {\em visited} array in a standard implementation. It is a natural question to ask whether there is an algorithm that can do better in terms of space keeping the efficiency in terms of time in tact.
+
+Savitch\cite{Sav73} showed the first (and the best known so far !) space complexity improvement for the problem. Savitch's algorithm runs in space $O(\log^2 n)$ but however, runs in time $O(n^{\log n})$. An question is to improve this algorithm further, either in terms of space or time. Indeed, the fundamental question in the area is whether or not there is an $O(\log n)$ space algorithm for the problem (any $O(\log n)$ space bounded algorithm can be bounded in time by $\poly(n)$). This question, while looks like a problem specific algorithm design challenge, captures on of the fundamental question in space complexity theory - the determinism vs non-determinism in the context of space - the {\sf NL} vs {\sf L} problem.
+
+Reachability for restricted graph classes has been studied. A natural restriction is that of directed acyclic graphs. It turns out that this case is as hard as the general case. That is, we can reduce (in log space) a general graph reachability problem to an instance of the reachability problem where the graph is guaranteed to be acyclic. 
+
+A second natural restriction is that of undirected graphs which is the object of study in this lecture. We will first describe a simple randomized algorithm for the problem which is based on random walks on graphs. 
+As for the heads up, in a break through result in 2004, Reingold\cite{Rei04} designed a $O(\log n)$ space deterministic algorithm for reachability in undirected graphs. The algorithm is based on expanders and replacement product that we discussed in the last lecture.
+
+\section{Random Walk Based Algorithm for Reachability}
+
+We first describe the algorithm based on random walk.  Let $d$ be the degree of the given graph. The algorithm directly performs a random walk on the graph $G$ starting from the source vertex $s$ and if $t$ is found on the way, it accepts, or else, if walked long enough it declares that $t$ is not reachable.
+
+\begin{algorithm}
+\label{alg:randomized-reachability-algo}
+\caption{({\sc Reach} : input $(G,s,t)$} 
+\begin{algorithmic}[1]
+\State {\tt curr} $= s$;
+\For{\texttt{repeat the following for $\ell$ steps}}
+\Comment{We will fix $\ell$ later to be $\poly(n)$}
+	\State If {\tt curr} $=t$ then {\sc Accept}.
+	\State Choose a neighbor ({\tt next}) of the vertex {\tt curr} in $G$ uniformly at random. \Comment{$O(\log d)$ bits}
+	\State {\tt curr} = {\tt next}.
+\EndFor
+\State {\sc Reject}.
+\end{algorithmic}
+\end{algorithm}
+
+Now we analyse the algorithm. We analyse the space bounds first. The for loop takes a counter to implement it and it has count from $1$ to $\ell$. Since $\ell$ is going to be chosen as $\poly(n)$ this takes at most $O(\log n)$ bits to store the counter. Inside the loop, the variables stored are {\tt next} and {\tt curr} and the randbom bits generated. The first two takes $O(\log n)$ bits to store since the graph $G$ has $n$ vertices and the third takes $O(\log d)$ bits. Since $d \le n$, the total space used inside the loop is at most $3 \log n$ bits and hence the entire algorithm runs in $O(\log n)$ space.
+
+Now we get to correctness. The first observation is that if there is no path from $s$ to $t$ in the graph $G$, then the algorithm will never {\sc Accept} since it accepts only when it reaches $t$ during the computation in Step 3. However, it may make an error when $t$ actually has a path from $s$, when the random walk just goes somewhere else due to some unfortunate outcomes of the coin tosses. We would like to argue that the probability (over the random choices that the algorithm makes) that the algorithm indeed reaches is $t$ is at least noticable, say at least $\frac{1}{n}$ (and then we will employ amplification techniques to make it better). Formally, we would like to prove:
+
+\begin{claim}
+\label{claim:correctness-rlalgo} 
+Let $G$ be such that $s \leadsto t$ in $G$:
+$$\Pr \left[~\textrm{{\sc Reach}~(G,s,t) accepts}~
+\right] \ge \frac{1}{n}$$
+\end{claim}
+
+\noindent Clearly, this requires analysis of how random walk on the graph $G$, which we will do in the next section.
+
+\section{Convergence of Random Walks}
+
+Recall how we mathematically represented random walks in Section~\ref{sec:spectral-expansion}. Let $X_i$ be the random variable denoting the vertex after the $i^{th}$ step. Define the vector $p_i$, with entries $p_i[j] = \Pr[X_{i} = j]$. Hence we can rewrite the claim \ref{claim:correctness-rlalgo} as :
+\begin{claim}
+\label{claim:rwalk-bound}
+Let $G$ be such that $s \leadsto t$ in $G$:
+$$\Pr \left[X_\ell = t\right] = \Pr \left[~p_\ell[t]~
+\right] \ge \frac{1}{n}$$
+\end{claim}
+
+\hspace{-6mm}\begin{minipage}{0.75\linewidth}
+\begin{center}
+\begin{tabular}{c|cccccccc}
+& 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 \\
+\hline
+$p_0$ & 1   & 0    & 0    & 0   & 0 & 0 & 0 & 0 \\
+$p_1$ & 0   & 0.5  & 0.5  & 0   & 0 & 0 & 0 & 0 \\
+$p_2$ & 0.5 & 0    & 0    & 0.5 & 0 & 0 & 0 & 0 \\
+$p_3$ & 0   & 0.42 & 0.42 & 0   & 0.17 & 0 & 0 & 0 \\
+$\vdots$ &   &  & $\vdots$ &    & & $\vdots$ & & \\
+\end{tabular}
+\end{center}
+$$p_{i+1}[j] = \Pr[X_{i+1} = j] = \bigsum_k \Pr[X_{i} = k]\Pr[\textrm{ $(k,j)$ edge is chosen }] $$
+This implies that $p_{i+1} = Ap_i$. 
+\end{minipage}
+\begin{minipage}{0.05\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.15\linewidth}
+\SetGraphUnit{1}
+\GraphInit[vstyle=Classic]
+\SetUpVertex[FillColor=blue!60]  
+\tikzset{VertexStyle/.append style={minimum size=2pt,inner sep=1pt}}
+\begin{tikzpicture}
+  \Vertex[x=4,y=1,L=1]{A}
+  \Vertex[x=4,y=-1,L=4]{B}
+  \Vertex[x=5,y=0,L=3]{C}
+  \Vertex[x=3,y=0,L=2]{D}      
+  \Vertex[x=4,y=-2,L=5]{E}
+  \Vertex[x=4,y=-4,L=8]{F}
+  \Vertex[x=5,y=-3,L=7]{G}    
+  \Vertex[x=3,y=-3,L=6]{H}
+  \Edges(A,C,B,D,A)
+  \Edges(E,G,F,H,E)
+  \Edges(B,E)
+\end{tikzpicture}
+\end{minipage}
+
+\vspace{3mm}
+\noindent Thus, the required claim follows from the following lemma.
+\begin{lemma}
+\label{lem:rapidmixing}
+If $A$ is the normalized adjacency matrix of an undirected graph and $p \in \mathbb{R}^n$ where $p$ is a probability vector then,
+$$ \norm{A^\ell p - u} \le \lambda_2^\ell $$
+where $u$ is the vector $\left(\frac{1}{n},\frac{1}{n},\ldots,\frac{1}{n}\right)$.
+\end{lemma}
+
+\noindent We quickly apply the above lemma to prove the claim~\ref{claim:rwalk-bound} and hence derive the value of $\ell$ in the algorithm. Recall from Theorem~\ref{thm:spectralgap-graphs} that every connected graph with self loop on every vertex has a spectral gap of $\frac{1}{12n^2}$. Hence $\lambda_2 = 1-\frac{1}{12n^2}$. We first ensure that the gap between $A^\ell p$ and $u$ are small - formally, $\norm{A^\ell p-u} \le \frac{1}{n^2}$. Thus, we choose an $\ell$ such that $$\left(1-\frac{1}{12n^2}\right)^\ell < \frac{1}{n^2} \textrm{\hspace{2mm} which happens if we choose $\ell = 24n^2\log n$}$$
+Thus, if we choose $\ell$ to be at least this large, $\norm{A^\ell p - u} \le \frac{1}{n^2}$. If we denote $v = A^\ell p$, this says, $\sqrt{\sum_{i}(v_i-u_i)^2} \le \frac{1}{n^2}$. Since each term is positive, for every $i$, $|v_i - u_i| \le \frac{1}{n^2}$. The lowest value of $v_i$ can only be $u_i - \frac{1}{n^2}$. Hence,
+
+$$\forall i \in [n], ~(A^\ell p)_i \le \frac{1}{n}-\frac{1}{n^2} \le \frac{1}{2n}$$
+Thus proving claim~\ref{claim:rwalk-bound}. We now provide the proof of Lemma~\ref{lem:rapidmixing} that we used.
+
+\begin{proof}[\bf Proof of Lemma~\ref{lem:rapidmixing}]
+We need to understand $A^\ell p$. Decompose $p = \alpha u + p'$ where $p' \perp u$. Notice that sum of the components of $p'$ is 0. Since $p$ is a probability vector, its componenents should add up to exactly 1. Hence we can conclude that $\alpha=1$. Thus, $p = u+p'$.
+
+Now observe that $A^\ell p = A^\ell u + A^\ell p' = u + A^\ell p'$. Hence, $A^\ell p - u = A^\ell p'$. Using the fact that for any vector $x \in \mathbb{R}^n$, such that $x \perp 1$, $\norm{Ax} \le \lambda_2\norm{x}$, we derive:
+%As we observed earlier, if $p' \perp 1$, then $A^\ell p' \perp 1$. Hence:
+$$\norm{A^\ell p - u} = \norm{A^\ell p'} \le \lambda^\ell\norm{p'} $$
+
+\noindent To upper bound $\norm{p'}$, note that $\norm{p}^2 = \norm{u}^2 + \norm{p'}^2$. This gives, $\norm{p'}^2 \le \norm{p}^2 \le |p|_1^2 \le 1$.
+%We start by using the fact that for any vector $x \in \mathbb{R}^n$, such that $x \perp 1$, we have that $\norm{Ax} \le \lambda_2\norm{x}$.
+Hence the proof.
+\end{proof}
+
+\section{Diameter of Expander Graphs}
+
+We now derive a nice property of expander graphs which will imply a deterministic algorithm for reachability which uses small space.
+
+\begin{lemma}
+For an $(n,d,\half,\beta)$ vertex expander, the diameter of $G$ is at most $O(\log\left(n\right))$.
+\end{lemma}
+\begin{proof}
+Let $u,v \in V$, Run a breadth first search from $S=\{u\}$ and count the number of vertices that we see in $k$ distance from $u$. Clearly the set $S$ will keep expanding to $(\beta d)^k|S|=(\beta d)^k$ in $k$ steps. Choose the smallest $k$ such that $(\beta d)^k > \frac{n}{2}$ which implies $k \in O(\frac{\log\left(\frac{n}{2}\right)}{\log(\beta d)}) = O(\log n)$. Let $T$ be the resulting set of vertices. Now, run the same process from $v$ as well choosing $S'=\{v\}$ as the initial set to get to the set $T'.$ Since the $|T|$ and $|T'|$ are more than $\frac{n}{2}$, we must have $T \cap T' \ne \phi$. This gives a path from $u$ to $v$ of distance at most $O(\log\left(n\right))$. Hence the diameter of the graph is at most $O(\log n)$.
+\end{proof}
+
+This gives a deterministic algorithm for reachability testing in undirected graphs $G$, where each component of the graph is degree at most $d$ for each vertex\footnote{We can even assume that the graph is regular, by introducing multiple edges between two vertices where there is already and edge.}. Indeed, if $s$ and $t$ are provided, we can run a DFS only up to depth $O(\log n)$ remembering the path being explored currently by storing the index of each neighbor we followed of each vertex on the path. This gives $O(\log n \log d)$ space algorithm. When $d$ is a constant, this gives $O(\log n)$ space algorithm as desired.
+
+\section{Expanderization Process}
+
+Given the above section, the following approach to solving reachability problem is quite natural : given $(G,s,t)$ can we convert $(G,s,t)$ to an expander $(G',s',t')$ in such a way that: (1) conversion preserves reachability - that is, $s \leadsto t$ in $G$ if and only if $s' \leadsto t'$ in $G'$ (2) $G'$ is a constant degree vertex expander (3) $G'$ is constructible (implicitly in $O(\log n)$ space) from $G$. Indeed, each of these steps is quite challenging.
+
+We directly describe the construction since we have developed all the required tools for it.
+
+\begin{description}
+\item{\sf Step 1:} Given the graph $(G,s,t)$, reduce the degree of the graph to at most $3$ by doing the following: 	for every vertex $v$ with degree more than $3$, replace $v$ with a cycle of $d$ vertices and connect each of the neighbors of $v$ to the vertices of the cycle. Notice that this construction preserves reachability and does not introduce paths between the original vertices which originally were not connected.
+We can make the degree of each vertex to be exactly 3 by adding parallel edges.
+\item{\sf Step 2:} Add a self-loop to each vertex. The resulting graph is a $4$-regular graph with a small spectral gap of $\frac{1}{12n^2}$ (see Theorem~\ref{thm:spectralgap-graphs}). By adding more self-loops we may assume that the graph is of degree $d^{20}$ for some constant $d$ that is sufficiently large so that there exists a $(d^{20},d,0.01)$-spectral expander graph $H$. Find $H$ by bruteforce search.
+\item{\sf Step 3:} Let $G_0 = G$ and inductively define $$G_k = (G_{k-1} \circled{R} H)^{50}$$
+\item{\sf Step 4:} Run the deterministic algorithm for testing reachability in expander graphs for the graph $G_k$ where $k = 10n \log n$. Without storing $G_k$ explicitly (which we cannot since it can be of polynomial size).
+\end{description}
+
+There are multiple aspects of this constrution to be discussed.
+\begin{description}
+\item{\bf Correctness:} Observe that by doing replacement product and powering, we never introduce a spurious path between $s$ and $t$ if it did not exist in $G$ already. This follows by definition.
+\item{\bf Size of $G_k$}. If size of $G_k$ is $n_k$ vertices, then the $n_{k} = n_{k-1}d^{50}$. Thus $G_k$ has $d^{50k}$ vertices. When $k = O(\log n)$, this is still a a polynomial size graph such that each vertex label is of length $O(\log n)$ bits.
+\item{\bf Expansion of $G_k$} We should argue that the final graph $G_k$ in step 4, has every component to be an expander. Notice that the product operation happens to each component. Consider any component of the graph. If $\lambda_2(G_{k-1}) \le 1-\epsilon$, then $\lambda_2(G_{k-1} \circled{R} H) \le 1-\frac{\epsilon}{25}$. Thus, $\lambda_2(G_k) \le \left(1-\frac{\epsilon}{25}\right)^{50} \le 1-2\epsilon$.
+Thus, the spectral gap $\epsilon$ improves to $2\epsilon$ while going from $G_{k-1}$ to $G_k$. Since there is a spectral gap of $\frac{1}{12n^2}$ already, this implies, we should choose $k$ such that:
+$$2^k\left( \frac{1}{12n^2} \right) > \half$$
+This explains the choice of $k = O(\log n)$ in step 4.
+\item{\bf Logspace implementation:}
+\end{description}
+

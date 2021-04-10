@@ -203,3 +203,225 @@ We now prove how good the graph $G \circled{R} H$ is, as a spectral expander, if
 \begin{lemma}\textbf{Spectral Expansion in Replacement Product}
 If $G$ is an $(n,D,1-\epsilon)$ spectral expander and $H$ is an $(D,2d,1-\delta)$ spectral expander, then $G \circled{R} H$ is a $(nD,2d,1-\frac{\epsilon\delta^2}{24})$ spectral expander.
 \end{lemma}
+
+\begin{proof}
+The degree bounds follow directly from the definition of the product opertation. We will show that $\lambda_2((G \circled{R} H)^3) \le 1-\frac{\epsilon\delta^2}{8}$. This implies the claimed bound\footnote{$\lambda_2((G \circled{R} H)) \le \sqrt[3]{\lambda_2((G \circled{R} H)^3)} \le \left(1-\frac{\epsilon\delta^2}{8}\right)^{1/3} \le \left(1-\frac{\epsilon\delta^2}{24}\right)$}. \\[-10mm]
+
+\paragraph{\bf Step 1 : Understanding the Adjacency Matrix of the Product Graph:} We express the adjacency matrix of the product graph using tensor product. Let $A$ and $B$ be the normalized adjacency matrix corresponding to the graph $G$ and $H$ respectively. Let $R$ be the normalized adjacency matrix ($nD \times nD$ matrix) corresponding to the replacement product graph $G \circled{R} H$. We first express $R$ in terms of $A$ and $B$. If we ignore the edges across different clusters in the graph $G \circled{R} H$, then the adjacency matrix is obtained by $I_n \otimes B$. 
+
+How do we get the edges across the clusters? If $P$ is the $nD \times nD$ permutation matrix corresponding to the rotation map of the graph. That is, the entry $P[(x,i),(y,j)] = 1$ if the $y$ is the $i$-th neighbor of $x$ and $x$ is the $j$-th neighbor of $y$.
+\begin{eqnarray}
+R = \half \left(I_n \otimes B\right) + \half P \\
+\label{eqn:replacement-product}
+(I_n \otimes J_D)P(I_n \otimes J_D) = A \otimes J_D
+\end{eqnarray}
+
+%We also can express the structure of the original graph in the form of a permutation matrix. Consider the information that we are using for each edge $(x,y)$ in $G$ where $y$ is the $j$-th neighbor of $x$ and $x$ is the $j$-th neighbor of $y$. This can be viewed as a bijection between the sets $V \times D \to V \times D$ and hence can be represented by a permutation matrix $P$ of size $nD \times nD$. Notice that $P$ depends only on the adjacency matrix $A$ of the graph $G$. In fact, it is easy to describe $P$ in terms of $A$. Let $J_D$ is the $D \times D$ matrix with all entries as $\frac{1}{D}$.
+%$$A \otimes J_D = \left(I_n \otimes J_D\right)P\left(I_n \otimes J_D\right)$$
+
+\paragraph{\bf Step 2 : A Matrix Decomposition Lemma} 
+For this, we need the definition of matrix norm. If $A$ is an $n \times n$, then $\|A\|$ is the maximum number $\alpha$ such that $\|Av\|_2 \le \alpha \|v\|_2$ for every $v \in\mathbb{R}^n$. The norm of a matrix is larger than all the eigen values. For the largest eigen value $\lambda$, choose a unit eigen vector $v$,
+$$\|A\|\ge\norm{Av}=\norm{\lambda v}=|\lambda|\norm{v}=|\lambda|$$
+ A doubly stochastic matrix also has a decomposition into "all-$1$s matrix" and the "rest" (with norm $< 1$).
+We also will state a linear algebraic decomposition lemma. 
+\begin{lemma}
+The normalized adj. matrix of an $(n,d,\lambda)$ graph can be written as :
+$A = (1-\lambda)J+\lambda K$ where $J$ is an $n \times n$ matrix with all entries as $\frac{1}{n}$ and $K$ has norm at most $1$.
+\end{lemma}
+One way to interpret the above lemma is that the random walk on the graph can be viewed as a convex combination of $J$ (which is the random walk on complete graph (whose normalized adjacency matrix is $J$) and a random walk on a small norm (weighted) graph.
+
+\begin{proof}
+We claim $K = \frac{1}{\lambda}(A-(1-\lambda)J)$ satisfies the lemma. We prove that $\|K\| \le 1$ first. Consider any $x \in \mathbb{R}^n$. We show that $\norm{Kx} \le \norm{x}$. Decompose $x = u+v$ where $w \perp 1$ and $u = \alpha 1$. Hence $\norm{u}^2+\norm{v}^2 = \norm{x}^2$. We want to estimate $\norm{Kx}^2 = \norm{Ku+Kv}^2$. 
+
+\begin{description}
+\item{To understand $Ku$:} We write $Ku = \frac{1}{\lambda}(Au-(1-\lambda)Ju))$. Since $Ju = u$ and $Au = u$, $Ku = u$.\\[-8mm]
+\item{To understand $Kv$:} Using the fact that $v \perp 1$, $Kv = \frac{1}{\lambda}(Av-(1-\lambda)Jv)) = \frac{1}{\lambda}Av$ since $Jv = 0$.\\[-8mm]
+\item{Estimating $\norm{Kx}^2$:} Note that $Av \perp 1$ (since $\langle Av, 1\rangle = \langle v,A1 \rangle = \langle w,1 \rangle = 0$). Thus, $Kv \perp Ku$.
+\begin{eqnarray*}
+\norm{Kx}^2 & = & \norm{Ku+Kv}^2 = \norm{Ku}^2+\norm{Kv}^2 \\
+& = & \norm{u}^2+\frac{1}{\lambda}\norm{Av}^2 \le \norm{u}^2+\norm{v}^2 = \norm{x}^2
+\end{eqnarray*}
+\end{description}
+\vspace{-12mm}
+%Hence the proof.
+\end{proof}
+
+\paragraph{\bf Step 3: Bounding the norms:}
+Applying the lemma to the two adjacency matrices : we have that $B = \delta J_D + (1-\delta)B'$ where $B'$ has norm $\le 1$. Substituting this into Equation~\ref{eqn:replacement-product}, we get that:
+\begin{eqnarray*}
+R & = & \half \left(I_n \otimes (\delta J_D + (1-\delta)B') \right) + \half P\\
+ & = & \left[ \frac{\delta}{2} (I_n \otimes J_D) + \frac{(1-\delta)}{2} (I_n \otimes B') + \half P \right]
+\end{eqnarray*}
+To get to the normalized adjacency matrix of $(G \circled{R} H)^3$. Consider $R^3$ and consider the terms appearing in the product. $(I_n \otimes J_D)$ and $(J_n \otimes I_D)$ commutes with each other and $(I_n \otimes J_D) = J_{nD}$, we have:
+\begin{eqnarray*}
+R^3 & = & \frac{\delta^2}{8} \left[(I_n \otimes J_D)P(I_n \otimes J_D)\right] + \left(1-\frac{\delta^2}{8}\right) R' \textrm{\hspace{1cm}where $R'$ is a matrix of norm at most $1$.}\\
+& = & \left( \frac{\delta^2}{8} \right) (A \otimes J_{D})+\left(1-\frac{\delta^2}{8}\right)R'
+\end{eqnarray*}
+
+\noindent To find out the second largest eigen value of $R^3$. The eigen values of the first term is $\frac{\delta^2}{8}$ times the eigen value of $A \otimes J_D$. The latter is exactly the second largest eigen value of $A$. Since $\|R'\| \le 1$, 
+this gives $\lambda_2((G \circled{R} H)^3) \le 1-\frac{\epsilon\delta^2}{8}$. Hence the proof.
+\end{proof}
+
+\subsection{Effect of Replacement Product : Combinatorial View}
+
+We now present a direct combinatorial argument that the replacement product of two edge expanders gives a reasonably good edge expander with reduced degree. The construction of the graph is same as what we described in the beginning of the section.
+We prove the following theorem.
+
+\begin{theorem}[\textbf{Edge Expansion in Replacement Product}]
+\label{thm:combinatorial-rp}
+If $G$ is $(n,D,\delta_1)$ edge expander and $H$ is $(D,d,\delta_2)$ edge expander, then $G \circled{R} H$ is $(nD,2d,\frac{1}{80}\delta_1^2\delta_2)$ edge expander.
+\end{theorem}
+\begin{proof}
+For any $S \subseteq [nD]$, a set of vertices in $G \circled{R} H$ such that $|X| \le \frac{nD}{2}$, we should prove, 
+$$\left|E(S,\bar{S})\right| \ge \frac{2d}{80}\left(\delta_1^2\delta_2|S|\right)$$
+
+\noindent The idea of the proof is quite straightfoward. We will directly count the number of edges. Recall that the replacement product, places copies of $H$ for each vertex in $G$. We call $H_1, H_2, \ldots H_n$ to be these clusters. 
+Given $S \subseteq V$, $|S| \le \frac{nD}{2}$, we want to count $E(S,\bar{S})$. Intuitively, there are "inter-cluster edges" and "intra-cluster edges" going out of $S$ which we need to count separately. The former set should use the expansion of $G$ and the latter should use the expansion of $H$. In a given cluster, the intra-cluster edges will be maximum if the number of vertices in $S$ from the cluster is very close to half of the vertices in the cluster. Thus, we need to distinguish between clusters which have large intersection with $S$ and others. For accounting this carefully, we will define the following sets.\\
+
+\noindent Let $I \subseteq [n]$ be the index into the clusters where the intersection is small (and hence they will expand within their own cluster).
+$$I = \left\{ i \in [n] ~~\left| ~~|S \cap H_i| \le \left(1-\frac{\delta_1}{4}\right)D \right. \right\}
+% \textrm{\hspace{1cm}} I' = \left\{ i \in [n] ~~\left| ~~|S \cap H_i| > \left(1-\frac{\delta_1}{4}\right)D \right. \right\}
+$$
+
+This classifies the clusters into two kinds (with respect to the given $S$) - \textit{sparse} (we will denote by $A_i = S \cap H_i$, $i \in I$) and \textit{dense} clusters (we will denote them by $B_j = S \cap H_j$, $j \notin I$). By a slight misuse of notation, we will denote by $\bar{A_i} = H_i\setminus A_i$ and $\bar{B_j} = H_j\setminus B_j$. Let,
+$$A = \bigcup_{i \in I} A_i \hspace{1cm} \bar{A} = \bigcup_{i \in I} \bar{A_i} \hspace{1cm} B = \bigcup_{j \notin I} B_j \hspace{1cm} \bar{B} = \bigcup_{j \notin I} \bar{B_j} \hspace{1cm} S = A \bigcup B$$
+
+Intuitively, there cannot be too many dense clusters since each dense cluster has to account for at least $\left(1-\frac{\delta_1}{4}\right)D$ many vertices. This implies that 
+
+$$|\bar{I}| = \left|[n]\setminus I\right|\le \frac{|B|}{\left(1-(\delta_1/4)\right)D} \le \frac{(nD/2)}{\left(1-(\delta_1/4)\right)D} \le \frac{n}{\left(2-(\delta_1/2)\right)} \le \frac{2n}{3}$$
+
+\noindent That means, at least $n/3$ of the clusters are sparse and at most $2n/3$ clusters are dense.
+
+\paragraph{Contributors to the Cut $E(S,\overline{S})$:} Based on the above classification, we have the following four different disjoint summands which contributes to $E(S,\bar{S})$ which is the sum of :
+\begin{eqnarray*}
+\mathlarger{E}\left(S, \bar{S}\right) & = & 
+\left| \mathlarger{E}\left(\bigcup_{i \in I} A_i~,~\bigcup_{i \in I} \bar{A_i} \right) \right| + 
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{j \notin I} \bar{B_j} \right) \right|+ 
+\left| \mathlarger{E}\left(\bigcup_{i \in I} A_i~,~\bigcup_{j \notin I} \bar{B_j} \right) \right| +
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right|
+\label{eqn:edge-sum-split}
+\end{eqnarray*}
+\noindent Since we need to show a lower bound for $|E(S,\bar{S})|$, we can count the approrpiate term in the above and prove a lower bound.
+
+A first natural attempt is to consider the sparse clusters (the first summand in the above summation). Since $H$ is an expander, they will have a lot of intra-cluster edges between $S$ and $\bar{S}$. This works if there are many vertices in the sparse clusters in $S$. This gives rise to the following two cases.
+
+\begin{description}
+\item{\bf Case 1 : Many sparse clusters - $|A| \ge \frac{1}{10}\delta_1|S|$}
+More specifically, we claim the following, which also implies a lower bound on the first term in the above summation.
+\begin{claim}[\textbf{Intra-cluster Edges Within Sparse Clusters}] 
+For $i \in I$:
+$$|E(A_i,H_i\setminus A_i)| \ge \frac{1}{4}\delta_1\delta_2d|A_i|$$
+\end{claim}
+\begin{proof}
+We use the fact that $H$ is a $(D,d,\delta_2)$-edge expander. We have two cases.
+\begin{description}
+\item{\bf Case 1:  $|A_i| \le \frac{D}{2}$:}
+$\left|E(A_i,H_i\setminus A_i)\right| \ge \delta_2d|A_i| \ge \frac{1}{4}\delta_1\delta_2d|A_i|$
+\item{\bf Case 2: $|H_i\setminus A_i| \le \frac{D}{2}$:}
+we have that $\left|E(H_i\setminus A_i,A_i)\right| \ge \delta_2d|H_i\setminus A_i| \ge \frac{1}{4}\delta_1\delta_2dD \ge \frac{1}{4}\delta_1\delta_2d|A_i|$
+\end{description} 
+\vspace{-7mm}
+\end{proof}
+\noindent Recall that $A = \bigcup_{i \in I} A_i$. Since $|A| \ge \frac{1}{10}\delta_1|S|$, then this implies the required bound. $$|E(A_i,H_i\setminus A_i)| \ge \frac{1}{4}\delta_1\delta_2d|A_i| \ge \frac{1}{4}\delta_1 \delta_2 d \left(\frac{1}{10}\delta_1|S|  \right) \le \frac{2d}{80}\left(\delta_1^2\delta_2|S|\right)$$
+
+\item{\bf Case 2 : Many Dense Clusters - $|A| < \frac{1}{10}\delta_1|S|$ :}
+We have that  $|B| \ge (1-\frac{1}{10})\delta_1|S| \ge \frac{9}{10}|S|$.
+In this case, we will lower bound the fourth term in Equation~\ref{eqn:edge-sum-split}. More specifically, we claim the following :
+
+\begin{claim}
+\label{claim:expansion}
+$$\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right| \ge \frac{1}{24}\delta_1 d |S| $$
+%$$\bigsum_{\substack{i \in I\\j \notin I}} \left| E(H_i \setminus A_i,B_i) \right| \ge \frac{1}{24}\delta_1 d |S| $$
+\end{claim}
+
+\begin{proof}
+We will translate the statement in terms of $|\bar{I}|$ first. More precisely, it suffices to prove that:
+\begin{equation}
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right| \ge \frac{1}{24}\delta_1 d D|\bar{I}|
+\label{eqn:claim4}
+\end{equation}
+
+This is sufficient because since each dense cluster can have at most $D$ vertices from $S$, we know that $|\bar{I}| \ge \frac{|B|}{D} \ge \frac{9|S|}{10D} \ge \frac{|S|}{2D}$.
+
+Now we prove Equation~\ref{eqn:claim4}. We decompose the LHS of Equation~\ref{eqn:claim4}.
+\begin{eqnarray*}
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right| & = &
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} H_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right| -
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} \bar{B_j} ~,~\bigcup_{i \in I} \bar{A_i} \right) \right|\\
+&=& 
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} H_j~,~\bigcup_{i \in I} H_i \right) \right|-
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} H_j~,~\bigcup_{i \in I} A_i
+ \right) \right| - 
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} \bar{B_j} ~,~\bigcup_{i \in I} \bar{A_i} \right) \right|
+\end{eqnarray*}
+We will lower bound the first term and upper bound the second and third terms.
+\begin{description}
+\item{\underline{\sf Lower Bounding First Term:}}
+This is easier to bound since the term is exactly $d\left|E(I,\bar{I})\right|$. Since $\left|\bar{I}\right|$ is small as a subset of vertices in $G$ ($\left|\bar{I}\right| \le \frac{2n}{3}$)
+and since $G$ is an expander, 
+$$\left| \mathlarger{E}\left(\bigcup_{j \notin I} H_j~,~\bigcup_{i \in I} H_i \right) \right| = d\left|E(I,\bar{I})\right| \ge \delta_1 d D \left|\bar{I}\right|$$
+\item{\underline{\sf Upper Bounding Second Term:}}
+We will upper bound this crudely. Since $|A$ is small), and the edges coming out from any $A$ vertex is at most $d$, we have that:
+$$\left| \mathlarger{E}\left(\bigcup_{j \notin I} H_j~,~\bigcup_{i \in I} A_i \right) \right| \le d|A| \le \frac{\delta_1 D d |S|}{10} \le \frac{\delta_1 d D |\bar{I}|}{9}$$
+where the last line follows because $|\bar{I}| \ge \frac{|B|}{D} \ge \frac{9|S|}{10D}$.
+
+\item{\underline{\sf Upper Bounding Third Term:}}
+
+$$\left| \mathlarger{E}\left(\bigcup_{j \notin I} \bar{B_j} ~,~\bigcup_{i \in I} \bar{A_i} \right) \right| \le 
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} \bar{B_j} ~,~\bigcup_{i \in I} H_i \right) \right| 
+$$
+By definition of dense sets, $|B_j| \ge (1-\frac{\delta_1}{4})D$. Hence $|H_j \setminus B_j| \le \frac{\delta_1}{4}D$. This gives a bound on the number of edges coming out of $H_j \setminus B_j$ is at most 
+$\frac{\delta_1}{4}dD$.
+Thus, $$\left| \mathlarger{E}\left(\bigcup_{j \notin I} \bar{B_j} ~,~\bigcup_{i \in I} H_i \right) \right| \le \frac{\delta_1}{4}dD|\bar{I}|$$
+\end{description}
+Thus the LHS in Equation~\ref{eqn:claim4} is: (note that $|\bar{I}| $
+\begin{eqnarray*}
+\left| \mathlarger{E}\left(\bigcup_{j \notin I} B_j~,~\bigcup_{i \in I} \bar{A_i} \right) \right| & \ge & \delta_1dD|\bar{I}| - \frac{\delta_1}{9}dD|\bar{I}|-
+\frac{\delta_1}{4}dD|\bar{I}|\\
+& \ge & \frac{1}{48}\delta_1 (2d) D \left(\frac{9|S|}{2D}\right) \ge \frac{1}{80}\delta_1^2 \delta_2 (2d) |S|
+\end{eqnarray*}
+Hence the proof of claim~\ref{claim:expansion}.
+\end{proof}
+\end{description}
+This completes the proof of Theorem~\ref{thm:combinatorial-rp} the combinatorial proof of expansion of the replacement product graph.
+\end{proof}
+
+\section{Explicit Construction of Expanders}
+
+We now describe the explicit construction of expander graphs. We first comment on the notion of explicitness that we required. Note that we are interested in constructing a family of expander graphs $\{G_n\}_{n \ge 0}$ where each graph is $d$-regular for a constant $d$. The complexity of the family is hence described in terms of how efficiently these graphs can be described.
+\begin{description}
+\item{\bf Weakly Explicit Expanders:} There must be an algorithm which, given $n$ in unary, output the adjacency matrix of $G_n$ in the family, in time polynomial in $n$.
+\item{\bf Strongly Explicit Expanders:} There must be an algorithm for computing the rotation map of the graph $G_n$. Given $n$ in binary, and a vertex label $u$, and a value $1 \le i \le d$, output the vertex $v$ where $v$ is the $i$-th neighbor of the vertex $u$ in the graph $G_n$ in the family, in time polynomial in $\log n$ (which is the input size).
+\end{description}
+
+\noindent Note that that the Marguilis and Gabber-Galil expanders that we described (see Lemma~\ref{}) are strongly explicit by construction since we can explicitly write down the neighbors of the vertex in the order itself.
+\vspace{-4mm}
+
+\paragraph{Construction:}
+We now describe a construction of expander graphs (due to \cite{}) which will use the framework of graph products that we descirbed in this lecture. The idea is quite straight forward. We use powering for improving the spectral gap, which increases the degree. We use tensoring to increase the number of vertices, which again increases the degree. We use replacement product to reduce the degree of the graph without deteriorating the spectral gap by much. Do this iteratively. In the end, we must be getting a graph with a good spectral gap. By Cheeger's inequality, this must be a good edge expander. We now formally describe the construction.
+\begin{itemize}
+\itemsep-3pt
+\item Let $H$ be a $(D,\frac{d}{2},\frac{1}{100})$ spectral expander graph where $D = d^{40}$. We will find such a graph by brute force search. 
+\item Let $G_1$ be a $(D,d^{20},\half)$ spectral expander graph. Again, we find this by brute force search. Choose $d$ to be a large enough constant such that graphs $H$ and $G_1$ exist.
+\item Define for every $k\ge 2$:
+$$G_k = ((G_{k-1} \otimes G_{k-1}) \circled{R} H)^{20}$$
+\end{itemize}
+We list down properties of this construction.
+\begin{description}
+\item{\bf Number of vertices:} We claim that the graph $G_k$ has at least $2^{2^k}$ vertices. To see this, if $n_k$ is the number of vertices in $G_k$ take $n_0=1$, and $G_1$ has $D$ vertices. We have the recurrence, $n_k = \left(n_{k-1}\right)^2D$ since powering does not change the number of vertices. This gives, if $n_{k-1} = 2^{2^{k-1}}$
+$$n_k \ge \left(2^{2^{k-1}}\right)^2 = 2^{2^k}$$ 
+Thus, if we want to produce a graph on $n$ vertices, then $k \in  O(\log \log n)$.
+\item{\bf Degree:} The degree of the graph after replacement graph will be $d$, and that gets powered by the powering operation. Hence it becomes, $d^{20}$ which is still a constant. The graph is regular too, by construction.
+\item{\bf Spectral Expansion:} Suppose $\lambda_2(G_{k-1}) \le \frac{1}{3}$. After the tensor product, the $\lambda_2$ remains $\frac{1}{3}$ (see Lemma~\ref{lem:tensorproduct}). After the replacement product $\lambda_2 = 1-\frac{1}{36}$. After powering, the resulting graph $G_k$ has, $\lambda_2(G_k) = (1-\frac{1}{36})^{20} \le \frac{1}{3}$.
+\item{\bf Explicitness:} We claim that there is a $2^{O(k)}$-time algorithm that given a label of a vertex $u$ in $G_k$ and an index $i$, $1\le i\le d^{20}$,
+outputs the $i$-th neighbor of $u$ in the graph $G_k$. Since $k=O(\log \log n)$, this is $O(\log^c n)$, which is polynomial in the input size and meets the requirement for strong explicitness. This follows from the definition itself, by observing that to compute rotation map function of $G_k$, the algorithm will make $40$ recursive calls to the rotation map of the graph $G_{k-1}$.
+\end{description}
+
+\noindent An alternative to the construction defined above is as follows. Define for every $k\ge 2$:
+$$G_k = (G_{k-1} \otimes G_{k-1})^{20} \circled{R} H$$
+In fact, this is more logical since powering is immediately followed by a replacement product. The analysis of the construction is similar.
+
+\begin{remark}
+The disadvantage of the above construction is that it provides graphs only of size $2^{2^k}$ and that gives a large values of $n$ for which we cannot construct expanders of size $n$. Ideally, we would like to construct expanders which are denser. For example, can we reduce this "sparsity" from double exponential to single exponential $2^k$? This way, if we require a graph of size $n$, then there is a graph whose number of vertices is at most $2n$ (since between $n$ and $2n$ there must be a power of $2$). There is a variant of the above construction supplying a denser family
+of graphs that contains a graph with $n$ vertices for every $n$ that is a power of $c$, for some constant $c$. Noticing that we can transform an $(n,d,\lambda)$ spectral expander graph to an $(n',cd',\lambda)$ spectral expander graph for any $\frac{n}{c} \le n' \le n$ by merging a set of $c$ vertices into one vertex, this gives a construction of expander graphs for every $n$.
+\end{remark}
