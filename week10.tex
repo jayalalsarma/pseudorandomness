@@ -109,8 +109,6 @@ $$T_k \le {n \choose k} \bigsum_{i=1}^m \left(\frac{1}{m}\bigsum_{i=1}^m P_i \ri
 
 Now we have an easy case. Suppose $\sum P_i \le \frac{2e}{k}$, then we are done. That is, if the individual bits are $0$ with very low probability, then we are done. But this is hardly an interesting case for us.
 
-\newpage
-
 It remains to handle the case when $\sum_i P_i > \frac{k}{2e}$. Let $m'$ be the largest such that $\sum_{i=1}^{m'} P_i \le \frac{k}{2e}$. We can apply the previous argument for the first $m'$ bits.
 
 Now let us define the following quantities:
@@ -309,7 +307,7 @@ With the union bound applied:
 \right]
 & \le & 2^m \times 2^{-\Omega\left(\frac{\epsilon^2\ell}{2}\right)}
 \end{eqnarray*}
-For this to be less than $1$, we just need to choose $\ell$ such that $m < \frac{\epsilon^2\ell}{2}$. Thus, choice of $\ell = O\left(\frac{m}{\epsilon^2}\right)$ works. Hence, by probabilistic method, there exists a set of size $O\left(\frac{m}{\epsilon^2}\right)$ which is an $\epsilon$-biased set. This completes the proof of existence.
+For this to be less than $1$, we just need to choose $\ell$ such that $m < \frac{\epsilon^2\ell}{2}$. Thus, choice of $\ell = O\left(\frac{m}{\epsilon^2}\right)$ works. Hence, by probabilistic method, there exists a set of size $O\left(\frac{m}{\epsilon^2}\right()$ which is an $\epsilon$-biased set. This completes the proof of existence.
 \end{proof}
 
 \section{Explicit Construction of $\epsilon$-biased Sets}
