@@ -530,3 +530,98 @@ $$ \frac{1}{|\supp(D)|} \le \norm{D} \le \epsilon^2+\frac{1}{2^m}$$
 Let $G : \zo^{k \log m} \to \zo$ be the generator that we described such that $G\left(U_{k \log m}\right)$ outputs a $k$-wise independent distribution. (See the explicit construction of $k$-wise independent distribution). If we replace the input to $G$ with a small bias distribution of $\epsilon' = \frac{\epsilon}{2^k}$, then the output of $G$ is $\epsilon$-close to being $k$-wise independent. Thus, conclude that, there is a generator for almost $k$-wise independent distributions with seed length $O\left(\log\log m+k+\log(1/\epsilon)\right)$.
 \end{show-ps4}
 \end{exercise-prob}
+
+\section{$\epsilon$-biased distributions are almost $k$-wise independent}
+
+In this lecture, we prove yet another connection between the mathematical objects that we have seen so far - namely, $\epsilon$-biased sets and $k$-wise independent bits. Recall that in order to generate a distribution over $\zo^m$ which is $k$-wise indepdnent, we needed to invest $O(k \log n)$ random bits. In otherwise, the explicit $k$-wise independence construction that we saw earlier can also be seen as a function $G : \zo^{k \log m} \to \zo^m$ such that $G\left(U_{k \log m}\right)$ is a distribution that is $k$-wise independent. For generators, the number of pure random bits that they use, is called the {\em seed length}. So the seed length for our $k$-wise independent generator is $O(k \log m)$.
+
+Suppose, we do not really require $k$-wise independent distributions, but are fine with ``almost" $k$-wise independent distributions, the it turns out that $\epsilon$ biased sets can do the job with $O(k+\log m)$ seed instead of $O(k \log m)$. We define the notion of ``almost" first. We say that the distribution is ``almost" $k$-wise independent if every subset of $k$ bits is ``close" to uniform distribution. Now we need the definition of "closeness" of distribitions which we define first:
+
+\begin{definition}[{\bf $\delta$-close Distributions}]
+Two distributions $D$ and $D'$ over $\{0,1\}^m$ are said to be $\delta$-close to each other, if for any two $T \subseteq \zo^m$, the probability that a randomly chosen string is in $T$ is same for both distributions, upto additive $\delta$. More formally:
+$$ \forall T \subseteq \zo^m~:~ \left| \Pr_{y \to D} \left[ y \in T \right] - \Pr_{y \to D'} \left[ y \in T \right] \right| \le \delta $$
+\end{definition}
+
+Note that, $T \subseteq \zo^m$ can equivalently be viewed as a Boolean function $T : \zo^m \to \zo$. We use the same notation for the subset and the function. In terms of this, the above condition can also be rewritten as: 
+$$ \forall T \subseteq \zo^m~:~ \left| \Pr_{y \to D} \left[ T(y) = 1 \right] - \Pr_{y \to D'} \left[ T(y) = 1 \right] \right| \le \delta $$
+Another way to view $T$ is as a \textit{distinguisher function} which tries to distinguish the two distributions. The statement of the definition says, no Boolean function test $T$ will be able to distinguish the two distributions (in the sense that they do not have too different probabilities of getting $1$ for randomly chosen $t$). with more than $\delta$ probability. Compare this with the definition of pseudorandom generators - where we have restrictions on $T$ (which we called $\calA$ in that context) based on how easy the function $T$ is to compute.
+
+\paragraph{\bf Why do we care about almost $k$-wise independent distributions?} This is a question we will not answer in detail as a good part of it is in the exercises. However, we will set up the background here.
+
+\paragraph{\bf Why are $\epsilon$-biased distributions almost $k$-wise independent?}
+We now prove the main theorem that we want to learn in this lecture. We will prove a more general theorem, which will imply the statement to $k$-wise independent distributions. 
+
+\begin{theorem}
+If $\calD$ is an $\epsilon$-biased distribution over $\zo^m$, then it is $\delta$-close to uniform distribution where $\delta = \epsilon 2^{m/2}$.
+\end{theorem}
+To prove the above theorem, as in the definition of $\delta$-closeness, we need to deal with arbitrary distinguisher Boolean functions $T$. For this, we use Fourier analysis as a tool:
+
+\paragraph{\bf Basic Fourier Analysis of Boolean Functions:}
+
+Recall that we defined for $y \in \F_2^n$, the character function 
+$\chi_y : \F_2^m \to \mathbb{R}$ as : 
+$$\forall w \in \F_2^m \textrm{ define } \chi_y(w) = (-1)^{\langle y,w \rangle}$$
+
+This function has some nice properties. For any $y \in \F_2^m$, $\chi_y(w+w') = \chi_y(w)\chi_y(w')$. And, $\chi_y(w) = \chi_w(y)$. If we view $y \in \zo^m$ as the characterestic vector of a set $A \subseteq [m]$, then this can be interpreted as:
+
+$$\forall w \in \zo^m, \textrm{ define } \chi_A(w) = (-1)^{\sum_{i \in A} w_i}$$
+
+Note that, given a $A \subseteq [m]$, we can consider $\chi_A$ as a vector in $\mathbb{R}^{2^m}$. One interesting property is that these vectors (for different subsets $A \subseteq [m]$ are pairwise orthogonal (Prove this !). Hence they are also independent. Thus, they form a basis for $\mathbb{R}^{2^m}$ and is called the {\em Fourier basis}. Thus, any function $f: \zo^m \to \mathbb{R}$ (viewed as a vector in $\mathbb{R}^{2^m}$) is expressible as a linear combination of these vectors, as: $f = \sum_{A \subseteq [m]} \alpha_A \chi_A$. To standardise the notation, we denote the $\alpha_A \in \mathbb{R}$ as $\widehat{f}(A)$. This gives the following expression for the evaluation of the function $f$ on input $s$.
+$$\forall w \in \zo^m : f(w) = \sum_{A \subseteq [m]} \widehat{f}(A) \chi_A(w)$$
+This is called the {\em Fourier representation} of the function. The coefficients, $\widehat{f}(A)$ for different $A$ are called the  {\em Fourier coefficients} of the function $f$. 
+Since the basis is orthogonal, we have the coefficients as : $\langle f,\chi_A \rangle$. Hence, for any $f:\zo^m \to \mathbb{R}$ we can define another function $\widehat{f}:\zo^m \to \mathbb{R}$ such that $\widehat{f}(A) = \langle f,\chi_A \rangle$. The linear transformation from $\mathbb{R}^{2^m}$ to $\mathbb{R}^{2^m}$ which transforms the vector $f$ to $\widehat{f}$ is called the {\em Fourier transform}.
+$$\widehat{f}(A) = \frac{1}{2^m} \sum_{w \in \zo^m} f(w)  \chi_A(w) = \sum_{w \in \zo^m} \frac{1}{2^m}  f(w)  \chi_A(w) = \E_w\left[ f(w)\chi_A(w) \right]$$
+
+\begin{theorem}[{\bf Plancherel Theorem}]
+Let $f,g : \zo^m \to \mathbb{R}$. Then the following holds:
+$$\langle f,g \rangle = \sum_{S \subseteq [m]} \widehat{f}(S) \hat{g}(S) $$
+\end{theorem}
+\begin{proof}
+We use the definitions:
+\begin{eqnarray*}
+\langle f,g \rangle & = & \left\langle \bigsum_{S \subseteq [m]} \widehat{f}(S) \chi_S, \bigsum_{T \subseteq [m]} \widehat{g}(T)\chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S) \left\langle  \chi_S, \sum_{T \subseteq [m]} \widehat{g}(T)\chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S)   \sum_{T \subseteq [m]} \widehat{g}(T)\left\langle \chi_S, \chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S)  \widehat{g}(S) \textrm{  \hspace{1cm}$\because$ $\chi_S, \chi_T$ are othognal when $S \ne T$}
+\end{eqnarray*}
+
+Following is an important corollary, which can by a simple derivation.
+\begin{corollary}[{\bf Parseval's Identity}]
+If $f : \zo^m \to \{1,-1\}$ the :
+$$ \bigsum_{T \subseteq [m]} \widehat{f}(S)^2 = 1$$
+\end{corollary}
+
+\paragraph{\bf $\epsilon$-biased distributions are $\delta$-close to uniform distribution:} We now come back to the proof of the theorem. We need to prove that for any distinguisher $T$, the difference in probabilities of getting $y$ such that $T(y)=1$ from the two distributions is at most $\delta$.
+
+Let $T$ be any distinguisher, which we view as a Boolean function $T : \zo^m \to \{1,-1\}$. Notice that, in this interpretation, $\Pr_{y \to D} \left[ T(y) = 1 \right]$ is same as $\E_{y \to D} \left[ T(y) \right]$. Hence we want to prove that:
+$$\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| \le \epsilon 2^{m/2}$$
+Our starting information is that $D$ is $\epsilon$-biased. That is, by definition, $\left| \E_{y \to D} \left[  \chi_S(y) \right] \right|  \le \epsilon$. 
+To proceed with the proof, we apply use the Fourier representation of $T  = \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S$.
+\begin{eqnarray*}
+\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| & = & 
+\left| \E_{y \to D} \left[ \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S(y) \right] - \E_{y \to U} \left[ \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S(y) \right] \right| \\
+& = & 
+\left| \bigsum_{S \subseteq [m]}  \E_{y \to D} \left[ \widehat{T}(S) \chi_S(y) \right] - \bigsum_{S \subseteq [m]} \E_{y \to U} \left[ \widehat{T}(S) \chi_S(y) \right] \right| \\
+& = & 
+\left| \bigsum_{S \subseteq [m]} \widehat{T}(S) \left[ \E_{y \to D} \left[  \chi_S(y) \right] - \E_{y \to U} \left[ \chi_S(y) \right] \right] \right| \\
+& = & 
+\left| ~\bigsum_{S \subseteq [m]} \widehat{T}(S) \left[ \E_{y \to D} \left[  \chi_S(y) \right] \right] ~\right| \textrm{\hspace{1cm} $\because \E_{y \to U} \left[ \chi_S(y) \right]  = 0$} \\
+& \le & 
+\epsilon \left| \bigsum_{S \subseteq [m]} \widehat{T}(S) \right|
+\le \epsilon \bigsum_{S \subseteq [m]} \left| \widehat{T}(S) \right| \\
+\end{eqnarray*}
+Now we just need to bound $\bigsum_{S \subseteq [m]} \left|\widehat{T}(S)\right|$. This is just the consequence of the relation between $\ell_2$ norm and $\ell_1$ norm that we have seen earlier. Consider the $2^m$-tuple $\left[ \widehat{T}(S) \right]_{S \subseteq [m]}$ as a vector in $\mathbb{R}^{2^m}$. The above expression that we want to bound is the $\ell_1$ norm of this vector (sum of absolute values of individual entries). We use the relation between the $\ell_1$ norm and $\ell_2$ norm.
+
+$$\bigsum_{S \subseteq [m]} \left|\widehat{T}(S)\right| \le 2^{m/2} \bigsum_{S \subseteq [m]} \left[ \widehat{T}(S)\right]^2 = 2^{m/2}$$
+where the last step is from the Pareseval's identity. Hence the proof. We conclude that:
+$$\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| \le \epsilon 2^{m/2}$$
+\end{proof}
+
+Now we derive the corollary for almost $k$-wise independence if $\epsilon$-biased distributions. It is just to observe that the above proof works even for subset of bits of the string $y$.
+
+\begin{corollary}
+Any $k$ bits of an $\epsilon$-biased distribution are $\epsilon 2^{k/2}$-close to a uniform distribution on those $k$ bits.
+\end{corollary}
+
+Let us also get a sense of the parameters. Suppose we want $\delta$-close to a $k$-wise independent distributions (on every subset of $k$ bits), then we should choose an $\epsilon$-biased distribution such that $\epsilon = \frac{\delta}{2^{k/2}}$. The number of random bits required for this, using our earlier construction is, $2 \log m + 2 \log \left( \frac{1}{\epsilon} \right)$ (since the size of the set that we constructed earlier is $O\left( \frac{m^2}{\epsilon^2} \right)$.
+In terms of $\delta$, this is - $2 \log m + k + 2 \log\left(\frac{1}{\delta} \right)$. Viewing it as a generator, $G : \zo^\ell \to \{0,1\}^m$ - if we need $G(U_\ell)$ to be $k$-wise independent, then the best construction we know (and we need) to use $\ell = k \log m$ bit long seed, where as if we need $G(U_\ell)$ to be only ``almost" $k$-wise independent ($\delta$-close on each $k$ bits to uniform), then we can do that with a smaller $\ell = O\left( k+\log m+\log\left( \frac{1}{\delta} \right)\right)$ number of bits as the pure random bit seed for the generator.
