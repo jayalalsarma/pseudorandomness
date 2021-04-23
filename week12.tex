@@ -1,0 +1,7 @@
+\Week{12}{Fooling Space Bounded Computation : Nisan's Generator}
+
+In this week, we study how to use the objects that we have seen so far in order to design pseudorandom generators for space bounded computation with surprisingly small seed length. We will do a quick review first.
+
+\paragraph{Review of the Model for Space Bounded Algorithms:} Space bounded algorithms are formally modelled as follows. The Turing machine model - has a finite control (with a finite number of states), a read-only tape in which input is written, a read-write work-tape in which symbols can be read or written. The space used by the Turing machine is the maximum value of the head position in the worktape at any point during the computation \footnote{even if work tape head moves without writing, that is still considered to be space used, since otherwise the head position can be used as additional unapproved storage}.
+
+More formally, a Turing machine is said to be using at most $s(n)$ space if it uses 

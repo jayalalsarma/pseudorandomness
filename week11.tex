@@ -1,0 +1,503 @@
+\Week{11}{Fooling the PARITY ($\oplus_n$) : Small Biased Sets}
+
+Now we come to fooling {\sc PARITY} of $m$ bits. We start with the following notion of "almost uniform" distributions. Consider the following claim that we have seen before. For a $w \in \zo^m$, where $w \ne 0$, the probability that a randomly chosen $a \in \zo^m$ satisfies $\langle
+w,a \rangle = 0$ is exactly $\half$. How close is this probability to half can be used as a measure of how pure the $m$ bits are. The following definition formalizes this.
+\begin{definition}[{\bf Small Biased Distribution}]
+Let $\epsilon > 0$. A distribution $Y = (Y_1,Y_2, \ldots, Y_m)$ over $\{0,1\}^m$ is said to be an \textit{$\epsilon$-biased distribution }if $\forall w \in \{0,1\}^m$:
+$$\frac{1-\epsilon}{2} \le \Pr_{y \sim Y}\left[ \langle w,y \rangle = 0 \right] \le \frac{1+\epsilon}{2}$$
+\end{definition}
+\noindent An equivalent definition is in terms of the psuedorandom generators that we discussed in the initial lectures. The algorithm $\calA$ that we attempt to ``fool" is rather simplistic, it is just the parity of a set of $y$ bits (specified by the subset $I \subseteq [k]$). 
+
+\hspace{-6mm}\begin{minipage}{0.55\linewidth}
+By our formal definition of "fooling", this is exactly, for any $I \subseteq [m]$:
+$$\card{ \Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 0 \right) - \Pr_{y \sim U} \left( \bigoplus_{i \in I} y_i = 0 \right)} \le \frac{\epsilon}{2}$$
+Noting that the second term is exactly $\half$, this is equivalent definition to : for $I \subseteq [m]$, 
+$$\frac{1-\epsilon}{2} \le \Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 0 \right) \le \frac{1+\epsilon}{2}$$
+\end{minipage}
+\begin{minipage}{0.01\linewidth}
+~
+\end{minipage}
+\begin{minipage}{0.35\linewidth}
+\begin{tikzpicture}[shorten >=0.5pt,node distance=0.2cm,on grid,auto]
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_r)[]{${\cal A}(x,y)$\\$\bigoplus_{i \in I} [y_i]$}; 
+\node[state,rectangle,minimum width=1.5cm,minimum height=1.5cm,align=center](q_g)[below=of q_r,yshift=-2cm]{${\cal G}(y')$};
+\node[state,rectangle,minimum width=2.5cm,minimum height=5.25cm](q_b)[below=of q_r,yshift=-0.75cm]{};
+\node[](q_l)[above=of q_r,yshift=0.85cm]{${\cal B}(x,y')$}; 
+\node[coordinate](q_0)[right=of q_r,xshift=3.5cm]{};
+\node[coordinate](q_1)[below=of q_r,xshift=0cm,yshift=-1cm]{};
+\node[coordinate](q_2)[left=of q_r,xshift=-3.5cm,yshift=0mm]{};
+\node[coordinate](q_3)[below=of q_g,xshift=0cm,yshift=-2cm]{};
+\draw[->] ([yshift=1mm]q_r.east) -- ([yshift=1mm]q_0)node[midway] {\sc Yes/No};
+\draw[->] ([yshift=1mm]q_2) -- ([yshift=1mm]q_r.west)node[midway] {$x \in \{0,1\}^n$};
+\draw[->] ([yshift=-2mm]q_1) -- ([yshift=0mm]q_r.south)node[midway,swap] {\tiny $y \in \zo^m$};
+\draw[->] ([yshift=-5mm]q_3) -- ([yshift=0mm]q_g.south)node[midway,swap] {$y' \in \{0,1\}^{m'}$};
+
+\end{tikzpicture}
+\end{minipage}
+
+\noindent The small biased distributions get their name by the following equivalent definition.
+
+\begin{definition}[{\bf Bias of a distribution}]
+A distribution $Y \subseteq \zo^m$ is said to have a \textit{bias} of $\epsilon$ if for any $I \subseteq [m]$:
+$$\card{ \Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 0 \right) - \Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 1 \right)} \le \epsilon$$
+\end{definition}
+
+It follows from the above that $\epsilon$-biased distributions is exactly same as distributions whose bias is $\epsilon$. The following characterization is also useful. Let $D$ be a distribution over $\zo^m$.
+\begin{proposition}
+\label{prop:epsilon-biasd-expectation}
+$D$ is $\epsilon$-biased $\iff$ $\forall w \in \zo^m \setminus \{0^m\}$, $\E_{y \to D} \left[ (-1)^{\langle w,y \rangle} \right] \le \epsilon$.
+\end{proposition}
+In the discussion below, for showing that some distributions are $\epsilon$-biased, we show the RHS.
+
+%\noindent The equivalence follows by observing that:
+%$$\Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 1 \right) = 1 - \Pr_{y \sim D}\left( \bigoplus_{i \in I} y_i = 0 \right)$$
+
+\paragraph{Small Biased Sets:} For a distribution $Y$, the support of the distribution $\mathsf{supp}(Y)$ are the elements of the sample space which has a non-zero probability assigned to them. For the $\epsilon$-biased distributions, we would like smaller support. Moreover, a special case is when we have a multiset of small size over which the distribution is uniform. This motivates the following definition.
+
+\begin{definition}[{\bf Small Biased Sets}]
+Let $\epsilon > 0$.
+A sub(multi)set $S \subseteq \zo^m$ is said to be an \textit{$\epsilon$-biased set} if the distribution $Y$ on $\zo^m$ defined as:
+\[
+Y(w) = \left\{
+\begin{array}{ll}
+1/|S| & \textrm{ if $w \in S$} \\
+0 & \textrm{ otherwise}
+\end{array}
+\right.
+\]
+is an $\epsilon$-biased distribution on $\zo^m$.
+\end{definition}
+
+\noindent The size of small biased set is an important parameter. Imagine that we have $S \subseteq \zo^m$ such that $|S| = \poly(m)$ to be small biased set, and that the set $S$ is explicitly described an indexed by $\alpha \in \zo^\ell$ where $\ell = \log(|S|)$. Then, by choosing $O(\log m)$ bits uniformly at random, we have an $\epsilon$-biased distribution  which in certain situations will be as good as uniform distribution on $\zo^m$ (which requires $m$ bits).
+
+We will quickly remark that $\epsilon$-biased distributions if efficiently and explcitly constructed will lead to newer constructions of expanders and newer $t$-wise independent distributions. We will present these later in this lecture.
+
+\noindent We quickly remark on what is known:
+
+\begin{itemize}
+\item By probablistic method, we can show that there exists $\epsilon$-biased spaces of size $O(m/\epsilon^2)$.
+\item The first explicit construction was by \cite{NN90,NN93}. The space was of size $O(m/\epsilon^3)$.
+\item Incomparable bounds by \cite{AGHP92}. The space constructed is of size $O(m^2/\epsilon^2)$.
+\item Improved bounds by \cite{BT09}. The space constructed is of size $O\left((m/\epsilon^2)^{5/4}\right)$.
+\item Almost optimal bounds by \cite{Tas17}. The space constructed is of size $O\left(\frac{m}{\epsilon^{2+o(1)}} \right)$.
+\end{itemize}
+
+While it may look like a hard fight for optimizing the power for $\epsilon$ in the above expression, there are applications where that decides the boundary of efficiency.
+
+\section{Expanders from Small Biased Sets}
+\label{sec:expanders-from-small-biased-sets}
+We now describe a connection between small biased sets and expanders. Suppose that $S \subseteq \F_2^m$ is an $\epsilon$-biased set. We claim that this set naturally defines an expander. Viewing $\F_2^m$ as a group, a standard graph associated with it is the Cayley graph, defined as follows:
+
+\begin{definition}[{\bf Cayley Graph of $\F_2^m$ with respect to $\S$}]
+For $S \subseteq \F_2^n$, let $G(V,E)$ be the graph defined as follows. $V = \F_2^n$. Define the edges as:
+$$E = \left\{ (a,a+w) \mid a \in \F_2^m \textrm{ and } w \in S\right\}$$
+\end{definition}
+
+The graph is undirected since $w$ is its own additive inverse. The number of vertices is $2^m$, the degree is exactly $|S|$, assuming multiedges where elements repeat. We prove the following lemma.
+
+\begin{lemma}
+\label{lem:expanders-from-small-biased-sets}
+The graph $G$ is $(2^m,|S|,\epsilon)$ spectral expander.
+\end{lemma}
+\begin{proof}
+Let $A$ be the normalized adjacency matrix which is of the order $2^m \times 2^m$. We explicitly write down all the linearly independent eigen vectors and then bound the second largest eigen value.
+
+For $y \in \F_2^n$, define a function $\Gamma_y : \F_2^n \to \mathbb{R}$ as : 
+$$\forall w \in \F_2^n \textrm{ define } \Gamma_y(w) = (-1)^{\langle y,w \rangle}$$
+
+This function has some nice properties. For any $y \in \F_2^m$, $\Gamma_y(w+w') = \Gamma_y(w)\Gamma_y(w')$. Note that, given a $y \in \F_2^m$, we can consider $\Gamma_y$ as a vector in $\mathbb{R}^{2^m}$. We claim:
+
+\begin{claim}
+$\Gamma_y$ are eigen vectors of $A$.
+\end{claim}
+\begin{proof}
+We prove this directly by checking what $A\Gamma_y$ vector will be. Indeed:
+\begin{eqnarray*}
+\forall a \in \zo^m:~~~ \left(A\Gamma_y\right)[a] 
+& = & \sum_{(a,b)\in E} \left(A_{ab}\right) \left(\Gamma_y\right)[b] \\
+& = & \frac{1}{|S|} \sum_{(a,b)\in E} \left(\Gamma_y\right)[b] = \frac{1}{|S|} \sum_{(a,b) \in E} \Gamma_y(b) \\
+& = & \frac{1}{|S|} \sum_{w \in S} \Gamma_y(a+w) = \Gamma_y(a) \left( \sum_{w \in S} \frac{1}{|S|}\Gamma_y(w) \right) \\
+& = & \lambda_y (\Gamma_y[a]) \\
+A\Gamma_y & = & \lambda_y \Gamma_y
+\end{eqnarray*}
+And hence $\Gamma_y$ is an eigen vector of $A$ with eigen value $\bigsum_{w \in S} \frac{1}{|S|}\Gamma_y(w)$.
+\end{proof}
+
+Now we turn to bounding the eigen values $\lambda_y$. Notice that $\lambda_{0^m} = 1$. Indeed, when $y=0$, the vector $\Gamma_y \in \mathbb{R}^{2^m}$ is the all $1$s vector and hence is an eigen vector for the eigen value $1$. We claim that when $y \ne 0$, $\lambda_y \le \epsilon$. Let $D$ be the distribution on $\zo^m$ with support as $S$ and uniformly distributed over $S$. Since the set $S$ is $\epsilon$-biased, the distribution $D$ has bias at most $\epsilon$.
+\begin{eqnarray*}
+\lambda_y = \sum_{w \in S} \frac{1}{|S|} \Gamma_y(w) & = &  \frac{1}{|S|} \sum_{w \in S} (-1)^{\langle y, w \rangle} = \frac{1}{|S|} \left(\sum_{\substack{w \in S \\\langle y, w \rangle = 0}} (1) \right) + \frac{1}{|S|} \left(\sum_{\substack{w \in S \\\langle y, w \rangle = 1}} (-1)\right)\\[4mm]
+& = & \Pr_{w \sim D} \left[ \langle y, w \rangle = 0 \right] - \Pr_{w \sim D} \left[ \langle y, w \rangle = 1 \right] \le \epsilon \textrm{\hspace{7mm} since bias of $D$ is at most $\epsilon$.}
+\end{eqnarray*}
+
+\end{proof}
+
+\section{Existence of $\epsilon$-Biased Sets}
+
+We now quickly show the existence of $\epsilon$ biased set of size $\frac{m}{\epsilon^2}$. The argument is through probabilistic method. We state the technical theorem first.
+
+\begin{theorem}
+For every $\epsilon$, there exists $S \subseteq \zo^m$ of size $O(\frac{m}{\epsilon^2})$ such that $S$ is an $\epsilon$-biased set.
+\end{theorem}
+\begin{proof}
+We choose $z_1, z_2 \ldots z_\ell$ uniformly at random from the set $S \subseteq \zo^m$. We imagine that $S = \{z_1, z_2, \ldots z_\ell\}$. We ask the question. What does it mean for $S$ to be $\epsilon$ biased?  By definition, if $Y$ is the distribution over $\zo^m$ with support as $S$ (and distributed uniformly), we need that:
+$\forall w \in \{0,1\}^n \setminus \{0^m\}$:
+$$\frac{1-\epsilon}{2} \le \Pr_{y \sim Y}\left[ \langle w,y \rangle = 0 \right] \le \frac{1+\epsilon}{2}$$
+$$\textrm{\hspace{-2cm} Equivalently, } \frac{(1-\epsilon)\ell}{2} \le \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} \le \frac{(1+\epsilon)\ell}{2}$$
+$$\textrm{\hspace{-2cm} Equivalently, } \left| \vphantom{2^{2^{2^2}}} \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} - \frac{\ell}{2} \right| \le \frac{\epsilon\ell}{2}$$
+
+To show the existence of the set $S$ of the required size, we need to show that for $\ell$ chosen as required, we should prove :
+$$\Pr_{z_1,z_2, \ldots z_\ell} \left[ 
+\begin{array}{cc}
+ \forall w \in \zo^m, w \ne 0 \\
+\left| \vphantom{2^{2^{2^2}}} \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} - \frac{\ell}{2} \right| \le \frac{\epsilon\ell}{2}
+\end{array}
+\right]
+ > 0
+$$
+It suffices to show an upper bound on the complementary event.
+$$\Pr_{z_1,z_2, \ldots z_\ell} \left[ 
+\begin{array}{cc}
+ \exists w \in \zo^m, w \ne 0 \\
+\left| \vphantom{2^{2^{2^2}}} \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} - \frac{\ell}{2} \right| > \frac{\epsilon\ell}{2}
+\end{array}
+\right]
+< 1
+$$
+We plan to apply union bound to handle $\exists w \in \zo^m$ part of the statement. Hence, we fix a $w \in \zo^m$, such that $w \ne 0$ and want to derive an upper bound for:
+
+$$\Pr_{z_1,z_2, \ldots z_\ell} \left[ 
+\left| \vphantom{2^{2^{2^2}}} \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} - \frac{\ell}{2} \right| > \frac{\epsilon\ell}{2}
+\right]
+$$
+To model this, define a random variable $X_i$ which takes value $1$ when $z_i$ satisfies $\langle w,z_i \rangle = 0$ and $0$ otherwise. Since $z_i$ is chosen uniformly at random and $w \ne 0$, $\E[X_i] = \frac{1}{2}$. Defining $X = \sum_{i=1}^\ell$ gives us $\E[X] = \frac{\ell}{2}$. We are asking for the probability that $\Pr_{z_1,z_2, \ldots z_\ell} \left[ \card{\aphantom X - \E[X]} \ge \frac{\epsilon\ell}{2} \right]$. By Chernoff's bound\footnote{If $X = \sum_{i=1}^n{X_i}$ then $\Pr \left[ \card{\aphantom X - \E[X]} \ge A \right] \le e^{-A^2/2n}$}
+$$\Pr_{z_1,z_2, \ldots z_\ell} \left[ \card{\aphantom X - \E[X]} \ge \frac{\epsilon\ell}{2} \right] \le 2^{-\Omega\left(\frac{\epsilon^2\ell}{2}\right)}$$
+With the union bound applied:
+\begin{eqnarray*}
+\Pr_{z_1,z_2, \ldots z_\ell} \left[ 
+\begin{array}{cc}
+ \exists w \in \zo^m, w \ne 0 \\
+\left| \vphantom{2^{2^{2^2}}} \card{\vphantom{2^{2^{2}}}\{i \in [\ell] \mid \langle w,z_i \rangle = 0\}} - \frac{\ell}{2} \right| > \frac{\epsilon\ell}{2}
+\end{array}
+\right]
+& \le & 2^m \times 2^{-\Omega\left(\frac{\epsilon^2\ell}{2}\right)}
+\end{eqnarray*}
+For this to be less than $1$, we just need to choose $\ell$ such that $m < \frac{\epsilon^2\ell}{2}$. Thus, choice of $\ell = O\left(\frac{m}{\epsilon^2}\right)$ works. Hence, by probabilistic method, there exists a set of size $O\left(\frac{m}{\epsilon^2}\right()$ which is an $\epsilon$-biased set. This completes the proof of existence.
+\end{proof}
+
+
+\section{Explicit Construction of $\epsilon$-biased Sets}
+
+We first digress a little bit and understand the connection between two finite field $\F_q^m$ and $\F_{q^m}$. Let $r(x)$ be an irreducible polynomial\footnote{A polynomial is said to be irreducible if it cannot be written as the product of two other polynomials of smaller degree.} of degree $m$ in $\F_q[x]$ - which are polynomials whose coefficients are from $\F_q$. We claim that the set:
+$$\F \defn \left\{ p(x)\mod r(x) : p(x) \in \F_q[x] \right\}$$
+forms a finite field where the addition and multiplication is modulo the polynomial $r(x)$. By notation, $\F \equiv \F/\langle
+f\rangle$. Notice that, since the set is finite and there is no zero divisor in the set ($a,b \ne 0$ such that $ab = 0$), every non-zero element in $\F$ has an inverse\footnote{Consider $a \ne 0$, and suppose $a$ does not have an inverse, then mutliplying $a$ with all the non-zero elements in $\F$ should not give repeated elements (otherwise it will give zero divisors) and should not contain $0$ and $1$. Hence a contradiction.}. Hence this set is a field. Thus, each distinct element in $\F$ can also be viewed as a tuple of coefficients $(c_0, c_1, c_2, \ldots c_{m-1}) \in (\F_q)^m$ and vice versa. Thus it is a vector space over $\F_q$ of dimension $m$.
+
+For the remaining discussion, $r(x) = a_0 + a_1x+ \ldots a_mx^m$. Let $\alpha$ be a root of $r(x)$. Clearly, since $r(x)$ is irreducible, $\alpha$ is not in $\F_q$ (hence, consider $\alpha$ as an abstract symbol for a root of $r(d)$). Let us "adjoin" $\alpha$ to $\F_q$ and then try to take closure to make it a field. To start with, what is $\alpha^2$?, that becomes abstract another element outside $\F_q$, this way, we introduce $m-1$ new elements, $\alpha, \alpha^2, \ldots \alpha^{m-1}$. At the $m^{th}$ step, what is $\alpha^{m}$? That is not a new element since $r(\alpha) = 0$ and $a_m \ne 0$, hence $\alpha^m = \frac{1}{a_n}(-a_0-a_1\alpha-a_2\alpha^2-\ldots-a_{n-1}\alpha^{n-1})$. But then, all the distinct combinations of the above powers of $\alpha$ with coefficients from $\F_q$ are all distinct elements since $\alpha$ does not introduce any non-trivial relationship among them. This gives rise to a set of size $q^m$ which is a field by construction (again, inverse exists because it is a finite ring without zero divisors). We will call this set to be $\F_{q^m}$.
+
+The two sets that we described above $\F_{q^m}$ and $(\F_q)^m$ have a natural bijection among them. The map from $(\F_q)^m$ to $\F_{q^m}$ is easy to describe : given $(c_0, c_1, c_2, \ldots c_{m-1}) \in (\F_q)^m$, which denotes the polynomial $p(x) = c_0+c_1x+c_2x^2+\ldots c_{m-1}x^{m-1}$. The image in $\F_{q^m}$ is the evaluation $p(\alpha)$. This map is a bijection and also respects the addition and multiplication. It is an isomorphism between the two fields. Thus, we have an isomorphism, $\phi : \F_{q^m} \to \F_q^m$. We will use this map for the construction.
+
+\paragraph{Construction of the $\epsilon$-biased set:} We directly define the set:
+
+$$ S = \left\{ y \in \{0,1\}^m ~\bigger{\bigger{\bigger{|}}}
+\begin{array}{c}
+y = y_1y_2 \ldots y_m \textrm{ where }\\
+y_i = \langle \phi(\alpha^i), z \rangle, \textrm{ for } \alpha,z \in \F_2^\ell 
+\end{array}
+\right\}
+$$
+
+As per the above formulation, the size of the set $S$ is at most $2^{2\ell}$. We will choose the parameter $\ell$ later (to be $\log\left(\frac{m}{\epsilon}\right)$) and this will meet our size requirement. We now prove that for the above value of $\ell$, the set $S$ is $\epsilon$-biased.
+
+\begin{lemma}
+\label{lemma:epsilon-biased}
+For $\ell = \log\left(\frac{m}{\epsilon}\right)$), the set $S$ is $\epsilon$-biased.
+\end{lemma}
+\begin{proof}
+Consider the distribution $Y$ on $\zo^m$ defined as:
+\[
+Y(y) = \left\{
+\begin{array}{ll}
+1/|S| & \textrm{ if $y \in S$} \\
+0 & \textrm{ otherwise}
+\end{array}
+\right.
+\]
+For a given $w \in \zo^m$, $w \ne 0$, we need to estimate the probability $\Pr_{y \sim Y} \left[ \langle y, w \rangle = 0 \right]$. This is same as:
+\begin{eqnarray*}
+Pr_{y \in S} \left[ \langle y, w \rangle = 0 \right] 
+& = & \Pr_{y \in S} \left( \sum_{i=1}^m y_iw_i = 0 \right) 
+= \Pr_{y \in S} \left[ \sum_{i=1}^m \langle \phi(\alpha^i), z \rangle w_i = 0 \right] \\
+& = & \Pr_{y \in S} \left[ \sum_{i=1}^m \langle \phi(\alpha^i)w_i, z \rangle = 0 \right] 
+= \Pr_{y \in S} \left[ \sum_{i=1}^m \langle \phi(\alpha^iw_i), z \rangle = 0 \right] \\
+& = & \Pr_{y \in S} \left[ \left\langle \sum_{i=1}^m \phi(\alpha^iw_i), z \right\rangle = 0 \right]
+= \Pr_{y \in S} \left[ \left\langle \phi \left( \sum_{i=1}^m\alpha^iw_i \right) , z \right\rangle  = 0 \right] \\
+& = & \Pr_{y \in S} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \right] \\
+&& \textrm{ where $p_w(x) = \sum_{i=1}^mw_ix^i$ is a polynomial defined by $w$ of degree $m$.}
+\end{eqnarray*}
+Notice that choosing $y \in S$ unformly at random is equivalent to choosing $\alpha$ and $z$ uniformly at random from $\F_2^\ell$. Since $\phi$ takes only $0$ to $0^m$, $\phi(p_w(\alpha)) = 0$ if and only if $p_w(\alpha) = 0$. Hence, we can estimate the above expression by conditioning on the event $p_w(\alpha) = 0$. 
+\newpage
+\begin{eqnarray*}
+\Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \right] 
+& = & 
+\Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \mid p_w(\alpha) = 0 \right] \Pr_{\alpha \in \F_2^\ell} [ p_w(\alpha) = 0 ] \\
+& & + \Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \mid p_w(\alpha) \ne 0 \right] \Pr_{\alpha \in \F_2^\ell} [ p_w(\alpha) \ne 0 ] \\
+\end{eqnarray*}
+
+$\Pr_{\alpha \in \F_2^\ell} [ p_w(\alpha) = 0 ] \le \frac{m}{2^\ell}$ since $p_w(x)$ can have at most $m$ roots in $\F_2^\ell$. Denote $p = \frac{m}{2^\ell}$.
+Conditioned on $p_w(\alpha) = 0$, we know that $\phi(p_w(\alpha)) = 0$ and,
+$\Pr_{\alpha,z \in \F_2^\ell} \langle \phi(p_w(\alpha)), z \rangle  = 0] = 1$.
+Conditioned on $p_w(\alpha) \ne 0$, we know that $\phi(p_w(\alpha)) \ne 0$ and,
+$\Pr_{\alpha,z \in \F_2^\ell} \langle \phi(p_w(\alpha)), z \rangle  = 0] = \half$. Thus,
+$$
+\Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \right] 
+\le 1 \times p + \half \times (1) \le \half+p 
+$$
+To see a lower bound, 
+\begin{eqnarray*}
+\Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \right] 
+& \ge & 
+\Pr_{\alpha, z \in \F_2^\ell} \left[\left\langle \phi(p_w(\alpha)), z \right\rangle  = 0 \mid p_w(\alpha) \ne 0 \right] \Pr_{\alpha \in \F_2^\ell} [ p_w(\alpha) \ne 0 ]  \\
+& \ge & \half(1-p) \ge \half - \frac{p}{2} \ge \half - p
+\end{eqnarray*}
+Hence, 
+$$\textrm{Hence, } \half - p \le \Pr_{y \sim Y} \left[ \langle y, w \rangle = 0 \right] \le \half+p $$
+
+Thus, we just need to ensure that, $p \le \frac{\epsilon}{2}$. We choose $\ell$ such that, $2^{\ell} = \frac{m}{2\epsilon}$. Recall that the set $S$ was of size $2^{2\ell}$. Hence $|S| = \frac{m^2}{4\epsilon^2} \le O\left(\frac{m^2}{\epsilon^2}\right)$. This completes the correctness proof of the construction.
+\end{proof}
+
+\section{Repeated Sampling to Improves Bias}
+
+Consider an $\epsilon$-biased set $S \subseteq \zo^m$.
+As earlier, the distribution $D$ defined based on the set $S$ on $\zo^m$:
+\[
+D(y) = \left\{
+\begin{array}{ll}
+1/|S| & \textrm{ if $y \in S$} \\
+0 & \textrm{ otherwise}
+\end{array}
+\right.
+\]
+
+By definition $D$  is $\epsilon$-biased. We will consider the following distribution derived from $D$. Let $y_1, y_2, \ldots y_t$ be $t$ strings in in $\F_2^m$, independently chosen from distribution $D$. Consider the distribution of their sum $y = y_1+y_2+\ldots+y_t$ where the sum is defined over $\F_2^m$ (and hence is bitwise sum  modulo 2). We will denote the distribution of $y$ over $\zo^m$ to be  $D'$. We claim that $D'$ is $\epsilon^t$ biased.
+
+\begin{claim}
+\label{lem:bias-amplification}
+The distribution $\D^t$ is $\epsilon^t$-biased.
+\end{claim}
+\begin{proof}
+Let $w \in \zo^m$ such that $w \ne 0$. By Proposition~\ref{prop:epsilon-biasd-expectation} it suffices to upper bound $\E_{y \sim D^t} (-1)^{\langle y,w \rangle}$.
+\begin{eqnarray*}
+\E_{y \sim D^t} (-1)^{\langle y,w \rangle} & = & \E_{y_1, y_2 \ldots y_t \sim D} \left[ (-1)^{\langle \sum_i y_i,w  \rangle} \right] \\
+& = & \E_{y_1, y_2 \ldots y_t \sim D} \left[ \prod_i \left((-1)^{\langle y_i,w  \rangle} \right) \right] = \prod_i \E_{y_i \sim D} \left[ \left((-1)^{\langle y_i,w  \rangle} \right] \right) \le \epsilon^t
+\end{eqnarray*}
+\end{proof}
+
+\begin{curiousity}
+The above is a trivial bias amplification method and the analysis depends on independence of the sampling. One may ask the question, can we do more randomness efficient amplification of the bias? 
+
+Given our background with expanders, it is natural to consider a random walk on expanders. A simple case is consider the following length 2 walk lemma which is attributed to Rozenman and Wigderson (unpublished).
+\begin{lemma}
+Let $D$ be an $\epsilon$-biased distribution over $\zo^m$ and let $G$ be an $(2^m,d,\lambda)$ spectral expander whose vertices are labeled by samples of $D$ so that the number of vertices labeled $w \in \zo^m$ is proportional to $D(w)$. Let $D'$ be the following distribution: Uniformly choose a random vertex $y_1$ and choose a random neighbor of $y_2$ to sample a random edge $(y_1,y_2)$ of $G$
+and output $y=y_1+y_2$. Then $D'$ is $(\epsilon^2+ \lambda)$-biased and with support $O(d.\supp(D))$.
+\end{lemma}
+Notice that $\epsilon^2$ is smaller than $\epsilon$ and that amplifies the bias, and we lose it out a bit by additive $\lambda$. Thus if we choose a better spectral expander, we achieve amplification without much loss. One can also repeat this again and again, and achieve a good bias amplification for resulting distribution $D_i$ which will be $\epsilon_i$-biased and support size $s_i$ such that $\epsilon_{i+1} = \epsilon_i^2+\lambda_i$ and $s_{i+1} = O(d.s_i)$. Choosing $\lambda_i = \epsilon_i^2$ and $d_i = 1/\lambda_i^4$, this gives:
+$$\epsilon_{i+1} = 2\epsilon_i^2 \textrm{ and } s_{i+1} = s_i/\epsilon_i^4$$
+
+Instead of repeating this on different graphs, one can imagine~\cite{Tas17} taking a walk for $t$ steps: that is, choose $y_1$ from $D$ and then take a walk on the $s$-wide replacement product reduces the bias almost optimally. If the labels obtained in the walk be $y_1, y_2, y_3, \ldots y_t$ then output $y = y_1+y_2+\ldots+y_t$. Let $D^t$ be the resulting distribution whose bias we need to estimate. \cite{Tas17} analyses this as follows: let $w \in \zo^m$ and $w \ne 0$. We need to show that:
+$$\Pr_{y \sim D^t} \left[ \langle y, w \rangle = 1 \right] = \Pr_{y \sim D^t} \left[ \sum_{i=1}^t \left\langle y_i, w \right\rangle = 1\right]
+ \in \left[ \half-\frac{\delta}{2},\half+\frac{\delta}{2}\right] $$
+Thus, if we define a bad set $B$ as follows:
+$$B = \left\{ u \in \zo^m \mid \sum_{i:w_i=1} u_i = 1  \right\}$$ 
+We need to estimate the probability that $\sum_{i=1}^t \left\langle y_i, w \right\rangle = 1$. This is same as the probability that an odd number of $y_i$s sampled falls into the bad set $B$. Compare this with the expander walk based error reduction method, where we wanted to analyse the probability that the majority of the samples fall into a bad set. It is surprising that a similar analysis works for the "parity" of the samples to be in $B$ also. We refer the reader to \cite{Tas17} for modeling this interesting fact algebraically and a proof. See Section 3 of \cite{Tas17}.
+\end{curiousity}
+
+\section{Lowerbounds for the size of $\epsilon$-biased Sets}
+
+We showed the construction of $\epsilon$-biased set of size $\left(\frac{m}{\epsilon}\right)^2$ and also showed the existence of $\epsilon$-biased set of size at most $\frac{m}{\epsilon^2}$. We now show that the existence proof is tight. That is any $\epsilon$-biased set has to be that large.
+
+\begin{theorem}
+If $S \subseteq \zo^m$ is $\epsilon$-biased, then $|S| \ge \Omega\left(\frac{m}{\epsilon^2 \log{(1/\epsilon)}}\right)$.
+\end{theorem}
+\begin{proof}
+As earlier, the distribution $D$ defined based on the set $S$ on $\zo^m$:
+\[
+D(y) = \left\{
+\begin{array}{ll}
+1/|S| & \textrm{ if $y \in S$} \\
+0 & \textrm{ otherwise}
+\end{array}
+\right.
+\]
+\noindent By definition $D$  is $\epsilon$-biased. We consider $D^t$ which is $\epsilon^t$-biased by Lemma~\ref{lem:bias-amplification}.\\[-2mm]
+
+\hspace{-6mm}\begin{minipage}{0.55\linewidth}
+\vspace{-5mm}
+Recall that the support of a distribution $D$ ($\supp(D)$) is the elements of the sample space which has non-zero probability in the distribution. Eg: $\supp(D) = S$. We will study the size of support of $D'$. 
+By definition:\\[-2mm]
+$$\supp(D^t) = \left\{ y_1+y_2+\ldots+y_t :
+\begin{array}{c}
+\forall i \in [t]\\ 
+y_i \in \supp(D) 
+\end{array}
+\right\} $$
+%\vspace{-2mm}
+For picture assumes $0^m \in S$, and is shown for representational purposes.
+\end{minipage}
+\begin{minipage}{0.35\linewidth}
+%\begin{figure}
+%\caption{Support of $D$ and $D^t$}
+\begin{tikzpicture}
+%\AsymCloud{coordinate}{text}{scale factor}
+\draw (-3,-2) rectangle (3.5cm,2.5cm);
+\AsymCloud{(1,0)}{}{1.6}
+\node[] at (0,0){$\supp(D)$};
+\node[] at (2,0){$\supp(D^t)$};
+\node[] at (2.5,2){$\zo^m$};
+\draw (0,0) circle (0.9cm);
+\end{tikzpicture} 
+%\end{figure}
+\vspace{1mm}
+\end{minipage}
+
+\noindent We will estimate a lower bound and upper bound for the size of the $\supp(D)$ in terms of $|S|$.
+\begin{description}
+\item{\sf Estimating an upper bound for $|\supp(D)|$}:
+We would like to estimate 
+$$\card{\left\{ y_1+y_2+\ldots+y_t :
+\begin{array}{c}
+\forall i \in [t]\\ 
+y_i \in \supp(D) 
+\end{array}
+\right\}}$$
+Let $s = |S| = |\supp(D)|$. Thus we need to choose $y_1, y_2, \ldots y_\ell \in S$ each of which repeats $c_1, c_2, \ldots, c_\ell$ such that $c_1+c_2+\ldots+c_\ell = t$. This is at most ${s+t-1 \choose t} \le {s+t \choose t} \le \left(\frac{(s+t)e}{t}\right)^t$.
+\item{\sf Estimating an lower bound for $|\supp(D)|$}:
+We will use the following lemma which we leave as an exercise:
+\begin{lemma}
+If $D$ is an $\epsilon$-biased distribution, then as a vector $D \in \mathbb{R}^{2^m}$:
+$$ \frac{1}{|\supp(D)|} \le \norm{D}^2 \le \epsilon^2+\frac{1}{2^m}$$
+\end{lemma}
+\vspace{-5mm}
+$$\hspace{-21mm}\textrm{ Applying this lemma to $D^t$ which is $\epsilon^t$ biased:~~~~}
+\frac{1}{|\supp(D^t)|} \le \norm{D^t}^2 \le \epsilon^{2t}+\frac{1}{2^m}$$
+Choose $t$ such that $\epsilon^{2t} = 2^{-m}$, which is equivalent to $t = \frac{m}{2\log(1/\epsilon)}$.
+This gives, 
+$$\frac{1}{2\epsilon^{2t}} \le |\supp(D^t)| \le \left(\frac{(s+t)e}{t}\right)^t \textrm{ and hence, }
+\frac{1}{2^{1/t}\epsilon^{2}} \le \frac{se}{t}+e$$
+This gives : $|S| \ge \frac{m}{2^{1/t}}\left(\frac{1}{\epsilon^2 \log(1/\epsilon)}\right)$. Choose $m$ large enought to get $|S| \ge \frac{m}{\epsilon^2 \log(1/\epsilon)}$. Hence the proof.
+\end{description}
+\end{proof}
+
+\begin{exercise-prob}[See Problem Set 4~(Problem~\ref{epsilon-biased})]
+\begin{show-ps4}{epsilon-biased}
+If $D$ is an $\epsilon$-biased distribution over $\{0,1\}^m$, then as a vector $D \in \mathbb{R}^{2^m}$:
+$$ \frac{1}{|\supp(D)|} \le \norm{D}^2 \le \epsilon^2+\frac{1}{2^m}$$
+\end{show-ps4}
+\end{exercise-prob}
+
+
+\begin{exercise-prob}[See Problem Set 4~(Problem~\ref{k-wise-indep})]
+\begin{show-ps4}{k-wise-indep}
+Let $G : \zo^{k \log m} \to \zo$ be the generator that we described such that $G\left(U_{k \log m}\right)$ outputs a $k$-wise independent distribution. (See the explicit construction of $k$-wise independent distribution). If we replace the input to $G$ with a small bias distribution of $\epsilon' = \frac{\epsilon}{2^k}$, then the output of $G$ is $\epsilon$-close to being $k$-wise independent. Thus, conclude that, there is a generator for almost $k$-wise independent distributions with seed length $O\left(\log\log m+k+\log(1/\epsilon)\right)$.
+\end{show-ps4}
+\end{exercise-prob}
+
+\section{$\epsilon$-biased distributions are almost $k$-wise independent}
+
+In this lecture, we prove yet another connection between the mathematical objects that we have seen so far - namely, $\epsilon$-biased sets and $k$-wise independent bits. Recall that in order to generate a distribution over $\zo^m$ which is $k$-wise indepdnent, we needed to invest $O(k \log n)$ random bits. In otherwise, the explicit $k$-wise independence construction that we saw earlier can also be seen as a function $G : \zo^{k \log m} \to \zo^m$ such that $G\left(U_{k \log m}\right)$ is a distribution that is $k$-wise independent. For generators, the number of pure random bits that they use, is called the {\em seed length}. So the seed length for our $k$-wise independent generator is $O(k \log m)$.
+
+Suppose, we do not really require $k$-wise independent distributions, but are fine with ``almost" $k$-wise independent distributions, the it turns out that $\epsilon$ biased sets can do the job with $O(k+\log m)$ seed instead of $O(k \log m)$. We define the notion of ``almost" first. We say that the distribution is ``almost" $k$-wise independent if every subset of $k$ bits is ``close" to uniform distribution. Now we need the definition of "closeness" of distribitions which we define first:
+
+\begin{definition}[{\bf $\delta$-close Distributions}]
+Two distributions $D$ and $D'$ over $\{0,1\}^m$ are said to be $\delta$-close to each other, if for any two $T \subseteq \zo^m$, the probability that a randomly chosen string is in $T$ is same for both distributions, upto additive $\delta$. More formally:
+$$ \forall T \subseteq \zo^m~:~ \left| \Pr_{y \to D} \left[ y \in T \right] - \Pr_{y \to D'} \left[ y \in T \right] \right| \le \delta $$
+\end{definition}
+
+Note that, $T \subseteq \zo^m$ can equivalently be viewed as a Boolean function $T : \zo^m \to \zo$. We use the same notation for the subset and the function. In terms of this, the above condition can also be rewritten as: 
+$$ \forall T \subseteq \zo^m~:~ \left| \Pr_{y \to D} \left[ T(y) = 1 \right] - \Pr_{y \to D'} \left[ T(y) = 1 \right] \right| \le \delta $$
+Another way to view $T$ is as a \textit{distinguisher function} which tries to distinguish the two distributions. The statement of the definition says, no Boolean function test $T$ will be able to distinguish the two distributions (in the sense that they do not have too different probabilities of getting $1$ for randomly chosen $t$). with more than $\delta$ probability. Compare this with the definition of pseudorandom generators - where we have restrictions on $T$ (which we called $\calA$ in that context) based on how easy the function $T$ is to compute.
+
+\paragraph{\bf Why do we care about almost $k$-wise independent distributions?} This is a question we will not answer in detail as a good part of it is in the exercises. However, we will set up the background here.
+
+\paragraph{\bf Why are $\epsilon$-biased distributions almost $k$-wise independent?}
+We now prove the main theorem that we want to learn in this lecture. We will prove a more general theorem, which will imply the statement to $k$-wise independent distributions. 
+
+\begin{theorem}
+If $\calD$ is an $\epsilon$-biased distribution over $\zo^m$, then it is $\delta$-close to uniform distribution where $\delta = \epsilon 2^{m/2}$.
+\end{theorem}
+To prove the above theorem, as in the definition of $\delta$-closeness, we need to deal with arbitrary distinguisher Boolean functions $T$. For this, we use Fourier analysis as a tool:
+
+\paragraph{\bf Basic Fourier Analysis of Boolean Functions:}
+
+Recall that we defined for $y \in \F_2^n$, the character function 
+$\chi_y : \F_2^m \to \mathbb{R}$ as : 
+$$\forall w \in \F_2^m \textrm{ define } \chi_y(w) = (-1)^{\langle y,w \rangle}$$
+
+This function has some nice properties. For any $y \in \F_2^m$, $\chi_y(w+w') = \chi_y(w)\chi_y(w')$. And, $\chi_y(w) = \chi_w(y)$. If we view $y \in \zo^m$ as the characterestic vector of a set $A \subseteq [m]$, then this can be interpreted as:
+
+$$\forall w \in \zo^m, \textrm{ define } \chi_A(w) = (-1)^{\sum_{i \in A} w_i}$$
+
+Note that, given a $A \subseteq [m]$, we can consider $\chi_A$ as a vector in $\mathbb{R}^{2^m}$. One interesting property is that these vectors (for different subsets $A \subseteq [m]$ are pairwise orthogonal (Prove this !). Hence they are also independent. Thus, they form a basis for $\mathbb{R}^{2^m}$ and is called the {\em Fourier basis}. Thus, any function $f: \zo^m \to \mathbb{R}$ (viewed as a vector in $\mathbb{R}^{2^m}$) is expressible as a linear combination of these vectors, as: $f = \sum_{A \subseteq [m]} \alpha_A \chi_A$. To standardise the notation, we denote the $\alpha_A \in \mathbb{R}$ as $\widehat{f}(A)$. This gives the following expression for the evaluation of the function $f$ on input $s$.
+$$\forall w \in \zo^m : f(w) = \sum_{A \subseteq [m]} \widehat{f}(A) \chi_A(w)$$
+This is called the {\em Fourier representation} of the function. The coefficients, $\widehat{f}(A)$ for different $A$ are called the  {\em Fourier coefficients} of the function $f$. 
+Since the basis is orthogonal, we have the coefficients as : $\langle f,\chi_A \rangle$. Hence, for any $f:\zo^m \to \mathbb{R}$ we can define another function $\widehat{f}:\zo^m \to \mathbb{R}$ such that $\widehat{f}(A) = \langle f,\chi_A \rangle$. The linear transformation from $\mathbb{R}^{2^m}$ to $\mathbb{R}^{2^m}$ which transforms the vector $f$ to $\widehat{f}$ is called the {\em Fourier transform}.
+$$\widehat{f}(A) = \frac{1}{2^m} \sum_{w \in \zo^m} f(w)  \chi_A(w) = \sum_{w \in \zo^m} \frac{1}{2^m}  f(w)  \chi_A(w) = \E_w\left[ f(w)\chi_A(w) \right]$$
+
+\begin{theorem}[{\bf Plancherel Theorem}]
+Let $f,g : \zo^m \to \mathbb{R}$. Then the following holds:
+$$\langle f,g \rangle = \sum_{S \subseteq [m]} \widehat{f}(S) \hat{g}(S) $$
+\end{theorem}
+\begin{proof}
+We use the definitions:
+\begin{eqnarray*}
+\langle f,g \rangle & = & \left\langle \bigsum_{S \subseteq [m]} \widehat{f}(S) \chi_S, \bigsum_{T \subseteq [m]} \widehat{g}(T)\chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S) \left\langle  \chi_S, \sum_{T \subseteq [m]} \widehat{g}(T)\chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S)   \sum_{T \subseteq [m]} \widehat{g}(T)\left\langle \chi_S, \chi_T \right\rangle \\
+& = & \bigsum_{S \subseteq [m]}  \widehat{f}(S)  \widehat{g}(S) \textrm{  \hspace{1cm}$\because$ $\chi_S, \chi_T$ are othognal when $S \ne T$}
+\end{eqnarray*}
+
+Following is an important corollary, which can obtained by substututing $f = g$ in Plancharel's theorem and using the fact that the range of these functions are $\{-1,1\}$.
+\begin{corollary}[{\bf Parseval's Identity}]
+If $f : \zo^m \to \{1,-1\}$ then :
+$$ \bigsum_{T \subseteq [m]} \widehat{f}(S)^2 = 1$$
+\end{corollary}
+
+\paragraph{\bf $\epsilon$-biased distributions are $\delta$-close to uniform distribution:} We now come back to the proof of the theorem. We need to prove that for any distinguisher $T$, the difference in probabilities of getting $y$ such that $T(y)=1$ from the two distributions is at most $\delta$.
+
+Let $T$ be any distinguisher, which we view as a Boolean function $T : \zo^m \to \{1,-1\}$. Notice that, in this interpretation, $\Pr_{y \to D} \left[ T(y) = 1 \right]$ is same as $\E_{y \to D} \left[ T(y) \right]$. Hence we want to prove that:
+$$\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| \le \epsilon 2^{m/2}$$
+Our starting information is that $D$ is $\epsilon$-biased. That is, by definition, $\left| \E_{y \to D} \left[  \chi_S(y) \right] \right|  \le \epsilon$. 
+To proceed with the proof, we apply use the Fourier representation of $T  = \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S$.
+\begin{eqnarray*}
+\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| & = & 
+\left| \E_{y \to D} \left[ \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S(y) \right] - \E_{y \to U} \left[ \sum_{S \subseteq [m]} \widehat{T}(S) \chi_S(y) \right] \right| \\
+& = & 
+\left| \bigsum_{S \subseteq [m]}  \E_{y \to D} \left[ \widehat{T}(S) \chi_S(y) \right] - \bigsum_{S \subseteq [m]} \E_{y \to U} \left[ \widehat{T}(S) \chi_S(y) \right] \right| \\
+& = & 
+\left| \bigsum_{S \subseteq [m]} \widehat{T}(S) \left[ \E_{y \to D} \left[  \chi_S(y) \right] - \E_{y \to U} \left[ \chi_S(y) \right] \right] \right| \\
+& = & 
+\left| ~\bigsum_{S \subseteq [m]} \widehat{T}(S) \left[ \E_{y \to D} \left[  \chi_S(y) \right] \right] ~\right| \textrm{\hspace{1cm} $\because \E_{y \to U} \left[ \chi_S(y) \right]  = 0$} \\
+& \le & 
+\epsilon \left| \bigsum_{S \subseteq [m]} \widehat{T}(S) \right|
+\le \epsilon \bigsum_{S \subseteq [m]} \left| \widehat{T}(S) \right| \\
+\end{eqnarray*}
+Now we just need to bound $\bigsum_{S \subseteq [m]} \left|\widehat{T}(S)\right|$. This is just the consequence of the relation between $\ell_2$ norm and $\ell_1$ norm that we have seen earlier. Consider the $2^m$-tuple $\left[ \widehat{T}(S) \right]_{S \subseteq [m]}$ as a vector in $\mathbb{R}^{2^m}$. The above expression that we want to bound is the $\ell_1$ norm of this vector (sum of absolute values of individual entries). We use the relation between the $\ell_1$ norm and $\ell_2$ norm.
+
+$$\bigsum_{S \subseteq [m]} \left|\widehat{T}(S)\right| \le 2^{m/2} \bigsum_{S \subseteq [m]} \left[ \widehat{T}(S)\right]^2 = 2^{m/2}$$
+where the last step is from the Pareseval's identity. Hence the proof. We conclude that:
+$$\left| \E_{y \to D} \left[ T(y) \right] - \E_{y \to U} \left[ T(y) \right] \right| \le \epsilon 2^{m/2}$$
+\end{proof}
+
+Now we derive the corollary for almost $k$-wise independence if $\epsilon$-biased distributions. It is just to observe that the above proof works even for subset of bits of the string $y$.
+
+\begin{corollary}
+Any $k$ bits of an $\epsilon$-biased distribution are $\epsilon 2^{k/2}$-close to a uniform distribution on those $k$ bits.
+\end{corollary}
+
+Let us also get a sense of the parameters. Suppose we want $\delta$-close to a $k$-wise independent distributions (on every subset of $k$ bits), then we should choose an $\epsilon$-biased distribution such that $\epsilon = \frac{\delta}{2^{k/2}}$. The number of random bits required for this, using our earlier construction is, $2 \log m + 2 \log \left( \frac{1}{\epsilon} \right)$ (since the size of the set that we constructed earlier is $O\left( \frac{m^2}{\epsilon^2} \right)$.
+In terms of $\delta$, this is - $2 \log m + k + 2 \log\left(\frac{1}{\delta} \right)$. Viewing it as a generator, $G : \zo^\ell \to \{0,1\}^m$ - if we need $G(U_\ell)$ to be $k$-wise independent, then the best construction we know (and we need) to use $\ell = k \log m$ bit long seed, where as if we need $G(U_\ell)$ to be only ``almost" $k$-wise independent ($\delta$-close on each $k$ bits to uniform), then we can do that with a smaller $\ell = O\left( k+\log m+\log\left( \frac{1}{\delta} \right)\right)$ number of bits as the pure random bit seed for the generator.
+
+\begin{exercise-prob}[See Problem Set 1~(Problem~\ref{k-universal})]]
+\begin{show-ps4}{k-universal}
+A $k$ universal set $S \subseteq \{0,1\}^n$ has the property that the projection of $S$ onto any $k$ indexes contains all $2^k$ possible patterns. Use the previous question to construct $k$-universal sets of size $\left( 2^k \log n \right)^{O(1)}$.
+\end{show-ps4}
+\end{exercise-prob}
