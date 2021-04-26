@@ -1,0 +1,441 @@
+%\documentclass[11pt]{article}
+%\input{../template/preamble.tex}
+%\begin{document}
+\Week{13}{Introduction to Error Correcting Codes}
+
+%\theme{Lecture theme if any}
+%\lectureplan{Lecture Plan if any}
+Recall the discussion about error correcting codes that we did in the beginning of the course. This based on modelling the channel as a probability of flipping every bit.
+
+In this lecture, we will shift our focus from Shanon's viewpoint of codes to Hamming's perspective. The main change is that the channel is modelled using its worst case behavious as opposed to probablistic model that we did earlier. 
+
+\section{Combinatorial View of Codes \& Parameters}
+We clarify the model for the channel now. The channel sends bits in blocks of length $n$ each, and we are given the guarantee that the channel will flip at most $t$ of them in each block, but of course, we do not know which $t$ of the $n$ bits. We will assume that each block is marked out and the guarantee is only within a block. Hence $n$ will be called the {\em block length} from now on. For natural reasons, we will call $k$ to be the \textit{message length}\footnote{We will also call it the dimension of the code, but for reasons that comes later in the lectures.}.
+
+Thus, we would like to design codes in such a way that under the guarantee that the channel makes at most $t$ errors, the encoding and decoding functions work correctly. To study the combinatorial properties of error-correcting codes which also leads to constructions, we will begin by introducing the basic framework and crucial parameters of a code. 
+
+\begin{definition}[{\bf Error Correcting Codes}]
+An error correcting code $C$ of length $n$ over a finite alphabet $\Sigma$ is a subset of $\Sigma^n$. The elements of $C$ are referred to as codewords in $C$. Recall from the previous lecture that the encoding function of the code is $E : \zo^k \to \zon$ and the deconding function $D: \zo^n \to \zo^k$. \end{definition}
+
+As done in the previous lecture, we will model the error made by the channel by a bit vector $\eta \in \zon$ which represents the characterestic vector. This gives the following natural definition.
+
+\begin{definition}[{\bf Error Correction}]
+For an integer $t \ge 0$, the code $C \subseteq \Sigma^n$ is said to be $t$-bit error-correcting if there exists a decoding function $D$ such that $\forall m \in \zo^k, D(E(m)+\eta) = m$ where $\eta \in \zo^n$ is of weight at most $t$.
+\end{definition}
+
+A related notion that we will define is that of \textit{error detection}. %\begin{definition}[{\bf Error Detection}]
+For an integer $t \ge 0$, the code $C \subseteq \Sigma^n$ is said to be $t$-bit error-detecting code if there exists an error detection algorithm $D$ which for every $m \in \zo^k$ and error vector $\eta \in \zon$ of weight at most $t$, outputs "{\sc Yes}" if $E(m)+\eta \in C$ and "{\sc No}" otherwise. This notion is useful in situations where the receiver can detect that error has occured and ask the sender to send the message (equivalently, the codeword) again.
+
+%\begin{example}
+\begin{description}
+\item{\bf Example 1 : Repeatition Code:} 
+Suppose we want to send one bit ($k=1$) across a channel and we have block length of $5$ and $t=2$. A very easy code to design is the repetition code - which is described by the following encoding function. $E(1) = 11111$ and $E(0) = 00000$.
+
+\textit{How many errors can this code correct?} Indeed, if the number of bit flips is at most $2$, we can still decode. The decoding algorithm is as follows : given a $y \in \zo^5$ as the received word, output the majority of the 5 bits in the block. It is easy to see that if the original bit was $0$ and if $\eta \in \zo^5$ represents the error bitstring, then $E(0)+\eta$ will have at most two 1s, and hence the decoder will output a $0$. The argument is similar for $1$ as well. 
+
+\textit{How many errors can this code detect?} If the number bit flips is at most $4$, we will be able to detect an error. The detection algorithm simply outputs {\sc Yes} if all the bits are different and {\sc No} otherwise. The correctness of the algorithm is immeidate.
+
+\begin{minipage}{0.03\linewidth}
+~~
+\end{minipage}
+\hspace{-6mm}\begin{minipage}{0.57\linewidth}
+Notice that the hamming distance between these two words is $5$. As discussed above, the code is $2$-bit error correcting and $4$-bit error detecting. This was possible because we placed the two codewords very "far away", as a part of the code design.
+\end{minipage}
+\begin{minipage}{0.04\linewidth}
+~~
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+%\begin{figure}
+%\caption{Support of $D$ and $D^t$}
+\begin{tikzpicture}
+\draw (-2,-2) rectangle (4cm,1cm);
+\node[] at (0,-0.5){$0^5$};
+\node[] at (2,-0.5){$1^5$};
+\node[] at (3,0.5){$\zo^5$};
+\end{tikzpicture} 
+%\end{figure}
+\vspace{1mm}
+\end{minipage}
+
+\item{\bf Example 2 : Parity Check Bit Code:}
+Here we will go to the other extreme and add very few redundant bits. Let $n=k+1$ be the block length. For $m \in \zo^k$, where $m = (m_0,m_1,\ldots,m_{k-1})$, define $E(m) = \left(m_0, m_1, \ldots, m_{k-1}, \left( \sum_{i=0}^{k-1} m_i\right)\right)$ where addition is modulo 2. We have seen this code in various engineering contexts in the form of checksum bit. This describes the code.
+
+\textit{How many errors can this code correct?} Unfortunately none. How do we prove this? We can show this by showing a counter example where the received word makes one bit error from the code that was sent and it still has two codewords at equal (hamming) distance from it. Let $k=2$ and consider message $00$ which gets encoded to $000$ and consider the received word $y = 001$ where the third bit gets corrupted.. But then the same $y$ could have been obtained from the message $01$ which gets encoded to $011$, and the second bit corrupted to get the same $y$ !. Hence no decoding algorithm can exist which disambiguates between the messages $m=00$ and $m'=01$ when the received word is $y = 001$.
+
+\textit{How many errors can this code detect?} Yes, it can detect 1 bit errors. The error detection algorithm is as follows. Given a received word $y=(y_0, y_1, \ldots y_k) \in \zon$, output {\sc Yes} if $\sum_i y_i = 1$. Correctness follows from the observation that for all valid codewords in this code, the sum of the bits must be $0$ modulo $2$.\\
+
+\begin{minipage}{0.03\linewidth}
+~~
+\end{minipage}
+\hspace{-6mm}\begin{minipage}{0.57\linewidth}
+In the picture in the right side, we take $k=2$ and $n=3$. As discussed above, the code is $1$-bit error correcting code and cannot correct any error at all. We placed the $4$ codewords not so "far away", as a part of the code design. Hence we could pack in a lot of code words for the same $n$. In other words, it is a very "redundancy efficient" code if we compare the value of $n$ for a given $k$.
+\end{minipage}
+\begin{minipage}{0.04\linewidth}
+~~
+\end{minipage}
+\begin{minipage}{0.3\linewidth}
+%\begin{figure}
+%\caption{Support of $D$ and $D^t$}
+\begin{tikzpicture}
+\draw (-2,-2) rectangle (4cm,1cm);
+\node[] at (-1,-0.5){$000$};
+\node[] at (1,-0.5){$011$};
+\node[] at (-1,-1.5){$101$};
+\node[] at (1,-1.5){$110$};
+\node[] at (3,0.5){$\zo^3$};
+\end{tikzpicture} 
+%\end{figure}
+\vspace{1mm}
+\end{minipage}
+
+\end{description}
+%\end{example}
+
+The above two examples demonstrate what we need to worry about while designing the code. We need to keep the codewords far-enough so that we can correct many errors but still close enough to pack in many codewords ($2^k$) of them within $\{0,1\}^n$ for a given $n$. These are two contradictory requirements and ideal for both should not be achievable (we will discuss later about the bounds for these). To capture this discussion formally, we define two important parameters associated with a code : the \emph{distance} and \emph{rate}.
+
+\begin{definition}[{\bf Rate of the Code}]
+For a code $C$, the rate $R(C)$ is defined by
+$R(C)=\frac{k}{n}$. The notion of rate measures the amount of non-redundant information per bit in the codewords of $C$.
+\end{definition}
+\begin{definition}[{\bf Minimum Distance of a code}]
+The distance of a code $C$, denoted as $d(C)$, is the minimum Hamming distance between two distinct codewords of $C$.
+$\d(C)=\underset{x,y \in C; x \neq y} \Delta(x,y)$
+The relative distance of $C$, denoted as $\delta(C)$, is the normalized value $\frac{d(C)}{n}$. Thus, any two distinct codewords of $C$ differ in at least a fraction of $\delta$ positions.
+\end{definition}
+
+Ideally, we would aim at placing code words as far as possible without blowing up $n$ and achieve good rate while fighting against the channel to correct errors. We denote the specification of a code $C$ defined over alphabet $\Sigma$ with $|\Sigma|=q$ as $(n,k,d)_q$ to mean that $C$ is a code where codewords are $n$-tuples of symbols over the alphabet $\Sigma$ and messages are $k$-tuples of symbols over the alphabet $\Sigma$, such that the distance is at least $d$ for any two codewords in $C$. Now that the parameters are formally defined, we will capture what we learned from the above two example codes.
+
+\begin{lemma}
+For a code, the following are equivalent:
+\begin{enumerate}
+\item Distance is $2t+1$
+\item It is possible to detect upto $2t$ errors.
+\item It is possible to correct upto $t$ errors.
+\end{enumerate}
+\end{lemma}
+\begin{proof}
+\jsay{We had done this argument in class, yet to fill in here. This is where the maximum likelyhood decoding algorithm will need to come in}
+\end{proof}
+
+\begin{exercise-prob}
+[\textbf{Hash Functions: An Application of Codes} - See Problem Set 3~(Problem~\ref{perfect-hashing-from-codes})]
+\begin{show-ps5}{perfect-hashing-from-codes}
+A classic data structure problem is to map a large universe $U$ to a (possibly) smaller domain $\Sigma$. We call a hash function $h:U \to \Sigma$ as \textit{good} if $h(x) \neq h(y)$ for all $x \neq y \in U$ (if not, we call it a collision). Indeed, this requires that $|\Sigma| \ge |U|$ and hence is impossible. An interesting variant is to relax on the collision requirement - define a family of hash functions and then argue that for any pair of elements from the universe $U$, the probability of collision is small for a hash function chosen randomly from the family. More formally, a family of functions from $U$ to $M$, denoted by $H=\{h_1, h_2, \ldots h_n \}$ is a $\epsilon$-good hash family if for every $x \ne y \in U$, $\Pr_{h \in H} [ h(x) = h(y) ] \le \epsilon$.
+
+The task is to construct explicitly, $\epsilon$-good families of hash functions of small size. In this problem, we will use codes with large distance to construct $\epsilon$-good hash families. In fact, we show that the two tasks are equivalent.
+
+If $|\Sigma|=q$, given an $(n,k,d)_q$ code, we define a family of hash functions as follows: 
+$$H_C = \left\{ h_i : \Sigma^k \to \Sigma \mid 1\le i \le n, \forall x \in \Sigma^k, h_i(x) \defn C(x)_i \right\}$$
+
+\begin{enumerate}[(a)]
+\item Prove that if $C$ is an $(n,k,\delta n)_q$ code, then $H_C$ is $(1-\delta)$-good.
+Comment on the size of the family.
+\item Defining the code from the hash family appropriately, show that if we have a hash family which is $\epsilon$-good, then we also get a code from it which is $(n,k,(1-\epsilon)n)_q$.
+\end{enumerate}
+\end{show-ps5}
+\end{exercise-prob}
+
+
+\section{Singleton Bound}
+
+We had observed intuitively that it should not be possible to achieve high rate and high relative distance for a code since they seem to be contradictory requirements. Now we will prove a fundamental combinatorial connection between the two.
+
+\begin{theorem}[{\bf Singleton Bound}]
+Any code $(n,k,d)_q$ must satisfy:
+$$d \leq n-k+1$$
+\end{theorem}
+\begin{proof}
+Let $E$ be the encoding function of the code. $E:\{0,1\}^k \xrightarrow{} \{0,1\}^n$. Consider the first $k-1$ bits of the codewords. Since the original message is $k$ bits in length (for which there are $2^k$ possible messages, but the first $k-1$ bits can only be $2^{k-1} < 2^k$ in number, by pigeon hole principle, there exists atleast messages $m, m' \in \zo^k$ such that the first $k-1$ bits agree for $E(m)$ and $E(m')$. But then, these two code words can differ in maximum of $n-(k-1)$ bits and hence the minimum distance $d$ is at most $n-k+1$.
+\end{proof}
+
+Dividing by $n$ on both sides, $\frac{d}{n} \le  1-\frac{k}{n} + \frac{1}{n}$. Hence, $\delta \le 1-R+\frac{1}{n}$. Thus, if the rate of the code is high then the relative minimum distance must be small. Or the two should add up to almost $1$. This gives us an intuitive way of the connection between the rate and the distance. Notice that the above statement is independent of the size of the alphabet. A natural question is to ask whether there are codes which achieves the singleton bound? It turns out that there are, but they have non-constant alphabet size. Even more interestingly one can argue that singleton bound cannot be achieved with constant alphabet size (not just two !). We will take this up for discussion in the next lecture.
+
+In conclusion, one can see two combinatorial objectives while constructing codes. Ideally, we would like to come up with a $(n,k,d)_q$-code that
+\begin{enumerate}[(a)]
+\item maximizes $d$ for a given $n$, $k$ and $q$ to achieve best possible error correcting capability (and with efficient encoding and deconding algorithms, whereever possible).
+\item minimizes $n$ for a given $k$, $d$ and $q$ to achieve maximum rate for a fixed $d$ (and with efficient encoding and deconding algorithms, whereever possible).
+\end{enumerate}
+
+\subsection{The Hamming Code}
+
+Now that we have more motivation to construct linear codes with good parameter (as clarified by the above exercise question). Do we have distance 1 codes., yes the trivial identity function works for rate $1$ and distance $1$. The case for $d=2$ is our parity checkbit code.
+
+We now attempt on $d=3$. We study a family of codes constructed by Hamming, where the rate of the code is very close to optimal but indeed, as implied by singleton bound suffers from very low distance (in fact, distance is $3$ and hence can correct only 1 bit errors). The idea is to encode every 4-bit information to a 7-bit codeword. Consider $m=x_1,x_2,x_3,x_4$. Now, $E : \zo^4 \to \zo^7$ described as follows :  
+
+$$(x_1,x_2,x_3,x_4) \longmapsto (x_1,x_2,x_3,x_4,x_2 \oplus x_3 \oplus x_4, x_1 \oplus x_3 \oplus x_4, x_1 \oplus x_2 \oplus x_4)$$
+
+Notice that the arithemetic is modulo $2$ and hence we should think of $E: \F_2^4 \to \F_2^7$. The parameters of the code are not clear directly from the construction and hence we prove the following lemma. 
+
+\begin{proposition}
+Hamming Code for $k=4$ has rate $R = 4/7$ and distance $1$.
+\end{proposition}
+\begin{proof}
+The rate expression is immediate. For arguing the distance, we observe the following. Consider $c, c' \in \F_q^n$ are codewords, then their bitwise sum $c+c'$ is also a codeword. Indeed, if $m$ and $m'$ are messages such that $E(m) = c$ and $E(m') = c'$. Let $\Delta$ denote the hamming distance between two words. Notice that the distance $d$ is :
+\[
+d = \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}\Delta(E(m),E(m')) = \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}|E(m)+E(m')|= \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}|E(m+m')| = \min_{\substack{m \in \F_q^n \\ m \ne 0}}|E(m)| \\
+\]
+Thus the minimum distance of the code is the minimum weight of any non-zero codeword in the code. Now we show that this is exactly 3 for Hamming code. 
+\begin{claim}
+Weight of any non-zero codeword in Hamming code is at least $3$, and there is a codeword of weight $3$.
+\end{claim}
+\begin{proof}
+Indeed there is a codeword of weight 3. Consider the message $1000$, this gives rise to the codeword $1000011$. To show the lower bound, consider any message $m = (x_1,x_2,x_3,x_4) \ne 0000$. We have the following cases:
+\begin{description}
+\item{$wt(m) = 1$ :} We observe the peculiarity that for any bit $x_i$, the number of redundant bits that is contributes to is at least 2 for any $i$ (in fact, it is exactly 2 for all except $x_4$ and is three for $x_4$. Hence the weight of the codeword when the message is of weight 1 is at least three.
+\item{$wt(m) = 2$ :} For this, we have to observe that for $x_i, x_j$, there is exactly at least one redundant bit to which $x_i$ contributes and $x_j$ does not contribute or vice versa. Hence when both $x_i$ and $x_j$ are 1s and the rest of the $x_i$'s is zero, this redundant bit also be 1 and will contribute to the weight of the word. Hence the weight will be at least 3.
+\item{$wt(m) \ge 3$ :} This is trivial since the message itself is a part of the codeword and hence the codeword will have weight at least $3$.
+\end{description}
+While the above argument completes the proof, you might find it being far from being elegant since it might look very adhoc. Fortunately, there is a more linear algebraic argument for the above theorem which we will present in the next section.
+\end{proof}
+\end{proof}
+
+Now that the distance is $d=3$, we will ask the usual questions about how many errors can it correct and how many errors can it detect and that too how efficiently. Indeed, the distance of the code is $3$, hence the maximum likelyhood decoding will be able to correct up to $1$ bit error. However, this decoding is far from efficient since it will have run through different codewords to figure out which one the received word is closest to. It is unclear how to do error detection for up to $2$ errors efficiently (the trivial algorithm again is to run over the possible codewords).
+
+\section{Linear Codes}
+One of the main steps in the above distance arugment was the following observation. For Hamming code, if $m$ and $m'$ are two messages over $\F_q^k$, then for any $\alpha, \beta \in \F_q$, $E(\alpha m+\beta m') = \alpha E(m)+\beta E(m')$ which is a linearity condition. We call such codes to be linear codes. The repetition code, the parity check bit code, the Hamming code are all linear by design.
+Recall that a subset $C$ of $\mathbb{F}_2^n$ is a linear subspace if (1)~$0^n \in C$ (2)~$c,c' \in C \Rightarrow c+c' \in C$ 
+(3)~$c \in C \Rightarrow \alpha c \in C$ for each scalar $\alpha \in \mathbb{F}_2$.
+Thus, if $\Sigma = \F_q$ is a field and $C \subset \Sigma^n$ is a subspace of $\Sigma^n$ then $C$ is said to be a linear code. 
+
+A more important information is that since the code $C$ is linear subspace, the encoding process can be thought of as a linear transformation $E: \mathbb{F}_2^k \mapsto \mathbb{F}_2^n$ whose range is exactly $C$. Let $G$ be the $k \times n$ matrix representing this linear transformation such that for $x \in \\F_q^4$ viewed as a row vector, $E(x) = xG$.  Here, $x=[x_1 x_2 x_3 x_4]$ and $G$ is the matrix
+\[ \left( \begin{array}{ccccccc}
+1 & 0 & 0 & 0 & 0 & 1 & 1 \\
+0 & 1 & 0 & 0 & 1 & 0 & 1 \\
+0 & 0 & 1 & 0 & 1 & 1 & 0 \\
+0 & 0 & 0 & 1 & 1 & 1 & 1 
+\end{array} \right)\] 
+This matrix is called the generator matrix of the code. 
+We define this parameter for linear codes in general.
+
+\begin{definition}[{\bf Generator Matrix of a Code}]
+For a linear code $C \subseteq \F_q^n$, with $k$ as the message length, the generator matrix of the code is the $k \times n$ matrix, $G \in \F_q^{k \times n}$ such that $C$ is the row space of $G$.
+$$C = \{ xG \mid x \in \F_q^k \}$$
+Hence, the $k$ rows of the matrix $G$ has to be linearly independent vectors in $\F_q^n$ and forms a basis of the subspace $C$. Due to this, $k$ is also sometimes called the dimension of the code $C$.
+\end{definition}
+
+As for notation, we will represent linear codes with the parameter $n,k,d,q$ as $[n,k,d]_q$ code. 
+\begin{exercise-prob}
+[\textbf{Combining Codes} - See Problem Set 3~(Problem~\ref{code-combination})]
+\begin{show-ps5}{code-combination}
+Let $C_1$ be an $[n_1,k_1,d_1]_2$ binary linear code, and $C_2$ be an $[n_2,k_2,d_2]$ binary linear code. Let $C \subseteq \F_2^{n_1 \times n_2}$ be the subset of $n_1 \times n_2$ matrices whose columns belong to $C_1$ and whose rows belong to $C_2$. Show that
+$C$ is an $[n_1n_2,k_1k_2,d_1d_2]_2$ binary linear code.
+\end{show-ps5}
+\end{exercise-prob}
+
+
+For $w \in \F_q^n$, $|w| = |\{~i~ | ~w_i \ne 0~\}|$.
+From the above discussion, we have the following proposition:
+\begin{proposition}
+If $C \subseteq \F_q^n$ is an $[n,k,d]_q$ code, then:
+$d = \min_{\substack{m \in \F_q^n \\ m \ne 0}}|E(m)|$
+\end{proposition}
+\begin{proof}
+The argument just uses linearity and is same as what we used earlier.
+\[
+d = \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}\Delta(E(m),E(m')) = \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}|E(m)+E(m')|= \min_{\substack{m,m' \in \F_q^n \\ m \ne m'}}|E(m+m')| = \min_{\substack{m \in \F_q^n \\ m \ne 0}}|E(m)| \\
+\]
+\end{proof}
+This gives us a way to compute distance of linear codes and makes it easy to prove the distance for the parity check code and hamming code easily. Notice that the encoding algorithm is very efficient since it can now be thought of as computing a linear transformation, which can be done in $O(kn)$ time. The interesting question to ask is decoding. While the maximum likelyhood decoding works as always (although inefficient), one might dream of designing efficient decoding algorithms for all linear codes ideally (exploting the linearity structure). However, this far from what we have now.
+
+We start with a simpler task. Can we detect errors efficiently? Notice that this reduces to an efficient recognition of codewords. We now develop the machinery for that. Recall that every linear subspace $C \subseteq \F_q^n$ of dimension $k$, has an orthogonal space defined as follows:
+$$C^{\perp} = \{ w \in \F_q^n \mid \forall c \in C, \langle c,w \rangle = 0 \}$$
+
+We can verify that $C^\perp$ is a subspace and has dimension of $C^\perp$ is $n-k$. The set $C^\perp$ can be viewed as a code by itself (and we call it the {\em dual} code of $C$). Let $H$ be the generator matrix of the code $C^\perp$. The rows of $H$ will form a basis for $C^\perp$ and hence if $c \in C$ where $r_1, r_2, \ldots r_k \in \F_q^n$ forms the basis for $C$ (rows of $G$) and hence $c = \sum_i \alpha_i r_i$. Since rows of $H$, $w_1, w_2, \ldots w_{n-k}$ forms the basis for $C^\perp$ (and hence in $C^\perp$), we have that $Hc = H\left(\sum_i \alpha_i r_i\right) = \sum_i \alpha_i Hr_i = 0$. This gives the following definition:
+
+\begin{definition}[{\bf Parity Check Matrix of a Code}]
+Parity check matrix of a linear code $C\subseteq {\mathbb F}_{2}^n$ is a $(n-k)\times n$ matrix $H$ such that
+\[ c \in C \iff Hc^T =0.\]
+\end{definition}
+ \begin{lemma}
+\label{lem:paritycheck}
+For any code $C$ : 
+$H$ is a parity check matrix and $G$ as the generator matrix if and only if $GH^T =0$.
+\end{lemma}
+\begin{proof} The proof almost follows from the above discussion.
+\begin{eqnarray*}
+c \in C &\iff& c \in \textrm{\sf Row-Span}(G)\iff Hx^T=0\\ & \iff& H\cdot G^{(i)}=0, \forall~i\in\{1,\ldots, k\},~~ G^{(i)} {\mbox { is the ith row of }} G\\ &
+	\iff& HG^T=0 \iff GH^T=0.
+	\end{eqnarray*} 
+\end{proof}
+
+We will write down the parity check matrix of Hamming code explicitly. Consider $m=x_1,x_2,x_3,x_4$. By the Hamming code encoding, $E(m)=y_1,y_2,y_3,y_4,y_5,y_6,y_7$ where $y_i=x_i$ for $1 \leq i \leq 4$ and $y_5=x_2 \oplus x_3 \oplus x_4$, $y_6=x_1 \oplus x_3 \oplus x_4$ and $y_7=x_1 \oplus x_2 \oplus x_4$. A word $c\in \{0,1\}^7$ is a valid codeword if it satisfies the following equalities:
+\begin{center}
+$c_5 \oplus x_2 \oplus x_3 \oplus x_4 =0$\\
+$c_6 \oplus x_1 \oplus x_3 \oplus x_4 =0$ \\
+$c_7 \oplus x_1 \oplus x_2 \oplus x_4 =0$\\
+$c_i=x_i$ for $1 \leq i \leq 4$
+\end{center}
+In matrix terms, this is equivalent to saying that $y'\in \{0,1\}^7$ is a valid codeword if 
+\[
+\left( \begin{array}{ccccccc}
+0 & 0 & 0 & 1 & 1 & 1 & 1\\
+0 & 1 & 1 & 0 & 0 & 1 & 1\\
+1 & 0 & 1 & 0 & 1 & 0 & 1\\
+\end{array} \right)
+\left( \begin{array}{c}
+c_7 \\ 
+c_6 \\
+c_1 \\
+c_5 \\
+c_2 \\
+c_3 \\
+c_4
+\end{array} \right)
+=\left( \begin{array}{c}
+0 \\ 
+0 \\
+0
+\end{array} \right)^T
+\]
+
+Thus, we have an immeidate $2$ bit error detection and 1-bit error correction for Hamming codes. For detecting whether there was error (if at most $2$ bits of error happened) for a received word, check if $Hy^T = 0$. To correct $1$-bit error, given transmitted word $y$, consider the $n$ ways of at most 1-bit flip and check if any of them is in the nullspace of $H$ or not. Thus, by at most $n$ matrix multiplications, the single bit error can be corrected. 
+
+All this is good for Hamming code. For a general linear code, how do we construct parity check matrix of a code from the generator matrix?
+
+\begin{lemma}
+Let $G\subseteq {\mathbb{F}}_{2}^{k\times n}$ be a generator matrix, where
+\[G= \left[ I_k~\mid~P\right]\]
+then
+\[H= \left[-P^T~\mid~I_{n-k}\right]\]
+is a parity check matrix for $C$.
+\end{lemma}
+\begin{proof}
+It is easy to verify that $GH^T=0$, then by Lemma~\ref{lem:paritycheck} the result follows.
+\end{proof}
+
+Going back to the case of Hamming codes, recall the above error correction algorithm, which took $n$ linear tranformation computations in the worst case. Because of the special design of Hamming codes, this can be done directly by one linear transformation. Suppose that we have a received word $y$ with the guarantee that at most one bit (say $i \in [n]$) was corrupted. Let $e_i$ be the column vector of zeros in all positions but $i$. Now, if we represent $y$ as $c +e_i$, where $c$ is the codeword sent and $y$ is the received word. Note that $Hy=H(c+e_i)=Hc+He_i=He_i$. $He_i$ is the $i^{th}$ column of $H$ denoting the binary representation of $i$. Thus, the erroneous bit $i$ is corrected by a single multiplication.
+
+\paragraph{Hamming Code packs in maximum number of codewords:}
+Notice that one of the aims of the code design is to maximise $|C|$ given $d$ and $n$. How may words can be packed in if the minimum distance is restricted to $3$. We answer this first:
+
+\begin{lemma}
+If $C$ is a $(n,k,3)_2$-code, then $|C| \leq \frac{2^n}{n+1}$.
+\label{lem1}
+\end{lemma}
+\begin{proof}
+For each $x \in C$, define $N(C)=\{y \in \{0,1\}^n \mid \Delta(x,y) \leq 1\}$. Since $d=3$, $N(x) \cap N(y) =\emptyset$ for $x \neq y \in C$. Therefore, $2^n \geq |\underset{x \in C}\bigcup N(x)|= \underset{x \in C}\Sigma |N(x)|=|C| \cdot (n+1)$.
+\end{proof}
+\begin{corollary}For any word $w \in \{0,1\}^7$, there is a codeword at a distance of at most 1 in the Hamming code.
+\end{corollary}
+\begin{proof}In the Hamming code $C$, if $n=4$ then $k=3$. Further, there are 16 distinct codewords in $C$. Each codeword has 7 possibilities of 1-bit flip. Thus, by Lemma \ref{lem1}, the upper bound on $|C|$ is achieved. Hence, the Hamming balls of radius 1 around the codewords have empty pair-wise intersection. Also, the union of the set of words in the balls is precisely $\{0,1\}^7$. 
+Therefore, every $w \in \{0,1\}^7$ has a codeword at a distance of at most 1.
+\end{proof}
+
+\begin{exercise-prob}
+[\textbf{From Linear Codes to $k$-wise Independence} - See Problem Set 3~(Problem~\ref{codes-k-wise-indep})]
+\begin{show-ps5}{codes-k-wise-indep}
+
+For integers $1 \le k \le n$, call a subset $S \subseteq {0,1}^n$ to be $k$-wise independent if for every $1 \le i_1< i_2 < \cdots < i_k \le n$ and $a \in {0,1}^k$
+$$\Pr_{x \in S} [x_{i_1} = a_1 \land x_{i_2} = a_2 \land \cdots \land x_{i_k} = a_k] = \frac{1}{2^k}$$
+where the probability is over an element $x$ chosen uniformly at random from $S$. In this problem, you will see how codes can be used to construct $k$-wise independent sets of small size. Recall the constructions that we have seen earlier.
+\begin{enumerate}[(a)]
+\item Let $H \in \F_2^{t \times n}$ be the parity check matrix of an $[n,n-t,d]_2$ binary linear code of distance $d > k+1$. Define:
+$$S = \left\{ x^TH \mid x \in \F_2^t \right\}$$ 
+Prove that $S$ is a $k$-wise independent set of size $2^t$.
+\item Using the above, show how one can construct a $k$-wise independent subset of $\zon$ of size at most $(2n)^{(k/2)}$.
+\end{enumerate}
+\end{show-ps5}
+\end{exercise-prob}
+
+
+We start by proving the generalization of the sphere packing argument that we presented in the last lecture.
+
+\section{Hamming Bound}
+
+\begin{lemma}[\textbf{Hamming Bound}]
+For an $(n,k,d)$ code $C$,
+\[ |C| \le \frac{2^n}{\sum_{i=1}^{\lfloor \frac{d-1}{2} \rfloor} {n \choose i}} \]
+\end{lemma}
+\begin{proof}
+Let $d$ be the minimum distance of the code $C$. Consider the Hamming balls of radius $\lfloor \frac{d-1}{2} \rfloor$ centred at the codewords. The number of strings in $\{0,1\}^n$ within this distance is at most $\sum_{i=1}^{\lfloor \frac{d-1}{2} \rfloor} {n \choose i}$. None of these balls intersect with each other, since otherwise the minimum distance will be less than $d$. Thus each word is covered at most once (we may skip some). Thus if we count the "volume" of each of the Hamming balls:
+\[ |C|.\sum_{i=1}^{\lfloor \frac{d-1}{2} \rfloor} {n \choose i} \le 2^n \]
+The Hamming bound follows.
+\end{proof}
+
+An intuitive interpretation of Hamming Bound is as a tradeoff result between $n$ and $k$. It shows the limits on on packing too many codewords in the space $[0,1\}^n$ while keeping the minimum distance to be large. Thus, for a given minimum distance if we want to pack in too many codewords, we have no option but to increase the value of $n$. Codes which achieve the Hamming bound are called \textit{Perfect Codes}.
+
+\section{Generalized Hamming Codes}
+
+Now we generalize the construction. Let $n$ be of the form $2^r-1$. We specify the code by describing the parity check matrix. The parity check matrix of the Hamming code is the matrix formed by all $r$ bit representations of the numbers from $1, 2, \ldots 2^r-1$. Note that this excludes all 0s. Hence the parity check matrix is of dimensions $(2^r-1) \times r$ which is $(n-k) \times n$. To calculate the distance, we use the fact that the minimum distance of a linear code is the size of the smallest subset of columns of $H$ which are dependent (Prove this in exercise). The first three columns of the matrix are linearly dependent, and no two columns are linearly dependent. Hence the Hammind Code is an $[2^r-1, 2^r-r-1, 3]_2$ code. Notice that the decoding procedure works exactly as the case for $k=3$ case.
+
+We check the Hamming bound. We know that $|C| = 2^{2^r-1-r}$.
+Thus, $|C| = \frac{2^{2^r-1}}{2^r} = \frac{2^n}{n+1}$. We observe that any general hamming code of length $2^r-1$ is also a perfect code. 
+
+\begin{exercise-prob}
+[\textbf{The Hat Game} - See Problem Set 3~(Problem~\ref{hat-game})]
+\begin{show-ps3}{hat-game}   
+Consider a game involving $n$ people in a room, each of whom is given a 
+red/white hat chosen uniformly and independently at random. 
+Each person can see the hat color of all other people, but not their own. 
+They are asked to guess their own hat color which they can decline or make a guess (simultaneously).
+They either win collectively, or lose collectively. Once the guessing is done, they win if no body makes a wrong guess and at least one person makes the correct guess.
+They cannot interact during the game, but can have some predetermined strategy among themselves.
+
+A trivial strategy is to make only one person guess and everyone else decline. This gives a probability of $\frac{1}{2}$.
+In this problem, our goal is to come up with a much better strategy. The problem presents an interesting application of Hamming Codes.
+
+A directed graph $G$ is a subgraph of the n-dimensional hypercube if its vertex set is $\{0,1\}^n$ and if $(u ,v)$ is an edge in G, then $\Delta(u,v) = 1$ (hamming distance).
+
+For a graph $G$, let $K(G)$ be the number of vertices of $G$ with in-degree at least one, and out-degree zero.
+
+\begin{enumerate}[(a)]
+\item Show that: ${\sf Pr} \left\{ \textrm{Winning Hat Game} \right\} = \max_G \frac{K(G)}{2^n}$
+(Hint : Establish a bijection between strategies and subgraphs. Think of the endpoints of an edge as two possible views for a player.)
+\item Using the fact that the out-degree of any vertex is at most $n$, show that, for any directed subgraph $G$ of the $n$-dimensional hypercube :
+\[ \frac{K(G)}{2^n} \le \frac{n}{n+1} \]
+\item Use hamming codes to show that if $n = 2^\ell-1$ then there exists a directed subgraph of $G$ of the $n$-dimensional hypercube with 
+$$\frac{K(G)}{2^n} = \frac{n}{n+1}$$
+\end{enumerate}
+\end{show-ps3}
+\end{exercise-prob}
+
+\section{Dual Codes and Hadamard Code}
+
+Recall the definition of the dual of a code defined by the orthogonal space to the code subspace. That is, if $C \subseteq \F_q^n$,
+$$C^{\perp} = \{ w \in \F_q^n \mid \forall c \in C, \langle c,w \rangle = 0 \}$$
+
+If we view $C^\perp$ as a code itself, we get the dual code of $C$. The generator matrix of $C$ is the parity check matrix of $C^\perp$ and vice versa. Indeed, if $C$ is an $[n,k]_q$ code, then $C^\perp$ is an $[n,n-k]_q$ code. 
+
+As our first example, we will think about the dual code of the Hamming code itself. This is easy since we have described the Hamming code directly by its parity check matrix itself (whose columns are the set of all $r$-bit representations of he numbers $1,2 \ldots 2^r-1$. Viewing this as a generator matrix will give us the \textit{simplex code} which is $[2^r-1,r,2^{r-1}]_2$ code. If we add the all $0$s column to the generator matrix, then we get a special code called the \textit{Hadamard code} which is a $[2^r,r,2^{r-1}]_2$ code. We quickly prove the claim about the distance.
+
+\begin{exercise}
+For the paramter $r$ used above, Hadamard code and Simplex code both have distance $2^{r-1}$. In fact something stronger is true, every non-zero codeword has weight exactly $2^{r-1}$.
+\end{exercise}
+
+The Hamming and Hadamard codes show the two ends of a spectrum. Hamming code has rate $\frac{2^r-r-1}{2^r-1}$ (which is close to 1) while Hadamard code has rate $\frac{r}{2^r}$ (which is close to $0$). On the distance front, the Hamming code has very low distance $3$ (independent of $r$) and Hadamard code has distance $2^{r-1}$.
+
+\begin{exercise-prob}
+[\textbf{Codes from Graph Cuts} - See Problem Set 3~(Problem~\ref{codes-from-cuts})]
+\begin{show-ps3}{codes-from-cuts}
+Let $G=(V,E)$ be any undirected graph (assume no loops or multiple edges). A cut in the graph is the subset of all edges that connect a vertex in $S$ to vertex in $V \setminus S$, for some subset $S \subseteq V$. Let $\mathsf{Cuts}(G) \subseteq \{0,1\}^E$ consist of the characteristic vectors of all cuts of $G$.
+\begin{enumerate}[(a)]
+\item Prove that $\mathsf{Cuts}(G)$ is an $[|E|,|V|-1]_2$ binary linear code. What parameter of $G$ equals the distance of Cuts(G)?
+\item Describe the dual code $\mathsf{Cuts}(G)^\perp$ of $\mathsf{Cuts}(G)$. What is its dimension? What parameter of $G$
+equals the distance of $\mathsf{Cuts}(G)^\perp$?
+\end{enumerate}
+\end{show-ps3}
+\end{exercise-prob}
+
+\begin{exercise-prob}[{\bf Constructing Codes from Other Codes} - See Problem Set 5~(Problem~\ref{codes-from-codes})]
+\begin{show-ps5}{codes-from-codes}
+Assume that there exists an $[n,k,d]_q$-code $C$ over
+$\F_q$. Then:
+\begin{enumerate}[(a)]
+\item ({\bf Extension}) There exists an $[n+r,k,d]_q$ code for every $r \ge 1$.
+\item (\textbf{Puncturing}) There exists an $[n-r,k,d-r]_q$ code for every $r \in [d-1]$.
+\item There exists an $[n,k,d-r]_q$-code over $\F_q$ for every $1 \le r \le d-1$.
+\item ({\bf Subcode}) There exists an $[n,k-r,d]_q$ code for every $r \in [k-1]$.
+\item There exists a $[n-r,k-r,d]_q$ code for every $r \in [k-1]$.
+\item (\textbf{Direct Sum}) Let $C_1, C_2$ be linear codes such that for $i \in [2]$, $C_i$ is an $[n_i,k_i,d_i]_q$. Define the direct sum :
+$$C_1 \oplus C_2 = \{(c_1,c_2)\mid c_1 \in C_1, c_2 \in C_2 \}$$
+is an $[n_1+n_2,k_1+k_2,\min\{d_1,d_2\}]_q$-code. Write down the generator matrix for the direct sum code.
+\item Let $C_1, C_2$ be linear codes such that for $i \in [2]$, $C_i$ is an $[n,k_i,d_i]_q$. Define the direct sum :
+$$C = \{(c_1,c_1+c_2)\mid c_1 \in C_1, c_2 \in C_2 \}$$
+is an $[2n,k_1+k_2,\min\{2d_1,d_2\}]_q$-code. (Hint: Analyse in two cases : $c_2=0^n$, $c_2 \ne 0^n$.)
+\item Let $\overline{x}$ denote the bitwise complement of a vector $x$, and let $C$ be a $[n,k,d]_2$-code. Then the code:
+$$C' = \{ (c,c),(c,\overline{c}) \mid c \in C \}$$
+is a $[2n,k+1,\min\{2d,n\}]_2$-code. (Hint : Repetition code) This provides us a way of rovides us a way to double all parameters ($n,k$ and $d$).
+\end{enumerate}
+\end{show-ps5}
+\end{exercise-prob}
+

@@ -133,4 +133,21 @@
     }{\@nameuse{endcollect}}
 \makeatother
 
+%%% For ps5
+\definecollection{ps5.tmp}
+\makeatletter
+\newenvironment{show-ps5}[1]
+    {\@nameuse{collect*}{ps5.tmp}
+	    {\ifthenelse{ \equal{\psetbackref}{1} }{\label{prob:#1}}{}} {}
+	    {\item \label{#1} (See Exercise~\ref{prob:#1})} {}
+    }{\@nameuse{endcollect*}}
+\makeatother
+
+\makeatletter
+\newenvironment{ps5}
+    {\@nameuse{collect}{ps5.tmp}
+		{\item}{}
+    }{\@nameuse{endcollect}}
+\makeatother
+
 %%%%% Exercise and pset macros (end) %%%%%
