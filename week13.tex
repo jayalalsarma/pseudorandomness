@@ -362,8 +362,8 @@ We check the Hamming bound. We know that $|C| = 2^{2^r-1-r}$.
 Thus, $|C| = \frac{2^{2^r-1}}{2^r} = \frac{2^n}{n+1}$. We observe that any general hamming code of length $2^r-1$ is also a perfect code. 
 
 \begin{exercise-prob}
-[\textbf{The Hat Game} - See Problem Set 3~(Problem~\ref{hat-game})]
-\begin{show-ps3}{hat-game}   
+[\textbf{The Hat Game} - See Problem Set 5~(Problem~\ref{hat-game})]
+\begin{show-ps5}{hat-game}   
 Consider a game involving $n$ people in a room, each of whom is given a 
 red/white hat chosen uniformly and independently at random. 
 Each person can see the hat color of all other people, but not their own. 
@@ -386,7 +386,7 @@ For a graph $G$, let $K(G)$ be the number of vertices of $G$ with in-degree at l
 \item Use hamming codes to show that if $n = 2^\ell-1$ then there exists a directed subgraph of $G$ of the $n$-dimensional hypercube with 
 $$\frac{K(G)}{2^n} = \frac{n}{n+1}$$
 \end{enumerate}
-\end{show-ps3}
+\end{show-ps5}
 \end{exercise-prob}
 
 \section{Dual Codes and Hadamard Code}
@@ -404,20 +404,22 @@ For the paramter $r$ used above, Hadamard code and Simplex code both have distan
 
 The Hamming and Hadamard codes show the two ends of a spectrum. Hamming code has rate $\frac{2^r-r-1}{2^r-1}$ (which is close to 1) while Hadamard code has rate $\frac{r}{2^r}$ (which is close to $0$). On the distance front, the Hamming code has very low distance $3$ (independent of $r$) and Hadamard code has distance $2^{r-1}$.
 
-\begin{exercise-prob}
-[\textbf{Codes from Graph Cuts} - See Problem Set 3~(Problem~\ref{codes-from-cuts})]
-\begin{show-ps3}{codes-from-cuts}
+\begin{exercise}
+%[\textbf{Codes from Graph Cuts} - See Problem Set 5~(Problem~\ref{codes-from-cuts})]
+%\begin{show-ps3}{codes-from-cuts}
 Let $G=(V,E)$ be any undirected graph (assume no loops or multiple edges). A cut in the graph is the subset of all edges that connect a vertex in $S$ to vertex in $V \setminus S$, for some subset $S \subseteq V$. Let $\mathsf{Cuts}(G) \subseteq \{0,1\}^E$ consist of the characteristic vectors of all cuts of $G$.
 \begin{enumerate}[(a)]
 \item Prove that $\mathsf{Cuts}(G)$ is an $[|E|,|V|-1]_2$ binary linear code. What parameter of $G$ equals the distance of Cuts(G)?
 \item Describe the dual code $\mathsf{Cuts}(G)^\perp$ of $\mathsf{Cuts}(G)$. What is its dimension? What parameter of $G$
 equals the distance of $\mathsf{Cuts}(G)^\perp$?
 \end{enumerate}
-\end{show-ps3}
-\end{exercise-prob}
+%\end{show-ps3}
+%\end{exercise-prob}
+\end{exercise}
 
-\begin{exercise-prob}[{\bf Constructing Codes from Other Codes} - See Problem Set 5~(Problem~\ref{codes-from-codes})]
-\begin{show-ps5}{codes-from-codes}
+\begin{exercise}
+%\begin{exercise-prob}[{\bf Constructing Codes from Other Codes} - See Problem Set 5~(Problem~\ref{codes-from-codes})]
+%\begin{show-ps5}{codes-from-codes}
 Assume that there exists an $[n,k,d]_q$-code $C$ over
 $\F_q$. Then:
 \begin{enumerate}[(a)]
@@ -436,6 +438,7 @@ is an $[2n,k_1+k_2,\min\{2d_1,d_2\}]_q$-code. (Hint: Analyse in two cases : $c_2
 $$C' = \{ (c,c),(c,\overline{c}) \mid c \in C \}$$
 is a $[2n,k+1,\min\{2d,n\}]_2$-code. (Hint : Repetition code) This provides us a way of rovides us a way to double all parameters ($n,k$ and $d$).
 \end{enumerate}
-\end{show-ps5}
-\end{exercise-prob}
+%\end{show-ps5}
+%\end{exercise-prob}
+\end{exercise}
 
