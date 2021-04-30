@@ -1,0 +1,346 @@
+\Week{14}{Reed-Solomon Code, Reed-Muller Codes : Construction \& Decoding}
+
+In this lecture, we will describe Reed-Solomon code, a fundamental code in the algebraic coding theory. It is an example of an MDS code (achieves the singleton bound) but with a large alphabet. We also give the unique decoding algorithm for Reed-Solomon Codes.
+
+\section{Reed-Solomon codes}
+
+For any $n$ and $k \le n$, and $q \ge n$, there is a Reed-Solomon code $[n,k,d]_q$. We describe the code by describing the encoding procedure. The message $m=(m_0,\ldots, m_{k-1}) \in \F_q^{k} $ can be viewed as a polynomial $p_m(x) =\sum_{i=0}^{k-1}m_ix^i$ of degree
+		$k-1$ over $\F_q$. Fix a subset $\{\alpha_1, \alpha_2, \ldots \alpha_n\}$ of size $n$ for the field $\F_q$.
+$$E_{RS}(m) = \left(p_m(\alpha_1), p_m(\alpha_2), \dots, p_m(\alpha_n)\right)$$
+
+Reed-Solomon code is indeed a linear code - the generator matrix can be described as follows:
+\[
+G_{RS} =
+\begin{pmatrix}
+1 & 1 & \dots\ & 1\\
+\alpha_{1}^1\ & \alpha_{2}^1\ & \dots\ & \alpha_{n}^{1}\\
+\vdots\\
+\alpha_{1}^{k-1}\ & \alpha_{2}^{k-1}\ & \dots\ &\alpha_n^{k-1}\\
+\end{pmatrix}
+\]
+
+\noindent We now compute the distance of the Reed-Solomon code.
+\begin{lemma}
+For a  $[n,k,d]_q$ Reed Solomon code, $d = n-k+1$.
+\end{lemma}
+\begin{proof}
+Because of singleton bound, we just need to show that $d \ge n-k+1$. Since RS codes are linear, we have
+\[d = \min_{0\neq m \in \F_q^k} \mathsf{weight}(E(m))\]
+
+Thus, $d = \min_{m\in {\mathbb{F}}^k} |\{ i~|~p_m(\alpha_i)\neq 0 \}| = n-\max_{m\in {\mathbb F}^k } | \{ i~|~p_m(\alpha_i)= 0 \}|$
+
+Since $p_m(x)$ is a polynomial of degree at most $k-1$, it can have at most $k-1$ roots. In other words, $\max_{m\in {\mathbb F}^k } | \{ i~|~p_m(\alpha_i)= 0 \}|\le k-1$, and hence $d \ge n-(k-1)$ and hence $d \ge n-k+1$.
+\end{proof}
+    
+
+One of the disadvantages of Reed-Solomon codes it that it insists that the field size must be at least $n$. So the next attempt is to achieve (or attempt to achieve) singleton bound with smaller fields, resulting in Reed-Muller codes.
+
+
+\begin{curiousity}[{\bf Concatenation of Codes}]
+A natural question that may arise is why could we not just encode the $q$-ary alphabet symbols using binary alphabet "inside" the code and then use it as a binary code. One immediate difficulty with this is that one bit change in the encoding can change the whole symbol - hence 1 bit error can potentially have the effect of $O(\log q)$ errors. This will make the parameters quite weak. Then, how about using another code inside the binary encoding so that we can correct those errors too. While it may look complicated, it is possible do this systematically and construct a code with a small alphabet from a code with a large alphabet.
+Let $q$ by a prime power, and let $C$ be an $[N,K,D]_{q^k}$ code and let $C'$ be an $[n,k,d]_q$ code . Then there exists a linear code $C^{''}$ over $\F_q$ with parameters $[nN,kK,d']_q$ such that $d' \ge dD$. $C$ is called the {\em external} code, and $C'$ is called the {\em internal} code.
+
+This is particularly interesting to apply for concatenation two codes with good distances. Consider the Reed-Solomon codes which requires large alphabet size, and the Hadamard code. The external code is the Reed-Solomon code $[n,\frac{n}{2},\frac{n}{2}+1]$ over $\F_q$ with $q=n=2^r+1$ for some $r$. We then concatenate this code with the Hadamard code with parameters $[2^r,r+1,2^r-1]$. In terms of $n$ the inner code is $[\frac{n}{2},\log n,\frac{n}{4}]$. This concatenation is legal because the block length of Reed-Solomn code and the message length of Reed-Muller code exactly matches. By the above theorem (in the previous paragraph), we have that the concatenated $[\frac{n^2}{2},\frac{n}{2}\log n,\frac{n^2}{8}]$. But unfortunately this codes does not have constant rate.
+
+The problem with concatenating Reed-Solomon codes with Hadamard code is that the internal code does not have constant rate. We would therefore like to concatenate the Reed-Solomon code with a internal binary code with constant rate and distance. One can choose codes which achieves the Gilbert-Varshamov bound. But then, we do not know if such a code that is explicitly constructible. Even more interestingly, \cite{For66} asked \textit{do we require inner code to be explict and efficiently encodable/decodable?} The answer is no, because the codewords are symbols of the external code and the internal codes message lengths are logarithmic in the blocklength. Thus, if the internal code can be constructed in time that is exponential in the message length of the code, then this will still be polynomial in the length of the concatenated code and still good enough for us. The asymptotically good codes (costant rate and relative distance) constructed out of this idea are called Forney Codes~\cite{For66}.
+\end{curiousity}
+
+
+\section{Reed Muller Codes}
+Let us start with some efforts at  reducing the field size. Note that for
+Reed-Solomon codes, we need at least $n$ elements in the field since the code
+tuples must be of length $n$. So the question is 
+\begin{center}
+`` Can $n$ tuples be still obtained with a smaller field ? "
+\end{center}
+The answer is yes and can be achieved by moving to a multivariate polynomial.
+We shall see how to reduce the field size by the following example of bivariate polynomials.
+
+Let $p(x,y)$ be a bivariate polynomial of degree $\le t$. Hence,
+\[ p(x,y) = \sum_{\substack{0 \le i,j \le t \\ i+j \le t}} m_{ij} x^iy^j \]
+We shall interpret the message as the coefficients of this polynomial. Indeed, we need to ensure that the number of coefficients match up.
+\begin{exercise}
+For a bivariate polynomial of degree $t$, the number of
+monomials given by 
+\[\left |\{(i,j)| 0\le i,j\le t, i+j \le t \} \right | \]
+is $\binom{t+2}{2}$. In general show that for a $v$ variate polynomial of
+degree $t$, number of monomials is $\binom{t+v}{v}$.
+\end{exercise}
+
+\noindent Hence, the message length $k = \binom{t+2}{2}$ or $k = \frac{(t+2)(t+1)}{2} > \frac{t^2}{2}$. Hence, $t < \sqrt{2k}$.
+
+Now to generate $n$ evaluations of $p(x,y)$, the set $S$ needs to have only
+$\sqrt{n}$ elements thereby reducing the requirement on the field size to $q \ge \sqrt{n}$. Hence for a message
+$m = (m_1,m_2,\ldots,m_k)$ where $k = \binom{t+2}{2}$, 
+\[ C(\overline{m}) = \left ( p_m(\alpha, \beta) \right )_{\alpha,\beta \in S^2}
+\]
+where $p_m$ is the bivariate polynomial whose coefficients are the $m_i$s with indices interpreted appropriately.
+
+\begin{exercise}
+Argue that the Reed-Muller code is linear.
+\end{exercise}
+
+\paragraph{Minimum distance of Reed-Muller Codes:}
+Since the code is linear, it suffices to estimate the weight of minimum weight code word. Hence it is sufficient to find the minimum number of non-zero entries in any $n$-tuple that is a codeword. To obtain this bound we use the following lemma which we have seen in the first lecture in the course.
+
+\begin{lemma}[\textbf{Schwartz-Zippel Lemma}] Let $p \not \equiv 0$, be a polynomial in $r$ variables $(x_1,x_2,\ldots,x_n)$ of degree $t > 0$ defined on a field $\F$. Let $S$ be a non-empty subset of $\F$. Then,
+\[ {\sf Pr}_{\overline{a} \in S^r} [P(\overline{a}) = 0]  \le \frac{t}{|S|} \] 
+\end{lemma}
+
+Applying the above lemma, we have
+\[ {\sf Pr}_{a \in S^2} (p(\overline{a}) = 0) = \frac{\text{total
+degree}}{|S|} < \frac{\sqrt{2k}}{\sqrt{n}} \]
+Hence, number of zeros in any code word 
+$< \sqrt{\frac{2k}{n}} \times |S|^2 = \sqrt{\frac{2k}{n}} \times n = \sqrt{2kn}$.
+Therefore \# of non zero entries is $ > n - \sqrt{2kn}$. By linearity of the
+code, minimum distance $d > n-\sqrt{2kn}$. Also $d \le n-k+1$. Hence,
+\[ n-\sqrt{2kn} < d \le n-k+1\]
+This inequality points to the trade-off between the distance and field
+size for the Reed-Muller code construction.
+
+Now, let us consider the general case where we have a degree $t$ polynomial in $v$ variables. By Schwatrz-Zippel lemma, number of zero $ \le \frac{t}{|S|}.|S|^v = t|S|^{v-1}$. Hence minimum distance $d \ge n-t|S|^{v-1}$. Since $|S|^v = n$, $|S| = n^{1/v}$. Hence:
+\[ d \ge n-t.n^{\frac{v-1}{v}} \]
+and $t$ and $k$ are related as $k=\binom{t+v}{v}$. Here
+again, we can see the trade-offs: increasing $n$ (for obtaining a larger code word) or increasing $v$ (to reduce the field size) clearly decreases the minimum distance.
+
+\paragraph{Hadamard Code as a Reed-Muller Code:}
+Let polynomial $p(x_1,x_2,\ldots,x_n) = m_1x_1+m_2x_2+\ldots+m_kx_k$ where $\mathbf{m} = (m_1,m_2,\ldots,m_k) \in \F_2^k$ is the message polynomial. Encoding would be,
+\[ C(\mathbf{m}) = (p(a_1,a_2,\ldots,a_n))_{(a_1,a_2,\ldots,a_n)}\in \F_2^n\]
+Thus, we obtain all possible combinations of the message which is
+nothing but a $[2^k,k,2^{k-1}]$ Hadamard code. Hence Hadamard codes can be seen as special case of Reed-Muller code.
+
+\section{Decoding Problem}
+
+As we observed earlier, the encoding of linear codes is an easy task, but efficient decoding is far from clear. 
+
+We recall the (unique) decoding problem for a code $C$ 
+can be formulated as follows:
+\begin{problem}[{\bf Unique Decoding Problem}] The unique decoding problem for codes is as follows: \\
+{\bf Input:} An $[n,k,d]_q$ code $C$, $t\in {\mathbb N}$, and  a word  $y\in {\mathbb F}^n$, with $\d(y,C) \le t\le \frac{d-1}{2}$.\\
+{\bf Output:} Output a codeword $c$ such that $\d(c,y)\le t$. 
+\end{problem}
+
+Note that, since the number of erros is limited to $t = \frac{d-1}{2}$, there will be  a unique codeword within the Hamming distance of $t$ from the given word $y\in {\mathbb F}^n$, since $t\le \frac{d-1}{2}$. A brute force approach would be to guess
+$t$ index locations where the target codeword differs from the input word $y$, and try all possible modifications to $y$ at the locations guessed.  This would require  ${n\choose t} (q-1)^t$ membership queries to $C$.
+ The brute-froce algorithm worked well in the case of Hamming codes as  their distance $d=3$.  In the following section, we study the Unique decoding problem for Reed-Solomon Codes.
+
+\section{Decoding Reed-Solomon Codes : Berlekamp-Welch Algorithm}
+
+The unique decoding problem for Reed-Solomon codes can be re-formulated as follows:
+
+\noindent \textbf{Input:} $[n,k,d]_{q}$, $d=n-k+1$, ${\alpha _{1},\ldots,\alpha _{n}} \in {\mathbb F} $  as parameters for the RS-code, 
+  $y = (y_{1},y_{2},y_{3},\ldots,y_{n}) \in \mathbb{F} ^{n}$ with the guarantee that there is a codeword $c\in RS$, with  $\Delta(c,y)=t<\frac{n-k+1}{2}$ $(=\frac{d}{2})$
+
+\noindent \textbf{Output:}  A polynomial $P$ of degree $\leq (k-1)$ such that the  $|\{ i_{\in [n]}$ $ (P(\alpha_{i})\neq y_{i})\}\leq t$
+
+A natural algorithm would be to guess a polynomial $p$ of degree at most $k-1$ and then verify if the codeword corresponding to $p$ is at a distance of 
+$t$ from $y$. This would put the decoding problem in the complexity class ${\sf NP}$. A polynomial time algorithm for the problem was first  given by Wesley Peterson in 1960. 
+Later on the running time of the algorithm was  improved by many authors. We discuss an algorithm by Berlekamp and Welch in full detail. We begin with the notion of error locator polynomials:
+\begin{definition}[\textbf{Error Locator Polynomial}]
+Let $C$ be an $[n.k,d]_q$ RS-code with the evaluation set $S=\{\alpha_1,\ldots, \alpha_n\}$. A polynomial 
+$E(x)$ is an error locator  polynomial for a given word $y\in {\mathbb F}^n$, if $\forall i$ $E(\alpha_{i})=0$ iff $p(\alpha_{i})\neq y_{i}$
+\end{definition}
+\begin{lemma}
+ There exists an  error locating polynomial $E$ of degree at most $t$, where $t= \Delta(y, C)$.\footnote{By abusing the notation, we let $\Delta(y,C)=\min_{c\in C}\Delta(y,c)$}
+\end{lemma}
+\begin{proof}
+Suppose $P$ is a  polynomial of degree at most  $k-1$ such that $ \Delta(y, (p(\alpha_1),\ldots, p(\alpha_n)) =t$.  
+ Let $T = \{i$ $|$ $P(\alpha_{i})\neq y_{i}\}$. Consider the polynomial $E(x) = \prod_{i\in T}$ $(x-\alpha_{i})$, it is easy to see that $E$ is an error locator polynomial for $y$ ,and 
+degree$(E) =t$.
+\end{proof}
+
+Though we have shown the existence of an error locator polynomial for a given input word $y$, it is not yet clear how to compute this polynomial efficiently.  Note that once we know an error locator plolynomial $E$, then we can 
+compute the required polynomial using the standard Lagrangian interpolation.  Towards computing $E$, define a new polynomial $N(x)$ as follows: 
+\[
+ N(x)\stackrel{\triangle}{=}P(x)*E(x) , \Longrightarrow P(x)=\dfrac{N(x)}{E(x)}
+\]
+ Note that we are interested in some error locator $E(x)$,  and  do not know  any of the polynomials $P(x)$, $E(x)$ and $N(x)$.  Though computing each of the polynomials seems to be hard, we can compute them simultaneously!. In particular, we will compute $N$ and $E$ and hence $P$ can be computed using the above relation. The idea is to view the coefficients of $N$ and $E$ as unknowns of a linear system of equations that we will write, and argue that the system is consistent and solvable.
+ 
+Degree of $N(x)=(k-1)+t=k+t-1\leq k+t$. We are looking for the pair $N$, $E$ and we want to ensure that they satisfy the following:
+
+\begin{itemize}
+\item $\forall i$, $E(\alpha_{i})=0$ iff $P(\alpha_{i})\neq y_{i}$
+\item $N(x)=P(x)*E(x)$ with degree $<k+t$
+\item $\forall i$, $N(\alpha_{i})=P(\alpha_{i})*E(\alpha_{i})= y_{i}*E(\alpha_{i})$ ({\em \color{red} got rid of $P$ here!}).
+\end{itemize}
+
+ Note that whenever  $P(\alpha_{i})\neq y_{i}$, $E(\alpha_{i})=0$ and hence we are justified in  replacing  $P(\alpha_i)$ with $y_i$ in the above. 
+
+\begin{algorithm}
+\label{alg:Berlekamp-Welch}
+\caption{Berlekamp-Welch decoding algorithm}
+{\bf Input:} $n,k, t\le \frac{n-k-1}{2}$, $\{\alpha_1,\ldots, \alpha_n\}\subseteq {\mathbb F}$, $y=(y_1,\ldots, y_n)\in {\mathbb F}^n$. \\
+{\bf Output: } $P(x)$ with degree $P(x) \le k-1$ such that $|\{i~\mid~p(\alpha_i)\neq y_i\}| =t$.
+\begin{algorithmic}[1]
+\State Compute two polynomials   $E$, $N$ such that
+\begin{itemize}
+\item $\forall i$, $N(\alpha_{i})=y_{i}*E(\alpha_{i})$
+\item degree of $E=t$
+\item degree of $N\leq k+t$
+\end{itemize}
+\State Output $N(x)/E(x)$
+\end{algorithmic}
+\end{algorithm}
+
+
+\paragraph{Running time}
+
+\begin{lemma}
+ Time complexity of the Berlekamp-Welch  algorithm is $O(n^{3})$.
+\end{lemma}
+
+\begin{proof}
+ We can write $N$ and $E$ as given below.
+
+\begin{center}
+$N=\sum_{j=0}^{k+t-1}N_{j}*x^{j}$  and  $E=\sum_{j=0}^{t}E_{j}*x^{j}$\\
+\vspace{8 mm}
+For all $1\leq i\leq n$\\
+\vspace{4 mm}
+$N(\alpha_{i})=y_{i}*E(\alpha_{i})$\\
+\vspace{4 mm}
+$\sum_{j=0}^{k+t-1}N_{j}*\alpha_{i}^{j}= y_{i}*\sum_{j=0}^{t}E_{j}*\alpha_{i}^{j}$~~~~~~(A)\\
+\vspace{4 mm}
+$t\le\dfrac{n-k-1}{2}\Longrightarrow k+2t+1<n+2$
+\end{center}
+ The number of variables in the above set of linear equations is  at most  $n+1$,  and the number of equations is $n$.    We also need to add the constraint $E_{t}\neq0$, which is not linear.
+Nevertheless, we can always assume that $E_t=1$ ({\color{blue} why?}), and that adds one more equation to the above set of equations.  If there exist such polynomials $N,$ and $E$ exist, then
+solving the system of equations above will give us one par $(E,N)$ of polynomials. Then computing the fraction $N/E$ is just a polynomial division, which can be done in $O(n)$ time. So the overall time required is the time 
+required to solve the set of linear equations which is bounded by $O(n^3)$.
+\end{proof}
+
+\paragraph{Correctness}:
+To complete the description of Berlekamp-Welch algorithm, we need to argue that  the ratio $N/E$ is always going to be the polynomial $P$  independent of the solutions given by the algorithm for solving systems of linear equations. (Note that the error polynomial $E$ is not unique, and hence we could get different solutions with different algorithms for solving linear equations.)
+\begin{lemma}
+
+If there are two pairs $(N,E)$ and $(N^{'},E^{'})$ which are the solutions of $(A)$, then
+\end{lemma}
+\begin{center}
+$\dfrac{N(x)}{E(x)}=\dfrac{N^{'}(x)}{E^{'}(x)}$, i.e. $N(x)E'(x)= N'(x)E(x)$.
+\end{center}
+\begin{proof}
+%Let $T = \{ i~|~ P(\alpha_i) \neq y_i\}$, where $P$ is the polynomial we want to compute. we can write
+%\begin{center}
+%$\forall i \not\in T$ , $\dfrac{N(\alpha_{i})}{E(\alpha_{i})}=y_{i}$\\
+%\vspace{4 mm}
+%$\therefore \dfrac{N(\alpha_{i})}{E(\alpha_{i})}\neq y_{i}$ for atmost $|T|$ indices\\
+%\vspace{4 mm}
+%$E(\alpha_{i})$ can be zero only at $t$ places. Hence, \# $i (P(\alpha_{i})\neq y_{i}) \leq t$
+%\end{center}
+
+ Not that  degree($N(x)E'(x)$)= degree($N'(x)E(x)$) $\le k+2t-1$. Now, $\forall i\in\{1,\ldots, n\}$,
+\begin{eqnarray*}
+y_iE(\alpha_i) &=& N(\alpha_i); ~~~\mbox{and}\\
+N'(\alpha_i) &=& y_i E'(\alpha_i)\\
+\implies  y_iE(\alpha_i)N'(\alpha_i) &=& y_i N(\alpha_i)E'(\alpha_i). 
+\end{eqnarray*}
+Now in fact, we show that  $E(x) N'(x)= N(x) E'(x)$. This obvious if $y_i\neq 0, \forall i$. But if $y_i=0$ for some $i$, then
+$N(y_i)= N'(y_i)=0$, by the definition of $N$ and $N'$, and hence we get $n$  points $\alpha_1,\ldots, \alpha_n$ where the polynomials $N(x)E'(x)$ and $N'(x)E(x)$ agree.
+However their degree is at most $k+2t-1 < n$, and hence the two polynomials should be the same. 
+\end{proof}
+
+\begin{exercise}
+%\begin{exercise-prob}
+%[\textbf{Erasure Decoding for Reed-Solomon Codes} - See Problem Set 4~(Problem~\ref{erasure-decoding})]
+%\begin{show-ps6}{erasure-decoding} 
+Let $C$ be an $[n,k,d]_q$ code. Let $y = (y_1, \ldots , y_n) \in (\F_q \cup \{?\})^n$ be a received word (where $?$ denotes an erasure) such that $y_i=?$ for at most $d-1$ values of $i$. Present an $O(n^3)$ time algorithm that outputs a codeword 
+$c = (c_1, \ldots , c_n) \in C$ that agrees with $y$ in all unerased positions (i.e., $c_i = y_i$ if $y_i \ne ?$) or
+states that no such $c$ exists.(Recall that if such a $c$ exists then it is unique.)
+\end{exercise}
+%\end{show-ps6}
+%\end{exercise-prob}
+
+\begin{curiousity}[{\bf Reed-Solomon Code for CDROMs}]
+(This is a description from a lecture notes by Yehuda Lindell)
+{\sf CIRC} stands for \textit{Cross Interleaved Reed-Solomon code}; it was developed in 1979 by Phillips and Sony (the
+CD-ROM standard includes the error correcting code). The code provides a very high level of error correction
+and is the reason that even some scratched CDs typically keep working. This is a demonstration of the fact that the knowledge obtained in this part of the course is enough to understand real codes that are used.
+
+Every disk contains a spiral track of length approximately 5 km. The track contains pits and lands (for representing bits). The width of the track is 0.6$\mu m$ and the depth of a pit is 0.12$\mu m$. The laser
+is shone onto the track and is reflected with a different strength if it is focused on a land or a pit, enabling
+the bit to be read. The errors are usually burst
+errors, meaning that they come in a continuous region.
+
+Every audio sample is 16 bits long; in order to achieve stereo, two samples are taken for each time point.
+There are 44,100 samples per second and every sample pair is 4 bytes long. Therefore, every second of audio
+is made up of 176,400 bytes. Each sample in a pair is a vector in $\F_2^{16}$ ; each such vector is divided into two,
+and we view each half as an element of $F_2^8$. Two Reed-Solomon
+codes, denoted $C_1$ and $C_2$ are used in an interleaved fashion (this results in distributing large burst errors
+into small local errors).
+\end{curiousity}
+\section{Decoding Binary Reed-Muller Codes : Reed's Algorithm}
+
+Now we will present the decoding algorithm for binary Reed-Muller Codes. This variant of Reed-Muller codes was the one originally studied independently by Reed and Muller in the 1950s. The code is again based on using multivariate polynomials but over the field $\F_2$. In addition, the polynomials will also be multilinear - that is, each monomial has degree at most $1$ in each variable participating in it. Hence each monomial corresponds to a subset of variables. Thus, the general form of the polynomial is:
+$$ p(x_1, x_2, \ldots x_r) = \sum_{\substack{S \subseteq [r]\\ |S| \le t}} c_S \left( \prod_{i \in S} x_i \right)$$
+Thus the encoding function interprets the message bits of $m \in \F_2^k$ as $\left(C_S\right)_{S\subseteq [r]}$ and evaluates the polynomial $p(x_1, x_2, \ldots x_r)$ on all $2^r$ substitutions in the set $\zo^r$. The dimension of the code is exactly the number of multilinear polynomials, which is exactly the number of subsets of $[r]$ of size at most $t$, which is $\sum_{i=1}^t {r \choose i}$. We use this in the following lemma:
+\begin{lemma}
+The binary Reed-Muller code is a 
+$\left[2^r,\bigsum_{i=1}^t {r \choose i},2^{r-t}\right]_2$ code.
+\end{lemma}
+\begin{proof}
+We just need to show that the distance is exactly $2^{r-t}$. Again, it suffices to argue about the minimum weight of any non-zero codeword. We show that there is a non-zero codeword whose weight is at most $2^{r-t}$ and all non-zero codewords have weight at least $2^{r-t}$. 
+
+The former can be observed by considering the subset $T=\{1,2,\ldots, t\} \subseteq [r]$. Consider the message where $c_S$ is non-zero exactly when $S=T$. The codword corresponding to this message produced by the above encoding will be non-zero and the polynomial will have exactly one monomial which is $p(x_1, x_2, \ldots x_r) = x_1x_2\ldots x_t$. The codeword will be non-zero for exactly $2^{r-t}$ elements in $\zo^r$ which sets $x_1 = x_2 = \ldots = x_t = 1$. 
+
+The latter can be argued by noting that any degree $t$ polynomial must have a monomial of degree $t$ and let $S$ be the subset corresponding to that monomial such that $c_S=1$. Hence, $$ p(x_1, x_2, \ldots x_r) = \prod_{i \in S} x_i + \sum_{\substack{T \subseteq [r]\\ |T| \le t \\ T \ne S}} c_T \left( \prod_{i \in T} x_i \right)$$
+Consider substituting values $\alpha = \left( \alpha_i \right)_{i \notin S} \in \F_2^{r-t}$ (That is, for the variables outside $S$ in the subsets $T$). There are $2^{r-t}$ many ways of doing this. For each of these substitutions , the above polynomial gets restricted to a non-zero polynomial $p'$ since the leading monomial cannot get cancelled by the substitutions. Hence each of them have a substitution in $\F_2^{t}$ where $p'$ evaluates to non-zero. Thus for each partial assignment $\alpha \in\F_2^{r-t}$ there is an extension $\alpha' \in \F_2^r$ such that $p(\alpha') \ne 0$. Hence there are at least $2^{r-t}$ substitutions on which the polynomial evalutes to non-zero and hence the distance is at least $2^{r-t}$.
+\end{proof}
+
+\paragraph{Reed's Decoding Algorithm:} Let us recall the unique decoding problem in general. We are given a recieved message $y \in \zon$ with the guarantee that there is a $c \in C$ such that $d(y,c) \le \frac{d-1}{2}$ - the decoding problem asks us to output $m$ such that $E(m) = c$. Since binary Reed-Muller code is a $\left[2^r,\sum_{i=1}^t {r \choose i},2^{r-t}\right]_2$ code, we are given $y \in \F_2^{2^r}$ which is a binary string of length $2^r$. We can think of this as the truth table of a function $f : \zo^r \to \zo$. Hence, we can restate this as follows : {\em Given $f \in \F_2^r \to \F_2$, with the guarantee that there is a polynomial $p(x_1,x_2, \ldots, x_r)$ with coefficients from $\F_2$ such that:
+$${\card{ \{a \in \F_2^r \mid f(a) \ne p(a) \}}}\le 2^{r-t-1}$$
+output the coefficients of the polynomial $p$.} Notice that $p$ will be unique by definition since the distance is $2^{r-t}$.
+
+Our target is to compute the coefficients of the polynomial $p$:
+$$ p(x_1, x_2, \ldots x_r) = \sum_{\substack{S \subseteq [r]\\ |S| \le t}} c_S \left( \prod_{i \in S} x_i \right)$$
+The following lemma will give us a direct computation method for the coefficients of the polynomial.
+\begin{lemma}
+\label{lem:reed-sum}
+For all $b \in \F_2^{r-t}$, and polynomial $p$ of degree at most $t$, for any set $S \subseteq [t]$ :
+$ c_S = \bigsum_{\substack{a \in \F_2^r \\ a|_{\overline{S}} = b}} p(a) $
+\end{lemma}
+
+\noindent To explain the expression on the RHS. Let us denote it to be $W(p,b)$. Thus, $W(p,b)$ is the sum of the polynomial evaluations on $a \in \zo^r$ which has $b$ on indices outside the set $S$.
+We use the lemma for error correction, before proving it.
+
+\noindent Suppose $f \in \F_2^r \to \F_2$ is given as the input. We know that $f$ is not too far from the polynomial $p$ that we want to compute (we want to compute the coefficients $c_S$ of $p$ for differnet sets $S$). Here is a first cut : how bad will be $W(f,b)$ as an estimate for the coefficient $c_S$ for a subset $S$? But then, for which $b$? Intuitively, $W(f,b)$ cannot be the correct estimate $c_S$ for all $b$'s because somewhere the error that $f$ contains, has to show up.
+%Are there too many bad $b$s in $\F_2^{r-t}$? Quite interestingly, the expression is so nicely inter-twined that, even if $f$ is \textit{slightly} incorrect, for most $b$'s $W(f,b)$ will be the correct estimate for $W(p,b)$. Now we run over different $b$ and take the most frequent of the values of $W(f,b)$ that we get, in order to compute the value of $c_S$. This works for any $S$.
+
+To formalise this : Let $B_b = \{ a \in \F_2^r \mid a|_{\overline{S}} = b \}$ which we will call the \textit{bag} corresponding to $b \in \F_2^{r-t}$. Indeed, for $b \ne b' \in \F_2^{r-t}$, $B_b \cap B_{b'} = \phi$ and they form a partition of $\F_2^r$. Let us call an $a \in \F_2^r$ to be \textit{corrupt evluation point} if $p(a) \ne f(a)$. And a bag $B_b$ to be a {\em corrupt bag} if $a \in B_b$ it contains a corrupt evaluation point $a$.
+
+For a given $S$, if we knew an uncorrupted bag $B_b$, then we have that $\forall a \in B_b, f(a) = p(a)$, and hence we have $W(f,b) = W(f,b) = c_S$. Thus, $c_S$ can be computed directly using $f$. But then, we do not know how to compute an uncorrupted bag, or even to check whether a given bag is uncorrupted for a given $S$, because we do not know the polynomial $p$ (which is what we have to compute !).
+
+Now comes the critical observation. We are given the guarantee that there are at most $2^{r-t-1}$ corrupt evaluation points in $\F_2^r$. Hence, in the worst case, they can all be distributed among the bags (one in each bag, in the worst case), thus corrupting at most $2^{r-t-1}$ bags. Even then, there will be more than $2^{r-t} - 2^{r-t-1}$ uncorrupted bags which is majority of the number of bags (which is $2^{r-t}$).
+
+Still, we do not know any explicit uncorrupted bag to compute $c_S$. But by the above arugment, we know majority of the bags will be uncorrupted. Thus, we can just run over all $b \in \F_2^{r-t}$ and for each of the bags, compute $c_S$ and output the most frequent value (that is, majority). This gives the following algorithm:
+
+\begin{algorithm}
+\label{alg:Berlekamp-Welch}
+\caption{Reed's Decoding Algorithm for Binary Reed-Muller Codes}
+{\bf Input:} $r,t$ and $f : \F_2^r \to \F_2$ and $S \subseteq [r]$\\
+{\bf Output: } Coefficient of the monomial $\prod_{i \in S} x_i$ in the multilinear polyonomial $p \in \F_2[x_1, x_2 \ldots x_r]$ with degree $t$ such that 
+$$|\{a \in \F_2^r~\mid~p(a) \neq f(a) \}| < 2^{r-t-1}$$
+\begin{algorithmic}[1]
+\State {\em count} $\gets 0$.
+\For{\texttt{each $b \in \F_2^{r-t}$}}
+	\State Compute $c_S = \bigsum_{\substack{a \in \F_2^r \\ a|_{\overline{S}} = b}} f(a)$.
+	\State {\bf if} ($c_S = 0$) \textbf{then} increment {\em count}.
+\EndFor
+\State {\bf if} ~[{\em count} $> 2^{r-t-1}$]~ \textbf{then} output {\sf $c_S = 1$}, \textbf{else} output {\sf $c_S = 0$}.
+\end{algorithmic}
+\end{algorithm}
+
+\paragraph{Proof of Lemma~\ref{lem:reed-sum}:}
+We will create a special notation for the monomial indexed by a subset $S$ as $m_S(x) = \prod_{i \in S} x_i$. Viewing this as a function from $\F_2^r \to \F_2$, we observe two properties about this function. Let $|S| = t$.
+\begin{description}
+\item{$\sum_{a \in \F^\ell} m_S(a) = 1$:} Indeed, only one of the elements $a \in \F^\ell$ will make the monomial evaluate to $1$, and everything else make it evaluate to $0$. Hence the sum will be exactly $1$.
+\item{$\forall T \subset S$, $\sum_{a \in \F^\ell} m_S(a) = 0$:} To see this, let $i \in S \setminus T$ which exists because of the assumption. We split the sum into two sums based on the value of $a_i$.
+$$\sum_{a \in \F^\ell} m_T(a) = \sum_{\substack{a \in \F^\ell \\ a_i = 0}} m_T(a) + \sum_{\substack{a \in \F^\ell \\ a_i = 1}} m_T(a) = 2 \sum_{\substack{a \in \F^\ell \\ a_i = 0}} m_S(a) = 0 (\textrm{over $\F_2$}) $$
+where the second equality follows because $i \notin T$ and hence $m_T(a)$ does not depend on the value of $a_i$.
+\end{description}
+Using these two observations, now we can complete the proof of the Lemma~\ref{lem:reed-sum}. Fix an arbitrary $b \in \F_2^r$ and substitute it in $p(x)$ in order to get a restricted polynomial $p_b(x)$ with the variable set as $S$. We can write :
+$$ p_b(x) = c_S m_S(x) + \bigsum_{T \subset S} c_T m_T(x)$$
+Using this notation:
+\begin{eqnarray*}
+\bigsum_{\substack{a \in \F_2^r \\ a|_{\overline{S}} = b}} p(a) = \bigsum_{a \in \F_2^t} p_b(a) & = & c_S \bigsum_{a \in \F_2^t} m_S(a) + \bigsum_{a \in \F_2^t} \left( \bigsum_{T \subset S} c_T m_T(a) \right) \\
+& = & c_S \bigsum_{a \in \F_2^t} m_S(a) +  \bigsum_{T \subset S}  \left( c_T \bigsum_{a \in \F_2^t} m_T(a) \right) =  c_S \qed \\
+\end{eqnarray*}
