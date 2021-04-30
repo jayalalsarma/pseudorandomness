@@ -1,0 +1,211 @@
+\Week{16}{Constructing Codes from Expanders}
+
+In this lecture we will show how to construct codes from explicit expanders that we have constructed earlier in the course. 
+These codes belong to a general family where we visualize the code as a graph $G$ where the value of the $i$-th bit of a codeword corresponds to the value associated with the $i$-th vertex or the $i$-th edge of the graph. The distance of the code will then by given by combinatorial properties of the graph. The advantages of many of these codes will be that they have encoding and decoding algorithms that run in linear time.
+
+The first graph-theoretic codes were proposed in 1963 by Gallager. In 1984, Tanner rediscovered and generalized graph-theoretic codes, replacing the parity-check constraint with more general linear codes, and also proposed the idea of using expander graphs. The idea
+was again rediscovered by Sipser and Spielman, who put together error-correcting codes and expander graphs.
+
+We will work with bipartite expaners. That is, \textit{a graph $G(U,V,E)$ is said to be a $(n,m,d,\alpha,\beta)$-expander if, $|U|=n,|V|=m$, it is $d$-regular, and every $S \subseteq U$ such that $|S| = \alpha|V|$, the number of new neighbors $|N(S)| \ge \beta d|S|$.} We will be using $D$ for the degree from now on to avoid confusion with the minimum distance of a code.
+
+\section{Expander Codes}
+
+Let $G(U,V,E)$ be a bipartite regular expander graph such that every vertex in $U$ has exactly $D$ neighbors in $V$, and $D > 2$. And let $G$ be an expander with $\beta > \frac{3}{4}$. These parameters are chosen such that the following property is true : every subset in $U$ which is at most $\alpha|U|$ size has many \textit{unique neighbors}. Given $S \subseteq U$, we will say that $v \in V$ is a unique neighbor of $S$ if there is exactly one vertex $u \in S$  such that $(u,v) \in E$. We write this as the following lemma.
+
+\begin{lemma}
+\label{lem:unique-neighbors}
+If $G(U,V,E)$ is a $(n,m,D,\alpha,\beta)$ bipartite expander where $D > 2$ and $\beta > \frac{3}{4}$, then every $S \subseteq U$, with $|S| \le \alpha n$ has more than $\frac{D}{2}|S|$ unique neighbors.
+\end{lemma}
+\begin{proof}
+Let $S$ be as in the statement. Let $r$ be the number of unique neighbors of $S$. Then the number of edges going out from $S$ is at most $D|S|$ and it produces $\beta D |S|$ many neighbors. But since $r$ of them are unique neighbors of $S$, we have: 
+
+$$D |S| \ge r+ 2(\beta D|S|-r)$$
+
+\noindent And this implies that $r \ge (2\beta D - D) |S| > \frac{D}{2}|S|$.
+\end{proof}
+
+\paragraph{Construction:} Define the following $m \times n$ matrix from the graph, $H[i,j] = 1$ if the edge $(j,i) \in E$. Now consider the code whose parity check matrix is the matrix $H$. That is, define the code as:
+$$ C = \{ c \in \F_2^n \mid Hc = 0 \}$$
+
+There is a very natural combinatorial way to look at the code word with respect to the graph by using the above definition. For this, let us create a parity bit for vertices $v \in V$, $P_v = \bigoplus_{i \in N(v)} c_i$. A word $c \in \F_2^n$ is a codeword if and only if for every vertex $v \in V$, $P_v = 0$. That is, given a word $c \in \F_2^n$, it is a codeword if and only if for every vertex $v \in V$, the parity of the bits in $y$ whose index is a neighbor of $v$ in the graph $G$ is zero.
+
+Notice that the partiy check matix is the (transpose of) the adjacency matrix of a constant degree expander graph which by definition has only linear number of edges. Hence the parity check matrix has only few non-zero entries. Such codes, where the parity check matrix is sparse (that is it has only $\calO(n)$ nonzero entries as opposed to $\calO(n^2-nk)$ entries), are called \textit{low-density parity-check codes} (LDPC codes). The codes which we constructed out of expanders are called \textit{expander codes}.
+
+We will first prove claims about the parameters of expander code. Since the parity check is $n \times m$ matrix, the code has domension $k = n-m$. We prove the following claim about the distance of the code.
+
+\begin{lemma}
+The expander code constructed above has minimum distance at least $\alpha n$.
+\end{lemma}
+\begin{proof}
+The code is linear by definition. It suffices to show that every codeword has at least $\alpha n$ number of 1s in them. Suppose a codword $c$ has less than $\alpha n$ number 1s. We can associate a subset of vertices in $U$ corresponding to the indices where the $1$ appears in $c$.
+$$S = \left\{ i \in [n] \mid c_i = 1 \right\} \subseteq U$$
+By definition $|S| < \alpha n$. Hence expansion property applies. But then, by lemma~\ref{lem:unique-neighbors}, there must be at least $D/2$ unique neighbors. This would imply that $Hc \ne 0$ and hence $c$ is not a code word.
+\end{proof}
+
+\section{Unique Decoding Expander Codes}
+Now we will talk about decoding this code. For a node $v \in V$, if $y$ was a codeword, we would have :
+$$P_v = \bigoplus_{j \in N(v)} y_j = 0$$
+
+The algorithm is surprisingly simple. We describe the algorithm first: as for notation, for a node $u \in U$:
+$$\Gamma(u) = \{ v \in N(u) \mid P_v = 1 \}$$
+We call $u$ to be \textit{likely-to-be-corrupted} if $|\Gamma(u)| > \frac{D}{2}$. In this case, intuitively, it is likely that $u$ was a corrupted bit and hence it seems reasonable to flip $u$ as a part of the error correction. We do this systematically in the following algorithm:
+
+\begin{algorithm}
+\caption{~:~Unique Decoding Algorithm for Combinatorial Expander Codes}
+\label{alg:expander-code-decoding}
+{\bf Input:} $y \in \zo^n$ such that $d(y,C) < \frac{\alpha n}{2}$ \\
+{\bf Output:} The unique code $c$ such that $d(c,y) < \frac{\alpha n}{2}$
+\begin{algorithmic}[1]
+\State While ($\exists u \in U$, such that $|\Gamma(u)| > \frac{D}{2}$)
+\State Flip the value of $y_u$.
+\end{algorithmic}
+\end{algorithm}
+
+The termination of the algorithm is clear since each time we execute step 2, the number of unsatisfied vertices on the right would have strictly decreased. 
+
+\begin{lemma}
+The Algortihm~\ref{alg:expander-code-decoding} terminates and recovers the codeword from received word $y$ with guarantee $d(y,C) < \frac{\alpha n}{2}$.
+\end{lemma}
+\begin{proof}
+Let $S$ be the set of flipped bits in the received word $y$. For a vertex $v \in V$ to be unsatisfied it must me a neighbot to at least one of the bits in $S$. Thus we have at most $\frac{\alpha n D}{2}$ many unsatisfied vertices in $V$. Since each step of the algorithm strictly decreases the number of unsatisfied vertices in $V$, the algorithm must terminate in $O(n)$ steps.
+
+We need to show that we will end up with a codeword in the end - that is the algorithm never gets stuck - if $y$ is not a codeword then there is always a bit that will need to be flipped as per the rules of the algorithm. For such a word $y$, we know that $|S| \ge 1$. There are $D|S|$ many neighbors for $S$ which we call $T$. More than $\frac{D}{2}|S|$ of the elements in $T$ are unique neighbors and hence they will all be unsatisfied. By averaging, there must be a vertex $u \in S$ such that at least $\frac{D}{2}$ of these unsatisified vertices are adjacent to $u$. Given that the total number of neighbors for $u$ is $D$, this gives that $u$ has more than half of its neighbors unsatisfied and hence is the vertex which will get flipped by the algorithm.
+\end{proof}
+
+
+\begin{curiousity}[\textbf{Speilman Codes}]
+The running time of the decoder was $O(n^2)$ time (we showed only $O(n)$ rounds bound in class). With the right kind of data structure it can be improved to work in $O(n)$ time. It turns out that encoding is hard to do efficiently, since only the paritycheck matrix is defined based on the graph. Spielman came up with the
+\textit{superconcentrator} based codes, which have both linear time encoding and linear time decoding.
+\end{curiousity}
+
+\section{Tanner Codes}
+
+We introduce the idea of Tanner Codes now. Tanner in the 1980s discovered codes based on bipartite graphs. If $C$ is an $[D,k,\delta D]_2$ code, and $G(U,V,E)$ is a bipartite graph with both parts having $n$ vertices each, which is $D$-right-regular. The Tanner Code $T(C)$ is the set of codewords defined by :
+$$T_G(C) = \left\{ c \in \F_2^n \mid  \forall v \in V, c|_{N(v)} \in C \right\}$$
+where $c|_{N(v)}$ denotes the subsequence formed by the bits indexed by the neighbors of $v$ in the graph $G$. Tanner codes are linear codes because the set of codewords are defined by subwords being in linear space $C$. They are also generalizations of expander codes since in expander code $C$ was chosen to be the $[D,D-1,2]_2$ parity check code.
+
+To determine the dimension of the code: the constraint that each of the $c|_{N(v)}$ must be in $C$ (which is a space of dimension $k$ inside a space of dimension $D$) is equivalent to writing $D-k$ constraints. Thus, we have introduced a total of $2n(D-k)$ constraints and hence the domension is $n-n(D-k)$. 
+
+In expander codes which are a special case of Tanner codes, we used parity check codes for $C$. Since parity check codes have distance 2, we required that all sets of size at most $\alpha n$ expand by a factor of more than $\beta > \frac{3}{4}$ in order to argue that the code
+had distance at least $\alpha n$. However, if we use a local code $C$ of distance $d$, then we only require an expansion factor exceeding $\frac{3}{2d}$ to ensure the same code distance. Hence a good choice of $C$ allows us to construct explicit Tanner codes using graphs with weaker expansion properties which are therefore easier to construct.
+
+\section{Tanner Codes from Spectral Expanders}
+
+Recall the definition of a spectral expander:
+\begin{definition}
+A graph $G=(V,E)$ is said to be a $(N,D,\lambda)$-expander if $G$ is a $d$-regular graph on $n$ vertices and $|\lambda_1| \ge |\lambda_2| \ge \ldots \ge |\lambda_n|$ are the eigenvalues of the adjacency matrix of $G$.
+\end{definition}
+
+We need bipartite graphs for the construction. Hence we consider the 
+bipartite version of the graph, which is sometimes called the {\em double cover} of the graph. It has two copies of each node of $G$, one in the left partition and the other in the right partition, and there are two copies of each edge $(u,v)$ of $G$ - one from the vertex $u$ on the left to vertex $v$ on the right, and the other vice versa. Note that the bipartite adjacency matrix of the double cover is exactly the adjacency matrix of the original undirected graph. From now on, we will denote by $G$ this bipartite cover.
+
+We use the expander mixing lemma stated for the double cover graphs.
+
+\begin{lemma}[{\bf Expander Mixing Lemma}]
+Let $G(U,V,E)$ be a $D$-regular bipartite graph with $n$ vertices and let $\lambda_2<1$ be the second largest eigen value\footnote{Note that the double cover graphs are symmetric : $(u,v) \in E$ $\implies$ $(v,u) \in E$. Hence all eigen values are real.} of the normalized bipartite adjacency matrix of $G$. Then, for any $S \subseteq U$, $T \subseteq V$:
+$$\left||E(S,T)|-\frac{D|S||T|}{n}\right| \le D\lambda_2 \left(\sqrt{|S||T|}\right)$$
+\end{lemma}
+
+We start with a $D$-regular bipartite graph on $N$ vertices on either side, where the graph is symmetric. Let the second largest eigen value of the bipartite adjacency matrix be $\lambda$. Consider $C$ by an $[D,k,\delta n]$ code over $\F$ with rate $R = \frac{k}{D}$. We obtain a new code $C'$ which is an $[N',k',\delta'n]$ code from it over $\F$ were $N' = ND$. 
+
+We need to define which all vectors in $\F^{ND}$ are in the code space $C'$. Consider a vector $c \in \F^{ND}$. We can associate each component of the vector $c$ with the pair $(a,i)$ where $a \in U \cup V$ and $i \in [D]$. That is, view $c$ as the sequence:
+$$c = \left( c_{u,i} : u \in U \textrm{ and } i \in [D] \right) = \left( c_{v,j} : v \in V \textrm{ and } j \in [D] \right) $$
+under appropriate re-ordering of the indices.
+\noindent The given vector $c$ is a codeword of $C'$ if and only if for every $a \in U \cup V$, the word $c_a = \left( c_{a,i} : i \in [D] \right)$ is a codeword in $C$. 
+
+\paragraph{Parameters of the new code:} 
+The blocklength of the code is $N'=ND$. To determine the dimension of the code: the constraint that each of the $w_a$ must be in $C$ (which is a space of dimension $k$ inside a space of dimension $D$) is equivalent to writing $D-k$ constraints. Thus, we have introduced a total of $2N(D-k)$ constraints and hence the domension is $ND-2N(D-k)$. Hence the rate of the code is:
+$$\frac{ND-2N(D-k)}{ND} = \frac{2k}{D}-1 = 2R-1$$
+Thus the rate of the code improved by this operation. We now compute the minimum distance. 
+
+\begin{lemma}
+The relative distance of the code $C'$ is $\delta(\delta-\lambda)$ where $\lambda$ is the second largest eigen value of the graph $G$.
+\end{lemma}
+\begin{proof}
+Since the code is linear, it suffices to lower bound the weight of non-zero codewords. Consider any non-zero codeword $w \in C'$, and consider the positions of non-zero symbols in it. Define this index set as follows:
+
+$$ 
+E_U = \left\{ (u,i) : 
+\begin{array}{c}
+u \in U, i \in [D] \\
+w_{u,i} \ne 0 
+\end{array}
+\right\} \hspace{1cm} 
+E_V = 
+\left\{ (v,i) : 
+\begin{array}{c}
+v \in V, i \in [D] \\
+w_{v,i} \ne 0 
+\end{array}
+\right\}
+$$
+
+Note that $E_U$ and $E_V$ can be interpreted as a set of edges in the graph $G$ and prove a lower bound on the distance, it suffices to prove a lower bound on the size of $E = E_U \cup E_V$ as a multiset.
+
+Let $S$ and $T$ be the set of vertices that are incident to $E_U$ and $E_V$ respectively. Since $w_a$ for each $a \in S \cup T$ are non-zero codewords in $C$, each $u \in S$ (resp. $v \in T$) must have at least $\delta D$ edges in $E_U$ (respectively in $E_V$) incident on it. If we define $E = E_U \cup E_V$, as a multi-set, $|E| \ge \delta D |S|$ and $|E| \ge \delta D |T|$ and hence $|E| \ge \delta D \sqrt{|S||T|}$.
+
+Applying expander mixing lemma for this pair of subsets of vertices $S$ and $T$ gives, 
+$$\delta D \sqrt{|S||T|} \le |E| \le \frac{D|S||T|}{N} + \lambda D \sqrt{|S||T|}$$
+and hence, 
+$$\sqrt{|S||T|} \ge (\delta - \lambda)N$$
+This gives, 
+$$|E| \ge \delta(\delta-\lambda)DN$$
+
+\noindent Hence the relative distance of the code is at least $\delta(\delta - \lambda)$.
+\end{proof}
+
+\begin{remark}
+Note that when $G$ is the complete bipartite graph, the code $C'$ that we obtain is simply the product of $C$ with itself (that is each symbol in the codeword is replaced by an entire codeword of the same code) and thus has relative distance exactly $\delta^2$ and blocklength $D^2$. By using expander, we can get roughly the same distance, but at the same almost double the rate, as opposed to squaring in the case of product construction (note that $R^2 < R$).
+\end{remark}
+
+\section{Unique Decoding Spectral Expander Codes}
+
+Suppose the code $C$ was able to correct up to $\epsilon$ fraction of  errors. The algorithm for decoding of $C'$ is super simple to describe. 
+In each round, process at all the vertices on the left of the bipartite graph and decode the edges there to codewords in $C$ and replace the symbols. Repeat the same operation from the perspective of the vertices on the right. We describe this formally as a pseudocode in Algorithm~\ref{alg:spec-expander-code-decoding}.
+
+\begin{algorithm}
+\caption{~:~Unique Decoding Algorithm for Spectral Expander Codes}
+\label{alg:spec-expander-code-decoding}
+{\bf Input:} $y \in \F^{ND}$ such that $d(y,C) < \eta ND$ \\
+{\bf Output:} The unique code $c$ such that $d(c,y) < \eta ND$.
+\begin{algorithmic}[1]
+\Repeat
+\State{\underline{\textbf{Left-side Decoding Step:}}}
+\For{$u \in U$}
+\State{Correct $y_u \in \F^D$ by using the decoding algorithm for $C$.}
+\State{Replace the symbols on the edges accordingly.}
+\EndFor
+\State{\underline{\textbf{Right-side Decoding Step:}}}
+\For{$v \in V$}
+\State{Correct $y_v \in \F^D$ by using the decoding algorithm for $C$.}
+\State{Replace the symbols on the edges accordingly.}
+\EndFor
+\Until{No changes happen for an entire iteration}
+\end{algorithmic}
+\end{algorithm}
+
+\begin{lemma}
+The above decoding algorithm can recover from $\frac{9}{10}\epsilon(\epsilon-\lambda)$ fraction of errors, in $O(N \log N)$ time.
+\end{lemma}
+\begin{proof}
+Suppose a received word $y \in \F^|E|$ is given to us. As per our interpretation, we are associating each symbol of $y$ to edges of two symbols of $y$ to each edge of the graph $G$ correspoding to either endpoints. We use the terminology that a vertex is \textit{erroneous} if the value associated with at least one edge incident to the node is incorrect in comparison to the correct codeword.
+
+Let $S \subseteq U$ denote the set of vertices in $U$ that are erroneous before the first left-decoding step (steps 2-6), and let $T \subseteq V$ be the set of vertices in $V$ that are erroneous after the next right-decoding step (steps 7-11). Let $E' \subseteq E$ be the set of \textit{edges} that has error at the step in between the two decoding steps (step 6). Note that $E(S,T) \le E'$ since the edges that has errors has be definition an edge to $S$.
+
+Since we are using the decoding algorithm for $C$, we know that if the decoding algorithm for $C$ run in step 4 could not correct the word, then it must be because the number of errors is more than $\epsilon D$. Thus, the number of errors in the original word must be at least $|S|\epsilon D$. 
+$$
+|S|\epsilon D \le \frac{9}{10} \epsilon (\epsilon - \lambda) ND
+\textrm{ ~~and this gives an upper bound }
+|S| \le \frac{9(\epsilon-\lambda)N}{10}
+$$
+Again, similarly, we know that if the decoding algorithm for $C$ run in step 9 could not correct the word, then it must be because the number of errors is more than $\epsilon D$.
+This gives,
+\begin{eqnarray*}
+|T|\epsilon D \le |E'| \le |E(S,T)| & \le & \frac{D|S||T|}{N}+\lambda \sqrt{|S||T|} \\
+& \le & \frac{D|S||T|}{N}+\lambda \frac{|S|+|T|}{2} \\
+& \le & \frac{9D|T|}{10}(\epsilon-\lambda)+\lambda \frac{|S|+|T|}{2}\\
+|T|\left( 0.1 \epsilon D  + 0.9 D \lambda - 0.5D \right) & \le & 0.5\lambda |S|\\
+|T| & \le & \frac{\lambda|S|}{0.2 \epsilon D  + 1.8 D \lambda - \lambda } \le \alpha|S|
+\end{eqnarray*}
+where $\alpha < 1$ is a constant, if $\lambda < \epsilon D$. That is, we have an initial code that can correct at least $\frac{\lambda}{D}$ fraction of errors. Thus after each iteration, the number of erroneous vertices goes down by a constant factor $\alpha$. Since it is at most a constant fraction of $N$ initially, in $O(\log N)$ steps we would converge to $0$ errors. In each step, we need $O(N)$ steps and this makes the algorithm $O(N \log N)$ time.
+\end{proof}
